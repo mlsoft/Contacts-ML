@@ -17,7 +17,7 @@
 <resources>
 
     <string name="app_name">Contacts-ML</string>
-    <string name="activity_contacts_list">Contacts List</string>
+    <string name="activity_contacts_list">Contacts-ML</string>
     <string name="activity_contact_detail">Contact Detail</string>
     <string name="contacts_list_search_results_title">Contacts List Search for \"%s\"</string>
     <string name="app_description">This is a sample app, demonstrating use of the Android system Contacts Provider.</string>

@@ -12,7 +12,7 @@ android {
     compileSdkVersion 21
     buildToolsVersion "23.0.2"
     defaultConfig {
-        applicationId "com.example.android.contactslist"
+        applicationId "net.ddns.mlsoftlaberge.contactslist"
         minSdkVersion 5
         targetSdkVersion 17
     }
