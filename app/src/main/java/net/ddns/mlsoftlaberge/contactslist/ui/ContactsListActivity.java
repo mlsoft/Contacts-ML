@@ -16,11 +16,16 @@
 
 package net.ddns.mlsoftlaberge.contactslist.ui;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NotificationCompat;
+import android.view.View;
 
 import net.ddns.mlsoftlaberge.contactslist.BuildConfig;
 import net.ddns.mlsoftlaberge.contactslist.R;
@@ -127,4 +132,7 @@ public class ContactsListActivity extends FragmentActivity implements
         // search results. Only used pre-HC.
         return !isSearchResultView && super.onSearchRequested();
     }
+
+
+
 }

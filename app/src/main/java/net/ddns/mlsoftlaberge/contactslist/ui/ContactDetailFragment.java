@@ -18,12 +18,16 @@ package net.ddns.mlsoftlaberge.contactslist.ui;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,6 +37,7 @@ import android.provider.ContactsContract.Contacts.Photo;
 import android.provider.ContactsContract.Data;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.DisplayMetrics;
@@ -124,7 +129,8 @@ public class ContactDetailFragment extends Fragment implements
     /**
      * Fragments require an empty constructor.
      */
-    public ContactDetailFragment() {}
+    public ContactDetailFragment() {
+    }
 
     /**
      * Sets the contact that this Fragment displays, or clears the display if the contact argument
@@ -232,7 +238,7 @@ public class ContactDetailFragment extends Fragment implements
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
 
         // Inflates the main layout to be used by this fragment
         final View detailView =
@@ -369,7 +375,7 @@ public class ContactDetailFragment extends Fragment implements
                         // that holds the contact name.
                         mContactName.setText(contactName);
                     } else {
-                        if(mContactName != null) {
+                        if (mContactName != null) {
                             mContactName.setText(contactName);
                         }
                         // In the single pane layout, sets the activity title
@@ -379,9 +385,12 @@ public class ContactDetailFragment extends Fragment implements
                     }
                     // get the contact number for admin purpose
                     final String contactNo = data.getString(ContactDetailQuery.ID);
-                    if(mContactNo != null) {
+                    if (mContactNo != null) {
                         mContactNo.setText(contactNo);
                     }
+                    // Envoie un toast indiquant le no de client
+                    ContactDetailActivity mActivity = (ContactDetailActivity) getActivity();
+                    mActivity.setToast("No. : " + contactNo);
                 }
                 break;
             case ContactAddressQuery.QUERY_ID:
@@ -441,17 +450,17 @@ public class ContactDetailFragment extends Fragment implements
      * Each address for the contact gets its own LinearLayout object; for example, if the contact
      * has three postal addresses, then 3 LinearLayouts are generated.
      *
-     * @param addressType From
-     * {@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal#TYPE}
+     * @param addressType      From
+     *                         {@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal#TYPE}
      * @param addressTypeLabel From
-     * {@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal#LABEL}
-     * @param address From
-     * {@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal#FORMATTED_ADDRESS}
+     *                         {@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal#LABEL}
+     * @param address          From
+     *                         {@link android.provider.ContactsContract.CommonDataKinds.StructuredPostal#FORMATTED_ADDRESS}
      * @return A LinearLayout to add to the contact details layout,
-     *         populated with the provided address details.
+     * populated with the provided address details.
      */
     private LinearLayout buildAddressLayout(int addressType, String addressTypeLabel,
-            final String address) {
+                                            final String address) {
 
         // Inflates the address layout
         final LinearLayout addressLayout =
@@ -549,8 +558,9 @@ public class ContactDetailFragment extends Fragment implements
 
     /**
      * Decodes and returns the contact's thumbnail image.
+     *
      * @param contactUri The Uri of the contact containing the image.
-     * @param imageSize The desired target width and height of the output image in pixels.
+     * @param imageSize  The desired target width and height of the output image in pixels.
      * @return If a thumbnail image exists for the contact, a Bitmap image, otherwise null.
      */
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -702,4 +712,5 @@ public class ContactDetailFragment extends Fragment implements
         final static int TYPE = 2;
         final static int LABEL = 3;
     }
+
 }
