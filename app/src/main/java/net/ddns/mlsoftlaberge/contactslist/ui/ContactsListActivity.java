@@ -66,7 +66,8 @@ public class ContactsListActivity extends FragmentActivity implements
 
         // Check if two pane bool is set based on resource directories
         isTwoPaneLayout = getResources().getBoolean(R.bool.has_two_panes);
-        setToast("twopanes = "+isTwoPaneLayout);
+        // setToast("twopanes = "+isTwoPaneLayout);
+
         // Check if this activity instance has been triggered as a result of a search query. This
         // will only happen on pre-HC OS versions as from HC onward search is carried out using
         // an ActionBar SearchView which carries out the search in-line without loading a new
@@ -105,7 +106,7 @@ public class ContactsListActivity extends FragmentActivity implements
      */
     @Override
     public void onContactSelected(Uri contactUri) {
-        setToast(contactUri.toString());
+        // setToast(contactUri.toString());
         if (isTwoPaneLayout && mContactDetailFragment != null) {
             // If two pane layout then update the detail fragment to show the selected contact
             mContactDetailFragment.setContact(contactUri);
@@ -119,12 +120,12 @@ public class ContactsListActivity extends FragmentActivity implements
     }
 
     // Toast Builder
-    public void setToast(CharSequence text) {
-        Context context = getApplicationContext();
-        int duration = Toast.LENGTH_LONG;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-    }
+    // public void setToast(CharSequence text) {
+    //    Context context = getApplicationContext();
+    //    int duration = Toast.LENGTH_LONG;
+    //    Toast toast = Toast.makeText(context, text, duration);
+    //    toast.show();
+    // }
 
     /**
      * This interface callback lets the main contacts list fragment notify

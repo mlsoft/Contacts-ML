@@ -83,7 +83,7 @@ public class ContactDetailActivity extends FragmentActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        setToast("onOptionsItemSelected(MenuItem)");
+        // setToast("onOptionsItemSelected(MenuItem)");
         switch (item.getItemId()) {
             case android.R.id.home:
                 // Tapping on top left ActionBar icon navigates "up" to hierarchical parent screen.
@@ -172,12 +172,12 @@ public class ContactDetailActivity extends FragmentActivity {
     }
 
     // Toast Builder
-    public void setToast(CharSequence text) {
-        Context context = getApplicationContext();
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
-    }
+    // public void setToast(CharSequence text) {
+    //    Context context = getApplicationContext();
+    //    int duration = Toast.LENGTH_SHORT;
+    //    Toast toast = Toast.makeText(context, text, duration);
+    //    toast.show();
+    // }
 
 
 

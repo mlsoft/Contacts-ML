@@ -508,8 +508,8 @@ public class ContactDetailFragment extends Fragment implements
                     // a default (or use a previously set default) for geo Uris.
                     if (packageManager.resolveActivity(
                             viewIntent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
-                        Toast.makeText(getActivity(),
-                                R.string.yes_intent_found, Toast.LENGTH_SHORT).show();
+                        // Toast.makeText(getActivity(),
+                        //        R.string.yes_intent_found, Toast.LENGTH_SHORT).show();
                         startActivity(viewIntent);
                     } else {
                         // If no default is found, displays a message that no activity can handle
