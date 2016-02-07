@@ -21,4 +21,7 @@
     <integer name="contact_detail_photo_percent">45</integer>
     <integer name="contact_detail_info_percent">55</integer>
 
+    <integer name="contact_list_percent">100</integer>
+    <integer name="contact_detail_percent">0</integer>
+
 </resources>

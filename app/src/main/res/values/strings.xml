@@ -17,7 +17,7 @@
 <resources>
 
     <string name="app_name">Contacts-ML</string>
-    <string name="activity_contacts_list">Contacts-ML</string>
+    <string name="activity_contacts_list">Contacts List</string>
     <string name="activity_contact_detail">Contact Detail</string>
     <string name="contacts_list_search_results_title">Contacts List Search for \"%s\"</string>
     <string name="app_description">This is a sample app, demonstrating use of the Android system Contacts Provider.</string>
@@ -43,6 +43,7 @@
     <string name="search_match_other">Matches Other Field</string>
 
     <string name="no_address">No addresses found</string>
-    <string name="no_intent_found">No application found to handle this action</string>
+    <string name="no_intent_found">No application found to handle this action!</string>
+    <string name="yes_intent_found">Application found.</string>
 
 </resources>

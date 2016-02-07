@@ -16,8 +16,12 @@
 -->
 <resources>
 
-    <!-- Default is to use a single pane layout -->
-    <!-- <bool name="has_two_panes">false</bool> -->
-    <bool name="has_two_panes">false</bool>
+    <!-- These are the default percent values that the contact photo and information should take up
+         in the ContactDetailFragment. -->
+    <integer name="contact_detail_photo_percent">45</integer>
+    <integer name="contact_detail_info_percent">55</integer>
+
+    <integer name="contact_list_percent">50</integer>
+    <integer name="contact_detail_percent">50</integer>
 
 </resources>

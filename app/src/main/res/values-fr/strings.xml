@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Contacts-ML</string>
+    <string name="activity_contact_detail">Détails du Contact</string>
+    <string name="activity_contacts_list">Liste de Contacts</string>
+    <string name="address_button_description">Visualiser l\'Adresse</string>
+    <string name="alphabet">ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
+    <string name="app_description">Ceci est une application d\'exemple de l\'acces du provideur de contacts.</string>
+    <string name="contacts_list_search_results_title">Recherche de liste de Contacts pour \"%s\"</string>
+    <string name="imageview_description">Vignette du contact</string>
+    <string name="menu_add_contact">Ajoute Contact</string>
+    <string name="menu_edit_contact">Modifie Contact</string>
+    <string name="menu_search">Recherche</string>
+    <string name="no_address">Aucune Adresse trouvée</string>
+    <string name="no_contact_selected">Aucun contact sélectionné</string>
+    <string name="no_contacts">Aucun contact trouvé</string>
+    <string name="no_intent_found">Aucune application trouvée pour manipuler cette action!</string>
+    <string name="search_hint">Recherche Contacts</string>
+    <string name="search_match_other">Correspond à d\'autre champs</string>
+    <string name="yes_intent_found">Application trouvée.</string>
+</resources>

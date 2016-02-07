@@ -16,8 +16,8 @@
 -->
 <resources>
 
-    <!-- Default is to use a single pane layout -->
-    <!-- <bool name="has_two_panes">false</bool> -->
-    <bool name="has_two_panes">false</bool>
+    <!-- Create a layout alias so that devices with a minimum width of 600dp or more will use the
+         two-pane layout when referring to the activity_main layout identifier. -->
+    <item name="activity_main" type="layout">@layout/activity_main_twopanes</item>
 
 </resources>

@@ -83,6 +83,7 @@ public class ContactDetailActivity extends FragmentActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        setToast("onOptionsItemSelected(MenuItem)");
         switch (item.getItemId()) {
             case android.R.id.home:
                 // Tapping on top left ActionBar icon navigates "up" to hierarchical parent screen.
@@ -93,7 +94,6 @@ public class ContactDetailActivity extends FragmentActivity {
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
         }
-        setToast("onOptionsItemSelected(MenuItem)");
 
         // Otherwise, pass the item to the super implementation for handling, as described in the
         // documentation.

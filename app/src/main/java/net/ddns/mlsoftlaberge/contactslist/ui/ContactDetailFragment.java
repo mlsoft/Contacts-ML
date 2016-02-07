@@ -389,8 +389,8 @@ public class ContactDetailFragment extends Fragment implements
                         mContactNo.setText(contactNo);
                     }
                     // Envoie un toast indiquant le no de client
-                    ContactDetailActivity mActivity = (ContactDetailActivity) getActivity();
-                    mActivity.setToast("No. : " + contactNo);
+                    // ContactDetailActivity mActivity = (ContactDetailActivity) getActivity();
+                    // mActivity.setToast("No. : " + contactNo);
                 }
                 break;
             case ContactAddressQuery.QUERY_ID:
@@ -508,6 +508,8 @@ public class ContactDetailFragment extends Fragment implements
                     // a default (or use a previously set default) for geo Uris.
                     if (packageManager.resolveActivity(
                             viewIntent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
+                        Toast.makeText(getActivity(),
+                                R.string.yes_intent_found, Toast.LENGTH_SHORT).show();
                         startActivity(viewIntent);
                     } else {
                         // If no default is found, displays a message that no activity can handle
