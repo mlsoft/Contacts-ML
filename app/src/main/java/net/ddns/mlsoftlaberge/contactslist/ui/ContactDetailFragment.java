@@ -101,6 +101,8 @@ public class ContactDetailFragment extends Fragment implements
     private TextView mEmptyView;
     private TextView mContactName;
     private TextView mContactNo;
+    private TextView mContactStarred;
+    private TextView mContactStatus;
     private MenuItem mEditContactMenuItem;
 
     /**
@@ -192,6 +194,12 @@ public class ContactDetailFragment extends Fragment implements
             if (mContactNo != null) {
                 mContactNo.setText("");
             }
+            if (mContactStarred != null) {
+                mContactStarred.setText("");
+            }
+            if (mContactStatus != null) {
+                mContactStatus.setText("");
+            }
             if (mEditContactMenuItem != null) {
                 mEditContactMenuItem.setVisible(false);
             }
@@ -261,6 +269,12 @@ public class ContactDetailFragment extends Fragment implements
 
         mContactNo = (TextView) detailView.findViewById(R.id.contact_no);
         mContactNo.setVisibility(View.VISIBLE);
+
+        mContactStarred = (TextView) detailView.findViewById(R.id.contact_starred);
+        mContactStarred.setVisibility(View.VISIBLE);
+
+        mContactStatus = (TextView) detailView.findViewById(R.id.contact_status);
+        mContactStatus.setVisibility(View.VISIBLE);
 
         return detailView;
     }
@@ -388,9 +402,16 @@ public class ContactDetailFragment extends Fragment implements
                     if (mContactNo != null) {
                         mContactNo.setText(contactNo);
                     }
-                    // Envoie un toast indiquant le no de client
-                    // ContactDetailActivity mActivity = (ContactDetailActivity) getActivity();
-                    // mActivity.setToast("No. : " + contactNo);
+                    // get the contact number for admin purpose
+                    final String contactStarred = data.getString(ContactDetailQuery.STARRED);
+                    if (mContactStarred != null) {
+                        mContactStarred.setText(contactStarred);
+                    }
+                    // get the contact number for admin purpose
+                    final String contactStatus = data.getString(ContactDetailQuery.CONTACT_STATUS);
+                    if (mContactStatus != null) {
+                        mContactStatus.setText(contactStatus);
+                    }
                 }
                 break;
             case ContactAddressQuery.QUERY_ID:
@@ -680,11 +701,17 @@ public class ContactDetailFragment extends Fragment implements
         final static String[] PROJECTION = {
                 Contacts._ID,
                 Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME,
+                Contacts.STARRED,
+                Contacts.CONTACT_STATUS,
+                Contacts.PHOTO_URI,
         };
 
         // The query column numbers which map to each value in the projection
         final static int ID = 0;
         final static int DISPLAY_NAME = 1;
+        final static int STARRED = 2;
+        final static int CONTACT_STATUS = 3;
+        final static int PHOTO_URI = 4;
     }
 
     /**
