@@ -31,6 +31,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Contacts.Photo;
@@ -98,6 +99,7 @@ public class ContactDetailFragment extends Fragment implements
     // in multiple methods throughout this class.
     private ImageView mImageView;
     private LinearLayout mDetailsLayout;
+    private LinearLayout mNotesLayout;
     private TextView mEmptyView;
     private TextView mContactName;
     private TextView mContactNo;
@@ -178,6 +180,7 @@ public class ContactDetailFragment extends Fragment implements
             // multiple times.
             getLoaderManager().restartLoader(ContactDetailQuery.QUERY_ID, null, this);
             getLoaderManager().restartLoader(ContactAddressQuery.QUERY_ID, null, this);
+            getLoaderManager().restartLoader(ContactNotesQuery.QUERY_ID, null, this);
         } else {
             // If contactLookupUri is null, then the method was called when no contact was selected
             // in the contacts list. This should only happen in a two-pane layout when the user
@@ -255,6 +258,7 @@ public class ContactDetailFragment extends Fragment implements
         // Gets handles to view objects in the layout
         mImageView = (ImageView) detailView.findViewById(R.id.contact_image);
         mDetailsLayout = (LinearLayout) detailView.findViewById(R.id.contact_details_layout);
+        mNotesLayout = (LinearLayout) detailView.findViewById(R.id.contact_notes_layout);
         mEmptyView = (TextView) detailView.findViewById(android.R.id.empty);
 
         if (mIsTwoPaneLayout) {
@@ -362,6 +366,14 @@ public class ContactDetailFragment extends Fragment implements
                         ContactAddressQuery.PROJECTION,
                         ContactAddressQuery.SELECTION,
                         null, null);
+            case ContactNotesQuery.QUERY_ID:
+                // This query loads contact address details, see
+                // ContactAddressQuery for more information.
+                final Uri nuri = Uri.withAppendedPath(mContactUri, Contacts.Data.CONTENT_DIRECTORY);
+                return new CursorLoader(getActivity(), nuri,
+                        ContactNotesQuery.PROJECTION,
+                        ContactNotesQuery.SELECTION,
+                        null, null);
         }
         return null;
     }
@@ -447,6 +459,37 @@ public class ContactDetailFragment extends Fragment implements
                     mDetailsLayout.addView(buildEmptyAddressLayout(), layoutParams);
                 }
                 break;
+            case ContactNotesQuery.QUERY_ID:
+                // This query loads the contact address details. More than
+                // one contact address is possible, so move each one to a
+                // LinearLayout in a Scrollview so multiple addresses can
+                // be scrolled by the user.
+
+                // Each LinearLayout has the same LayoutParams so this can
+                // be created once and used for each address.
+                final LinearLayout.LayoutParams nlayoutParams =
+                        new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT);
+
+                // Clears out the details layout first in case the details
+                // layout has addresses from a previous data load still
+                // added as children.
+                mNotesLayout.removeAllViews();
+
+                // Loops through all the rows in the Cursor
+                if (data.moveToFirst()) {
+                    do {
+                        // Builds the address layout
+                        final LinearLayout nlayout = buildNotesLayout(
+                                data.getString(ContactNotesQuery.NOTE));
+                        // Adds the new address layout to the details layout
+                        mNotesLayout.addView(nlayout, nlayoutParams);
+                    } while (data.moveToNext());
+                } else {
+                    // If nothing found, adds an empty address layout
+                    mNotesLayout.addView(buildEmptyNotesLayout(), nlayoutParams);
+                }
+                break;
         }
     }
 
@@ -454,6 +497,66 @@ public class ContactDetailFragment extends Fragment implements
     public void onLoaderReset(Loader<Cursor> loader) {
         // Nothing to do here. The Cursor does not need to be released as it was never directly
         // bound to anything (like an adapter).
+    }
+
+    /**
+     * Builds an empty notes layout that just shows that no notes
+     * were found for this contact.
+     *
+     * @return A LinearLayout to add to the contact notes layout
+     */
+    private LinearLayout buildEmptyNotesLayout() {
+        return buildNotesLayout(null);
+    }
+
+    /**
+     * Builds a notes LinearLayout based on note information from the Contacts Provider.
+     * Each note for the contact gets its own LinearLayout object; for example, if the contact
+     * has three notes, then 3 LinearLayouts are generated.
+     *
+     * @param note          From
+     *                         {@link android.provider.ContactsContract.CommonDataKinds.Note#NOTE}
+     * @return A LinearLayout to add to the contact notes layout,
+     * populated with the provided notes.
+     */
+    private LinearLayout buildNotesLayout(final String note) {
+
+        // Inflates the address layout
+        final LinearLayout notesLayout =
+                (LinearLayout) LayoutInflater.from(getActivity()).inflate(
+                        R.layout.contact_notes_item, mNotesLayout, false);
+
+        // Gets handles to the view objects in the layout
+        final TextView nheaderTextView =
+                (TextView) notesLayout.findViewById(R.id.contact_notes_header);
+        final TextView notesTextView =
+                (TextView) notesLayout.findViewById(R.id.contact_notes_item);
+        final ImageButton editNotesButton =
+                (ImageButton) notesLayout.findViewById(R.id.button_edit_notes);
+
+        // If there's no addresses for the contact, shows the empty view and message, and hides the
+        // header and button.
+        if (note == null) {
+            nheaderTextView.setVisibility(View.GONE);
+            editNotesButton.setVisibility(View.GONE);
+            notesTextView.setText(R.string.no_notes);
+        } else {
+            // Sets TextView objects in the layout
+            nheaderTextView.setText("Note");
+            notesTextView.setText(note);
+
+            // Defines an onClickListener object for the address button
+            editNotesButton.setOnClickListener(new View.OnClickListener() {
+                // Defines what to do when users click the address button
+                @Override
+                public void onClick(View view) {
+                        // Displays a message that no activity can handle the view button.
+                        Toast.makeText(getActivity(),"Edit Note", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
+        return notesLayout;
     }
 
     /**
@@ -740,6 +843,30 @@ public class ContactDetailFragment extends Fragment implements
         final static int ADDRESS = 1;
         final static int TYPE = 2;
         final static int LABEL = 3;
+    }
+
+    /**
+     * This interface defines constants used by address retrieval queries.
+     */
+    public interface ContactNotesQuery {
+        // A unique query ID to distinguish queries being run by the
+        // LoaderManager.
+        final static int QUERY_ID = 3;
+
+        // The query projection (columns to fetch from the provider)
+        final static String[] PROJECTION = {
+                ContactsContract.CommonDataKinds.Note._ID,
+                ContactsContract.CommonDataKinds.Note.NOTE,
+        };
+
+        // The query selection criteria. In this case matching against the
+        // StructuredPostal content mime type.
+        final static String SELECTION =
+                Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE + "'";
+
+        // The query column numbers which map to each value in the projection
+        final static int ID = 0;
+        final static int NOTE = 1;
     }
 
 }
