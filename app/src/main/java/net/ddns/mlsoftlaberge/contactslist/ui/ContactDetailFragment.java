@@ -104,7 +104,7 @@ public class ContactDetailFragment extends Fragment implements
     private TextView mContactName;
     private TextView mContactNo;
     private TextView mContactStarred;
-    private TextView mContactStatus;
+    private TextView mContactLookup;
     private MenuItem mEditContactMenuItem;
 
     /**
@@ -200,8 +200,8 @@ public class ContactDetailFragment extends Fragment implements
             if (mContactStarred != null) {
                 mContactStarred.setText("");
             }
-            if (mContactStatus != null) {
-                mContactStatus.setText("");
+            if (mContactLookup != null) {
+                mContactLookup.setText("");
             }
             if (mEditContactMenuItem != null) {
                 mEditContactMenuItem.setVisible(false);
@@ -277,8 +277,8 @@ public class ContactDetailFragment extends Fragment implements
         mContactStarred = (TextView) detailView.findViewById(R.id.contact_starred);
         mContactStarred.setVisibility(View.VISIBLE);
 
-        mContactStatus = (TextView) detailView.findViewById(R.id.contact_status);
-        mContactStatus.setVisibility(View.VISIBLE);
+        mContactLookup = (TextView) detailView.findViewById(R.id.contact_lookup);
+        mContactLookup.setVisibility(View.VISIBLE);
 
         return detailView;
     }
@@ -420,9 +420,9 @@ public class ContactDetailFragment extends Fragment implements
                         mContactStarred.setText(contactStarred);
                     }
                     // get the contact number for admin purpose
-                    final String contactStatus = data.getString(ContactDetailQuery.CONTACT_STATUS);
-                    if (mContactStatus != null) {
-                        mContactStatus.setText(contactStatus);
+                    final String contactLookup = data.getString(ContactDetailQuery.LOOKUP_KEY);
+                    if (mContactLookup != null) {
+                        mContactLookup.setText(contactLookup);
                     }
                 }
                 break;
@@ -805,7 +805,7 @@ public class ContactDetailFragment extends Fragment implements
                 Contacts._ID,
                 Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME,
                 Contacts.STARRED,
-                Contacts.CONTACT_STATUS,
+                Contacts.LOOKUP_KEY,
                 Contacts.PHOTO_URI,
         };
 
@@ -813,7 +813,7 @@ public class ContactDetailFragment extends Fragment implements
         final static int ID = 0;
         final static int DISPLAY_NAME = 1;
         final static int STARRED = 2;
-        final static int CONTACT_STATUS = 3;
+        final static int LOOKUP_KEY = 3;
         final static int PHOTO_URI = 4;
     }
 
@@ -860,7 +860,7 @@ public class ContactDetailFragment extends Fragment implements
         };
 
         // The query selection criteria. In this case matching against the
-        // StructuredPostal content mime type.
+        // Note content mime type.
         final static String SELECTION =
                 Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE + "'";
 

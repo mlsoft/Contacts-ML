@@ -23,4 +23,9 @@
         <item name="android:textIsSelectable">true</item>
     </style>
 
+    <style name="notesDetail" parent="@android:style/TextAppearance.Medium">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textIsSelectable">true</item>
+    </style>
+
 </resources>

@@ -30,7 +30,8 @@
         android:id="@+id/contact_notes_header"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        style="@style/addressHeader"/>
+        android:text="Note"
+        style="@style/notesHeader"/>
 
     <LinearLayout android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -47,7 +48,8 @@
             android:layout_weight="1"
             android:paddingRight="@dimen/padding"
             android:layout_gravity="center"
-            style="@style/addressDetail"/>
+            android:text="No Notes"
+            style="@style/notesDetail"/>
 
         <ImageButton
             android:id="@+id/button_edit_notes"
@@ -58,7 +60,7 @@
             android:paddingBottom="8dp"
             android:layout_gravity="center"
             android:contentDescription="@string/notes_button_description"
-            style="@style/addressButton"/>
+            style="@style/notesButton"/>
 
     </LinearLayout>
 

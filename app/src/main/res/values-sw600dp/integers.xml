@@ -18,7 +18,7 @@
 
     <!-- On devices with a smallest width of 600dp or more, the two-pane layout should allocate
          a larger portion of the screen to the detail fragment. -->
-    <integer name="contact_list_percent">35</integer>
-    <integer name="contact_detail_percent">65</integer>
+    <integer name="contact_list_percent">30</integer>
+    <integer name="contact_detail_percent">70</integer>
 
 </resources>

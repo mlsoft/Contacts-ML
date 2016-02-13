@@ -37,4 +37,12 @@
 
     <style name="addressButton" parent="@android:style/Widget.Holo.Button.Borderless"/>
 
+    <style name="notesHeader" parent="@android:style/TextAppearance.Small">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/holo_blue</item>
+    </style>
+
+    <style name="notesButton" parent="@android:style/Widget.Holo.Button.Borderless"/>
+
 </resources>
