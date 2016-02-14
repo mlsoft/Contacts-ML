@@ -20,14 +20,14 @@
 -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:weightSum="100">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="100">
 
         <ScrollView
             android:layout_width="match_parent"
@@ -40,21 +40,21 @@
                 android:orientation="vertical">
 
                 <ImageView
-                android:id="@+id/contact_image"
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_contact_picture_180_holo_light"
-                android:contentDescription="@string/imageview_description"/>
+                    android:id="@+id/contact_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="150dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_contact_picture_180_holo_light"
+                    android:contentDescription="@string/imageview_description"/>
 
                 <TextView android:id="@+id/contact_name"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:paddingLeft="@dimen/padding"
-                      android:paddingRight="@dimen/padding"
-                      android:paddingTop="8dp"
-                      android:text="Full Name"
-                      style="@style/contactNameTitle"/>
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="@dimen/padding"
+                    android:paddingRight="@dimen/padding"
+                    android:paddingTop="8dp"
+                    android:text="Full Name"
+                    style="@style/contactNameTitle"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -62,21 +62,21 @@
                     android:orientation="horizontal">
 
                     <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="@dimen/padding"
-                    android:paddingRight="@dimen/padding"
-                    android:paddingTop="4dp"
-                    android:text="No."
-                    style="@style/addressDetail"/>
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="@dimen/padding"
+                        android:paddingRight="@dimen/padding"
+                        android:paddingTop="4dp"
+                        android:text="No."
+                        style="@style/addressDetail"/>
 
                     <TextView android:id="@+id/contact_no"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="@dimen/padding"
-                    android:paddingTop="4dp"
-                    android:text="0"
-                    style="@style/addressDetail"/>
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingRight="@dimen/padding"
+                        android:paddingTop="4dp"
+                        android:text="0"
+                        style="@style/addressDetail"/>
 
                 </LinearLayout>
 
@@ -130,11 +130,11 @@
 
 
                 <LinearLayout
-                        android:id="@+id/contact_address_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="@dimen/padding"
-                        android:orientation="vertical">
+                    android:id="@+id/contact_address_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="@dimen/padding"
+                    android:orientation="vertical">
                 </LinearLayout>
 
                 <LinearLayout
@@ -155,12 +155,12 @@
          layout mode and no contact is currently selected and therefore the this fragment will
          simply show a text message instead of contact details. -->
     <TextView android:id="@id/android:empty"
-              android:gravity="center"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:text="@string/no_contact_selected"
-              android:fontFamily="sans-serif-light"
-              android:visibility="gone"
-              android:textAppearance="?android:attr/textAppearanceLarge"/>
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/no_contact_selected"
+        android:fontFamily="sans-serif-light"
+        android:visibility="gone"
+        android:textAppearance="?android:attr/textAppearanceLarge"/>
 
 </FrameLayout>

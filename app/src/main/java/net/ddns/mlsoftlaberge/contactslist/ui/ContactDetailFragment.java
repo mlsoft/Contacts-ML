@@ -257,7 +257,7 @@ public class ContactDetailFragment extends Fragment implements
 
         // Gets handles to view objects in the layout
         mImageView = (ImageView) detailView.findViewById(R.id.contact_image);
-        mDetailsLayout = (LinearLayout) detailView.findViewById(R.id.contact_details_layout);
+        mDetailsLayout = (LinearLayout) detailView.findViewById(R.id.contact_address_layout);
         mNotesLayout = (LinearLayout) detailView.findViewById(R.id.contact_notes_layout);
         mEmptyView = (TextView) detailView.findViewById(android.R.id.empty);
 

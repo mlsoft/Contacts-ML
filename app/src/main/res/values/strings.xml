@@ -23,6 +23,7 @@
     <string name="app_description">This is a sample app, demonstrating use of the Android system Contacts Provider.</string>
     <string name="imageview_description">Contact Thumbnail</string>
     <string name="address_button_description">View Address</string>
+    <string name="admin_button_description">Edit Transaction</string>
     <string name="notes_button_description">Edit Notes</string>
     <string name="menu_search">Search</string>
     <string name="menu_add_contact">Add Contact</string>
@@ -44,8 +45,17 @@
     <string name="search_match_other">Matches Other Field</string>
 
     <string name="no_address">No addresses found</string>
+    <string name="no_admin">No transaction found</string>
     <string name="no_notes">No notes found</string>
     <string name="no_intent_found">No application found to handle this action!</string>
     <string name="yes_intent_found">Application found.</string>
+
+
+    <string name="admin_description_texthint">Transaction Description</string>
+
+
+
+
+
 
 </resources>
