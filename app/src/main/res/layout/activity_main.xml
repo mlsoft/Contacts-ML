@@ -72,11 +72,4 @@ android:baselineAligned="false">
     android:layout_weight="@integer/contact_list_percent"
     tools:layout="@layout/contact_list_fragment" />
 
-<fragment class="net.ddns.mlsoftlaberge.contactslist.ui.ContactDetailFragment"
-    android:id="@+id/contact_detail"
-    android:layout_height="match_parent"
-    android:layout_width="0dp"
-    android:layout_weight="@integer/contact_detail_percent"
-    tools:layout="@layout/contact_detail_fragment" />
-
 </LinearLayout>
