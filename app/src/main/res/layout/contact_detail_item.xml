@@ -30,6 +30,7 @@
             android:id="@+id/contact_detail_header"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
+            android:text="HOME"
             style="@style/addressHeader"/>
 
     <LinearLayout android:orientation="horizontal"
@@ -47,6 +48,7 @@
                 android:layout_weight="1"
                 android:paddingRight="@dimen/padding"
                 android:layout_gravity="center"
+                android:hint="Address"
                 style="@style/addressDetail"/>
 
         <ImageButton

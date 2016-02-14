@@ -26,11 +26,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/contact_admin_header"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        style="@style/adminHeader"/>
 
     <LinearLayout android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -45,6 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="8"
+            android:paddingLeft="@dimen/padding"
             android:paddingRight="@dimen/padding"
             android:layout_gravity="center"
             android:hint="@string/admin_description_texthint"

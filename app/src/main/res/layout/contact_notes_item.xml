@@ -48,7 +48,8 @@
             android:layout_weight="1"
             android:paddingRight="@dimen/padding"
             android:layout_gravity="center"
-            android:text="No Notes"
+            android:text=""
+            android:hint="Text Note"
             style="@style/notesDetail"/>
 
         <ImageButton
