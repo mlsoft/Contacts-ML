@@ -40,8 +40,6 @@
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="8"
-            android:paddingLeft="@dimen/padding"
-            android:paddingRight="@dimen/padding"
             android:layout_gravity="center"
             android:hint="@string/admin_description_texthint"
             style="@style/adminDetail"/>
@@ -62,7 +60,7 @@
             android:layout_height="match_parent"
             android:layout_width="wrap_content"
             android:layout_gravity="center"
-            android:contentDescription="@string/admin_button_description"
+            android:contentDescription="@string/admin_editbutton_description"
             style="@style/adminButton"/>
 
     </LinearLayout>

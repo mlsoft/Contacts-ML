@@ -48,7 +48,7 @@
                     <ImageView
                     android:id="@+id/contact_image"
                     android:layout_width="0dp"
-                    android:layout_height="150dp"
+                    android:layout_height="120dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_contact_picture_180_holo_light"
                     android:layout_weight="35"
@@ -65,6 +65,36 @@
                     style="@style/contactNameTitle"/>
 
                 </LinearLayout>
+
+                <LinearLayout android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:showDividers="middle"
+                    android:dividerPadding="12dp"
+                    android:minHeight="48dp"
+                    android:divider="?android:attr/listDivider">
+
+                    <TextView android:id="@+id/contact_address"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:paddingLeft="@dimen/padding"
+                        android:paddingRight="@dimen/padding"
+                        android:layout_weight="8"
+                        android:layout_gravity="center"
+                        android:text=""
+                        style="@style/addressDetail"/>
+
+                    <ImageButton
+                        android:id="@+id/button_map_address"
+                        android:src="@drawable/ic_action_map"
+                        android:layout_height="match_parent"
+                        android:layout_width="wrap_content"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/admin_addbutton_description"
+                        style="@style/adminButton"/>
+
+                </LinearLayout>
+
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -123,7 +153,6 @@
                     android:divider="?android:attr/listDivider">
 
                     <TextView
-                        android:id="@+id/contact_admin_description"
                         android:layout_height="wrap_content"
                         android:layout_width="0dp"
                         android:paddingLeft="@dimen/padding"
@@ -134,7 +163,6 @@
                         style="@style/adminHeader"/>
 
                     <TextView
-                        android:id="@+id/contact_admin_amount"
                         android:layout_height="wrap_content"
                         android:layout_width="0dp"
                         android:layout_weight="3"
@@ -144,18 +172,26 @@
                         style="@style/adminHeader"/>
 
                     <ImageButton
-                        android:id="@+id/button_edit_admin"
+                        android:id="@+id/button_add_admin"
                         android:src="@drawable/ic_action_add"
                         android:layout_height="match_parent"
                         android:layout_width="wrap_content"
                         android:layout_gravity="center"
-                        android:contentDescription="@string/admin_button_description"
+                        android:contentDescription="@string/admin_addbutton_description"
                         style="@style/adminButton"/>
 
                 </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/contact_admin_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="@dimen/padding"
+                    android:orientation="vertical">
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/contact_notes_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingBottom="@dimen/padding"
