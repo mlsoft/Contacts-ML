@@ -94,7 +94,8 @@ public class ContactsListActivity extends FragmentActivity implements
     public void onContactSelected(Uri contactUri) {
             // start a new ContactDetailActivity with
             // the contact Uri
-            Intent intent = new Intent(this, ContactDetailActivity.class);
+            // Intent intent = new Intent(this, ContactDetailActivity.class);
+            Intent intent = new Intent(this, ContactAdminActivity.class);
             intent.setData(contactUri);
             startActivity(intent);
     }
