@@ -885,8 +885,9 @@ public class ContactsListFragment extends ListFragment implements
         // the search string to CONTENT_FILTER_URI.
         @SuppressLint("InlinedApi")
         final static String SELECTION =
-                (Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) +
-                "<>''" + " AND " + Contacts.IN_VISIBLE_GROUP + "=1";
+                (Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) + "<>''"
+                        + " AND " + Contacts.IN_VISIBLE_GROUP + "=1";
+                        // + " AND " + Contacts.STARRED + "=1";
 
         // The desired sort order for the returned Cursor. In Android 3.0 and later, the primary
         // sort key allows for localization. In earlier versions. use the display name as the sort

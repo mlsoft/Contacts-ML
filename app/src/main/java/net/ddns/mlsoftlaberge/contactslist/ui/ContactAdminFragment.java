@@ -49,6 +49,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -106,6 +107,10 @@ public class ContactAdminFragment extends Fragment implements
 
     private TextView mContactPhone;
     private TextView mContactEmail;
+
+    private Button mPhoneAdminButton;
+
+    private Button mEmailAdminButton;
 
     private ImageButton mAddAdminButton;
 
@@ -184,6 +189,8 @@ public class ContactAdminFragment extends Fragment implements
             getLoaderManager().restartLoader(ContactDetailQuery.QUERY_ID, null, this);
             getLoaderManager().restartLoader(ContactAddressQuery.QUERY_ID, null, this);
             getLoaderManager().restartLoader(ContactNotesQuery.QUERY_ID, null, this);
+            getLoaderManager().restartLoader(ContactPhoneQuery.QUERY_ID, null, this);
+            getLoaderManager().restartLoader(ContactEmailQuery.QUERY_ID, null, this);
         } else {
             // If contactLookupUri is null, then the method was called when no contact was selected
             // in the contacts list. This should only happen in a two-pane layout when the user
@@ -298,8 +305,31 @@ public class ContactAdminFragment extends Fragment implements
         mContactPhone = (TextView) adminView.findViewById(R.id.contact_phone);
         mContactPhone.setVisibility(View.VISIBLE);
 
+        // Defines an onClickListener object for the add-admin button
+        mPhoneAdminButton = (Button) adminView.findViewById(R.id.button_phone);
+        mPhoneAdminButton.setOnClickListener(new View.OnClickListener() {
+            // Defines what to do when users click the address button
+            @Override
+            public void onClick(View view) {
+                // Displays a message that no activity can handle the view button.
+                Toast.makeText(getActivity(), "Phone Admin", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         mContactEmail = (TextView) adminView.findViewById(R.id.contact_email);
         mContactEmail.setVisibility(View.VISIBLE);
+
+        // Defines an onClickListener object for the add-admin button
+        mEmailAdminButton = (Button) adminView.findViewById(R.id.button_email);
+        mEmailAdminButton.setOnClickListener(new View.OnClickListener() {
+            // Defines what to do when users click the address button
+            @Override
+            public void onClick(View view) {
+                // Displays a message that no activity can handle the view button.
+                Toast.makeText(getActivity(), "Email Admin", Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         // Defines an onClickListener object for the add-admin button
         mAddAdminButton = (ImageButton) adminView.findViewById(R.id.button_add_admin);
@@ -410,6 +440,22 @@ public class ContactAdminFragment extends Fragment implements
                         ContactNotesQuery.PROJECTION,
                         ContactNotesQuery.SELECTION,
                         null, null);
+            case ContactPhoneQuery.QUERY_ID:
+                // This query loads contact address admins, see
+                // ContactAddressQuery for more information.
+                final Uri puri = Uri.withAppendedPath(mContactUri, Contacts.Data.CONTENT_DIRECTORY);
+                return new CursorLoader(getActivity(), puri,
+                        ContactPhoneQuery.PROJECTION,
+                        ContactPhoneQuery.SELECTION,
+                        null, null);
+            case ContactEmailQuery.QUERY_ID:
+                // This query loads contact address admins, see
+                // ContactAddressQuery for more information.
+                final Uri euri = Uri.withAppendedPath(mContactUri, Contacts.Data.CONTENT_DIRECTORY);
+                return new CursorLoader(getActivity(), euri,
+                        ContactEmailQuery.PROJECTION,
+                        ContactEmailQuery.SELECTION,
+                        null, null);
         }
         return null;
     }
@@ -493,6 +539,32 @@ public class ContactAdminFragment extends Fragment implements
                     // If nothing found, adds an empty address layout
                     mNotesLayout.addView(buildEmptyNotesLayout(), nlayoutParams);
                     mNotesData="";
+                }
+                break;
+            case ContactPhoneQuery.QUERY_ID:
+                // This query loads the contact address .
+                // Loops through all the rows in the Cursor
+                if (data.moveToFirst()) {
+                    do {
+                        // Fills the address field
+                        mContactPhone.setText(data.getString(ContactPhoneQuery.PHONE));
+                    } while (data.moveToNext());
+                } else {
+                    // If nothing found, adds an empty address layout
+                    mContactPhone.setText("");
+                }
+                break;
+            case ContactEmailQuery.QUERY_ID:
+                // This query loads the contact address .
+                // Loops through all the rows in the Cursor
+                if (data.moveToFirst()) {
+                    do {
+                        // Fills the address field
+                        mContactEmail.setText(data.getString(ContactEmailQuery.EMAIL));
+                    } while (data.moveToNext());
+                } else {
+                    // If nothing found, adds an empty address layout
+                    mContactEmail.setText("");
                 }
                 break;
         }
@@ -589,16 +661,27 @@ public class ContactAdminFragment extends Fragment implements
             descripTextView.setText(note);
             amountTextView.setText("0.00");
 
-            // Defines an onClickListener object for the edit-admin button
-            editAdminButton.setOnClickListener(new View.OnClickListener() {
-                // Defines what to do when users click the address button
-                @Override
-                public void onClick(View view) {
-                    // Displays a message that no activity can handle the view button.
-                    Toast.makeText(getActivity(),"Edit Admin", Toast.LENGTH_SHORT).show();
-                }
-            });
-
+            if(note.isEmpty()) {
+                // Defines an onClickListener object for the edit-admin button
+                editAdminButton.setOnClickListener(new View.OnClickListener() {
+                    // Defines what to do when users click the address button
+                    @Override
+                    public void onClick(View view) {
+                        // Displays a message that no activity can handle the view button.
+                        Toast.makeText(getActivity(), "Dont Edit Admin", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                // Defines an onClickListener object for the edit-admin button
+                editAdminButton.setOnClickListener(new View.OnClickListener() {
+                    // Defines what to do when users click the address button
+                    @Override
+                    public void onClick(View view) {
+                        // Displays a message that no activity can handle the view button.
+                        Toast.makeText(getActivity(), "Edit Admin", Toast.LENGTH_SHORT).show();
+                        }
+                });
+            }
         }
         return adminLayout;
     }
@@ -824,6 +907,54 @@ public class ContactAdminFragment extends Fragment implements
         // The query column numbers which map to each value in the projection
         final static int ID = 0;
         final static int NOTE = 1;
+    }
+
+    /**
+     * This interface defines constants used by address retrieval queries.
+     */
+    public interface ContactPhoneQuery {
+        // A unique query ID to distinguish queries being run by the
+        // LoaderManager.
+        final static int QUERY_ID = 4;
+
+        // The query projection (columns to fetch from the provider)
+        final static String[] PROJECTION = {
+                ContactsContract.CommonDataKinds.Phone._ID,
+                ContactsContract.CommonDataKinds.Phone.NUMBER,
+        };
+
+        // The query selection criteria. In this case matching against the
+        // Note content mime type.
+        final static String SELECTION =
+                Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE + "'";
+
+        // The query column numbers which map to each value in the projection
+        final static int ID = 0;
+        final static int PHONE = 1;
+    }
+
+    /**
+     * This interface defines constants used by address retrieval queries.
+     */
+    public interface ContactEmailQuery {
+        // A unique query ID to distinguish queries being run by the
+        // LoaderManager.
+        final static int QUERY_ID = 5;
+
+        // The query projection (columns to fetch from the provider)
+        final static String[] PROJECTION = {
+                ContactsContract.CommonDataKinds.Email._ID,
+                ContactsContract.CommonDataKinds.Email.ADDRESS,
+        };
+
+        // The query selection criteria. In this case matching against the
+        // Note content mime type.
+        final static String SELECTION =
+                Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE + "'";
+
+        // The query column numbers which map to each value in the projection
+        final static int ID = 0;
+        final static int EMAIL = 1;
     }
 
 }

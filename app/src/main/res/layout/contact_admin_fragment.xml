@@ -71,7 +71,7 @@
                     android:layout_height="wrap_content"
                     android:showDividers="middle"
                     android:dividerPadding="12dp"
-                    android:minHeight="48dp"
+                    android:minHeight="32dp"
                     android:divider="?android:attr/listDivider">
 
                     <TextView android:id="@+id/contact_address"
@@ -81,7 +81,7 @@
                         android:paddingRight="@dimen/padding"
                         android:layout_weight="8"
                         android:layout_gravity="center"
-                        android:text=""
+                        android:hint=""
                         style="@style/addressDetail"/>
 
                     <ImageButton
@@ -95,61 +95,75 @@
 
                 </LinearLayout>
 
-
-                <LinearLayout
+                <LinearLayout android:orientation="horizontal"
+                    android:minHeight="32dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_height="wrap_content">
 
                     <TextView
-                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
                         android:paddingLeft="@dimen/padding"
                         android:paddingRight="@dimen/padding"
-                        android:paddingTop="4dp"
-                        android:text="Phone:"
-                        style="@style/adminDetail"/>
+                        android:layout_gravity="center"
+                        android:text="Phone"
+                        style="@style/adminHeader"/>
 
                     <TextView android:id="@+id/contact_phone"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_weight="3"
+                        android:gravity="left"
+                        android:layout_gravity="center"
+                        android:text=""
+                        style="@style/addressDetail"/>
+
+                    <Button
+                        android:id="@+id/button_phone"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingRight="@dimen/padding"
-                        android:paddingTop="4dp"
-                        android:hint="418-123-4567"
-                        style="@style/adminDetail"/>
+                        android:text="Call"/>
 
                 </LinearLayout>
 
-                <LinearLayout
+                <LinearLayout android:orientation="horizontal"
+                    android:minHeight="32dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_height="wrap_content">
 
                     <TextView
-                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
                         android:paddingLeft="@dimen/padding"
                         android:paddingRight="@dimen/padding"
-                        android:paddingTop="4dp"
-                        android:text="Email:"
-                        style="@style/adminDetail"/>
+                        android:layout_gravity="center"
+                        android:text="Email"
+                        style="@style/adminHeader"/>
 
                     <TextView android:id="@+id/contact_email"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:layout_weight="3"
+                        android:gravity="left"
+                        android:layout_gravity="center"
+                        android:text=""
+                        style="@style/addressDetail"/>
+
+                    <Button
+                        android:id="@+id/button_email"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingRight="@dimen/padding"
-                        android:paddingTop="4dp"
-                        android:hint="johndoe@domain.com"
-                        style="@style/adminDetail"/>
+                        android:text="Send"/>
 
                 </LinearLayout>
+
 
                 <LinearLayout android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:showDividers="middle"
                     android:dividerPadding="12dp"
-                    android:minHeight="48dp"
+                    android:minHeight="32dp"
                     android:divider="?android:attr/listDivider">
 
                     <TextView
