@@ -14,7 +14,7 @@ android {
     defaultConfig {
         applicationId "net.ddns.mlsoftlaberge.contactslist"
         minSdkVersion 5
-        targetSdkVersion 17
+        targetSdkVersion 21
     }
     buildTypes {
         release {

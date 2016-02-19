@@ -24,6 +24,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -49,7 +50,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -98,10 +101,8 @@ public class ContactAdminFragment extends Fragment implements
     private MenuItem mModifContactMenuItem;
 
     private ImageView mImageView;
-    private LinearLayout mAdminLayout;
-    private LinearLayout mNotesLayout;
-
     private TextView mContactName;
+
     private TextView mContactAddress;
     private ImageButton mMapAddressButton;
 
@@ -115,6 +116,11 @@ public class ContactAdminFragment extends Fragment implements
     private ImageButton mAddAdminButton;
 
     private String mNotesData="";
+
+    private GridView mTransactionGrid;
+
+    private TextView mNotesItem;
+    private ImageButton mNotesEditButton;
 
     /**
      * Factory method to generate a new instance of the fragment given a contact Uri. A factory
@@ -199,8 +205,6 @@ public class ContactAdminFragment extends Fragment implements
             // the layout is empty, and set the contact name to the empty string. Turn off any menu
             // items that are visible.
             mImageView.setVisibility(View.GONE);
-            mAdminLayout.removeAllViews();
-            mNotesLayout.removeAllViews();
             if (mContactName != null) {
                 mContactName.setText("");
             }
@@ -343,8 +347,20 @@ public class ContactAdminFragment extends Fragment implements
         });
 
 
-        mAdminLayout = (LinearLayout) adminView.findViewById(R.id.contact_admin_layout);
-        mNotesLayout = (LinearLayout) adminView.findViewById(R.id.contact_notes_layout);
+        mTransactionGrid = (GridView) adminView.findViewById(R.id.transaction_grid);
+        // mTransactionGrid.setAdapter(new TransactionAdapter());
+
+        mNotesItem = (TextView) adminView.findViewById(R.id.contact_notes_item);
+        // Defines an onClickListener object for the add-admin button
+        mNotesEditButton = (ImageButton) adminView.findViewById(R.id.button_edit_notes);
+        mNotesEditButton.setOnClickListener(new View.OnClickListener() {
+            // Defines what to do when users click the address button
+            @Override
+            public void onClick(View view) {
+                // Displays a message that no activity can handle the view button.
+                Toast.makeText(getActivity(), "Edit Notes", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         return adminView;
     }
@@ -502,44 +518,17 @@ public class ContactAdminFragment extends Fragment implements
                 }
                 break;
             case ContactNotesQuery.QUERY_ID:
-                // This query loads the contact address admins. More than
-                // one contact address is possible, so move each one to a
-                // LinearLayout in a Scrollview so multiple addresses can
-                // be scrolled by the user.
-
-                // Each LinearLayout has the same LayoutParams so this can
-                // be created once and used for each address.
-                final LinearLayout.LayoutParams nlayoutParams =
-                        new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT);
-
-                // Clears out the notes layout first in case the notes
-                // layout has notes from a previous data load still
-                // added as children.
-                mAdminLayout.removeAllViews();
-                mNotesLayout.removeAllViews();
-
-                // Loops through all the rows in the Cursor
+                // Get first note found
                 if (data.moveToFirst()) {
-                    do {
-                        // Builds the notes layout
-                        final LinearLayout nlayout = buildNotesLayout(
-                                data.getString(ContactNotesQuery.NOTE));
-                        // Adds the new notes layout to the notes layout
-                        mNotesLayout.addView(nlayout, nlayoutParams);
-
-                        // store full note, and process it
-                        mNotesData=data.getString(ContactNotesQuery.NOTE);
-                        // build the admin layout from the note
-                        final LinearLayout alayout = buildAdminLayout(mNotesData);
-                        // Adds the new admin layout to the admin layout
-                        mAdminLayout.addView(alayout, nlayoutParams);
-                    } while (data.moveToNext());
+                    // store full note, and process it
+                    mNotesItem.setText(data.getString(ContactNotesQuery.NOTE));
+                    mNotesData=data.getString(ContactNotesQuery.NOTE);
                 } else {
                     // If nothing found, adds an empty address layout
-                    mNotesLayout.addView(buildEmptyNotesLayout(), nlayoutParams);
+                    mNotesItem.setText("");
                     mNotesData="";
                 }
+                mTransactionGrid.setAdapter(new TransactionAdapter());
                 break;
             case ContactPhoneQuery.QUERY_ID:
                 // This query loads the contact address .
@@ -575,118 +564,6 @@ public class ContactAdminFragment extends Fragment implements
         // Nothing to do here. The Cursor does not need to be released as it was never directly
         // bound to anything (like an adapter).
     }
-
-    /**
-     * Builds an empty notes layout that just shows that no notes
-     * were found for this contact.
-     *
-     * @return A LinearLayout to add to the contact notes layout
-     */
-    private LinearLayout buildEmptyNotesLayout() {
-        return buildNotesLayout(null);
-    }
-
-    /**
-     * Builds a notes LinearLayout based on note information from the Contacts Provider.
-     * Each note for the contact gets its own LinearLayout object; for example, if the contact
-     * has three notes, then 3 LinearLayouts are generated.
-     *
-     * @param note          From
-     *                         {@link android.provider.ContactsContract.CommonDataKinds.Note#NOTE}
-     * @return A LinearLayout to add to the contact notes layout,
-     * populated with the provided notes.
-     */
-    private LinearLayout buildNotesLayout(final String note) {
-
-        // Inflates the address layout
-        final LinearLayout notesLayout =
-                (LinearLayout) LayoutInflater.from(getActivity()).inflate(
-                        R.layout.contact_notes_item, mNotesLayout, false);
-
-        // Gets handles to the view objects in the layout
-        final TextView nheaderTextView =
-                (TextView) notesLayout.findViewById(R.id.contact_notes_header);
-        final TextView notesTextView =
-                (TextView) notesLayout.findViewById(R.id.contact_notes_item);
-        final ImageButton editNotesButton =
-                (ImageButton) notesLayout.findViewById(R.id.button_edit_notes);
-
-        // If there's no addresses for the contact, shows the empty view and message, and hides the
-        // header and button.
-        if (note == null) {
-            nheaderTextView.setVisibility(View.GONE);
-            editNotesButton.setVisibility(View.GONE);
-            notesTextView.setText(R.string.no_notes);
-        } else {
-            // Sets TextView objects in the layout
-            nheaderTextView.setText("Note");
-            notesTextView.setText(note);
-
-            // Defines an onClickListener object for the address button
-            editNotesButton.setOnClickListener(new View.OnClickListener() {
-                // Defines what to do when users click the address button
-                @Override
-                public void onClick(View view) {
-                    // Displays a message that no activity can handle the view button.
-                    Toast.makeText(getActivity(),"Edit Note", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-        }
-        return notesLayout;
-    }
-
-    private LinearLayout buildAdminLayout(final String note) {
-
-        // Inflates the address layout
-        final LinearLayout adminLayout =
-                (LinearLayout) LayoutInflater.from(getActivity()).inflate(
-                        R.layout.contact_admin_item, mAdminLayout, false);
-
-        // Gets handles to the view objects in the layout
-        final TextView descripTextView =
-                (TextView) adminLayout.findViewById(R.id.contact_admin_description);
-        final TextView amountTextView =
-                (TextView) adminLayout.findViewById(R.id.contact_admin_amount);
-        final ImageButton editAdminButton =
-                (ImageButton) adminLayout.findViewById(R.id.button_edit_admin);
-
-        // If there's no notes for the contact, shows the empty view and message, and hides the
-        // header and button.
-        if (note == null) {
-            descripTextView.setText("");
-            amountTextView.setText("");
-        } else {
-            // Sets TextView objects in the layout
-            descripTextView.setText(note);
-            amountTextView.setText("0.00");
-
-            if(note.isEmpty()) {
-                // Defines an onClickListener object for the edit-admin button
-                editAdminButton.setOnClickListener(new View.OnClickListener() {
-                    // Defines what to do when users click the address button
-                    @Override
-                    public void onClick(View view) {
-                        // Displays a message that no activity can handle the view button.
-                        Toast.makeText(getActivity(), "Dont Edit Admin", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            } else {
-                // Defines an onClickListener object for the edit-admin button
-                editAdminButton.setOnClickListener(new View.OnClickListener() {
-                    // Defines what to do when users click the address button
-                    @Override
-                    public void onClick(View view) {
-                        // Displays a message that no activity can handle the view button.
-                        Toast.makeText(getActivity(), "Edit Admin", Toast.LENGTH_SHORT).show();
-                        }
-                });
-            }
-        }
-        return adminLayout;
-    }
-
-
 
     /**
      * Constructs a geo scheme Uri from a postal address.
@@ -956,5 +833,38 @@ public class ContactAdminFragment extends Fragment implements
         final static int ID = 0;
         final static int EMAIL = 1;
     }
+
+    public class TransactionAdapter extends BaseAdapter {
+        public TransactionAdapter() {
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            TextView t;
+
+            if (convertView == null) {
+                t = new TextView(getActivity());
+                // t.setLayoutParams(new GridView.LayoutParams(50, 50));
+            } else {
+                t = (TextView) convertView;
+            }
+
+            t.setText("Note " + position);
+            return t;
+        }
+
+
+        public final int getCount() {
+            return 25;
+        }
+
+        public final Object getItem(int position) {
+            return null;
+        }
+
+        public final long getItemId(int position) {
+            return position;
+        }
+    }
+
 
 }
