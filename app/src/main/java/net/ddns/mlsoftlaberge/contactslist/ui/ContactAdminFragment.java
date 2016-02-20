@@ -477,6 +477,13 @@ public class ContactAdminFragment extends Fragment implements
     }
 
     @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // Nothing to do here. The Cursor does not need to be released as it was never directly
+        // bound to anything (like an adapter).
+    }
+
+
+    @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
         // If this fragment was cleared while the query was running
@@ -517,19 +524,6 @@ public class ContactAdminFragment extends Fragment implements
                     mContactAddress.setText("");
                 }
                 break;
-            case ContactNotesQuery.QUERY_ID:
-                // Get first note found
-                if (data.moveToFirst()) {
-                    // store full note, and process it
-                    mNotesItem.setText(data.getString(ContactNotesQuery.NOTE));
-                    mNotesData=data.getString(ContactNotesQuery.NOTE);
-                } else {
-                    // If nothing found, adds an empty address layout
-                    mNotesItem.setText("");
-                    mNotesData="";
-                }
-                mTransactionGrid.setAdapter(new TransactionAdapter());
-                break;
             case ContactPhoneQuery.QUERY_ID:
                 // This query loads the contact address .
                 // Loops through all the rows in the Cursor
@@ -556,14 +550,84 @@ public class ContactAdminFragment extends Fragment implements
                     mContactEmail.setText("");
                 }
                 break;
+            case ContactNotesQuery.QUERY_ID:
+                // Get first note found
+                if (data.moveToFirst()) {
+                    // store full note, and process it
+                    mNotesData=data.getString(ContactNotesQuery.NOTE);
+                    expandnote();
+                } else {
+                    // If nothing found, adds an empty address layout
+                    mNotesData="";
+                    clearnote();
+                }
+                mNotesItem.setText(notememo);
+                mTransactionGrid.setAdapter(new TransactionAdapter());
+                break;
         }
     }
 
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        // Nothing to do here. The Cursor does not need to be released as it was never directly
-        // bound to anything (like an adapter).
+    // tables containing the expanded note data
+    private String notememo;
+    private String notetext[];
+    private double noteamount[];
+    private int nbnotes;
+
+    // expand the note in a table of fields
+    // scan mNotesData and cut it in fields of tables
+    public void expandnote() {
+        nbnotes=0;
+        notememo="";
+        // expand note in fields
+
+        notememo=mNotesData;
     }
+
+    // clear the table of fields for an empty note
+    public void clearnote() {
+        nbnotes=0;
+        notememo="";
+    }
+
+    // return a view for every cell of the grid table
+    public class TransactionAdapter extends BaseAdapter {
+        public TransactionAdapter() {
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LinearLayout layout;
+
+            if (convertView == null) {
+                // Inflates the address layout
+                layout = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
+                                R.layout.contact_transaction_item, null, false);
+            } else {
+                layout = (LinearLayout) convertView;
+            }
+
+            TextView t = (TextView) layout.findViewById(R.id.contact_transaction_description);
+            TextView mnt = (TextView) layout.findViewById(R.id.contact_transaction_amount);
+
+            t.setText("Note " + position);
+            mnt.setText("0.00");
+
+            return layout;
+        }
+
+
+        public final int getCount() {
+            return 25;
+        }
+
+        public final Object getItem(int position) {
+            return null;
+        }
+
+        public final long getItemId(int position) {
+            return position;
+        }
+    }
+
 
     /**
      * Constructs a geo scheme Uri from a postal address.
@@ -832,38 +896,6 @@ public class ContactAdminFragment extends Fragment implements
         // The query column numbers which map to each value in the projection
         final static int ID = 0;
         final static int EMAIL = 1;
-    }
-
-    public class TransactionAdapter extends BaseAdapter {
-        public TransactionAdapter() {
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            TextView t;
-
-            if (convertView == null) {
-                t = new TextView(getActivity());
-                // t.setLayoutParams(new GridView.LayoutParams(50, 50));
-            } else {
-                t = (TextView) convertView;
-            }
-
-            t.setText("Note " + position);
-            return t;
-        }
-
-
-        public final int getCount() {
-            return 25;
-        }
-
-        public final Object getItem(int position) {
-            return null;
-        }
-
-        public final long getItemId(int position) {
-            return position;
-        }
     }
 
 

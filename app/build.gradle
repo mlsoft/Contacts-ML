@@ -13,7 +13,7 @@ android {
     buildToolsVersion "23.0.2"
     defaultConfig {
         applicationId "net.ddns.mlsoftlaberge.contactslist"
-        minSdkVersion 5
+        minSdkVersion 16
         targetSdkVersion 21
     }
     buildTypes {
@@ -21,6 +21,8 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
+    }
+    productFlavors {
     }
 }
 

@@ -21,7 +21,7 @@
 
 <resources>
 
-    <style name="AppTheme" parent="@android:style/Theme"/>
+    <style name="AppTheme" parent="@android:style/Theme.Holo.Light"/>
 
     <style name="ContactListView">
         <item name="android:verticalScrollbarPosition">right</item>
@@ -29,7 +29,9 @@
         <item name="android:scrollbarStyle">outsideInset</item>
     </style>
 
-    <style name="listViewActivatedStyle"/>
+    <style name="listViewActivatedStyle">
+        <item name="android:background">?android:attr/activatedBackgroundIndicator</item>
+    </style>
 
     <style name="quickContactBadgeStyle">
         <item name="android:background">@drawable/quickcontact_badge_small</item>
@@ -43,6 +45,7 @@
     <style name="addressHeader" parent="@android:style/TextAppearance.Small">
         <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/holo_blue</item>
     </style>
 
     <style name="addressDetail" parent="@android:style/TextAppearance.Medium">
@@ -50,11 +53,12 @@
         <item name="android:textIsSelectable">true</item>
     </style>
 
-    <style name="addressButton"/>
+    <style name="addressButton" parent="@android:style/Widget.Holo.Button.Borderless"/>
 
     <style name="notesHeader" parent="@android:style/TextAppearance.Small">
         <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/holo_blue</item>
     </style>
 
     <style name="notesDetail" parent="@android:style/TextAppearance.Small">
@@ -62,11 +66,12 @@
         <item name="android:textIsSelectable">true</item>
     </style>
 
-    <style name="notesButton"/>
+    <style name="notesButton" parent="@android:style/Widget.Holo.Button.Borderless"/>
 
     <style name="adminHeader" parent="@android:style/TextAppearance.Small">
         <item name="android:textAllCaps">true</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/holo_blue</item>
     </style>
 
     <style name="adminDetail" parent="@android:style/TextAppearance.Small">
@@ -74,7 +79,7 @@
         <item name="android:textIsSelectable">true</item>
     </style>
 
-    <style name="adminButton"/>
+    <style name="adminButton" parent="@android:style/Widget.Holo.Button.Borderless"/>
 
     <style name="contactNameTitle" parent="@android:style/TextAppearance.Large">
         <item name="android:textSize">38sp</item>
