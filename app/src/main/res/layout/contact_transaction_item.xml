@@ -23,11 +23,7 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/padding"
-        android:showDividers="middle"
-        android:dividerPadding="12dp"
-        android:minHeight="24dp"
-        android:divider="?android:attr/listDivider">
+        android:paddingLeft="@dimen/padding">
 
         <TextView
             android:id="@+id/contact_transaction_description"

@@ -74,7 +74,7 @@
         <item name="android:textColor">@color/holo_blue</item>
     </style>
 
-    <style name="adminDetail" parent="@android:style/TextAppearance.Small">
+    <style name="adminDetail" parent="@android:style/TextAppearance.Medium">
         <item name="android:fontFamily">sans-serif-light</item>
         <item name="android:textIsSelectable">true</item>
     </style>

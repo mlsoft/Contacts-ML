@@ -568,25 +568,49 @@ public class ContactAdminFragment extends Fragment implements
     }
 
     // tables containing the expanded note data
-    private String notememo;
-    private String notetext[];
-    private double noteamount[];
-    private int nbnotes;
+    private StringBuffer notememo=new StringBuffer();
+    private String notetext[]={"Note Un","Note Deux"};
+    private double noteamount[]={1.11,2.22};
+    private int nbnotes=2;
+    private String noteline;
 
     // expand the note in a table of fields
-    // scan mNotesData and cut it in fields of tables
-    public void expandnote() {
+    // scan mNotesData and cut it in fields and tables
+    private void expandnote() {
         nbnotes=0;
-        notememo="";
-        // expand note in fields
+        notememo.setLength(0);
 
-        notememo=mNotesData;
+        // expand note in fields
+        int i=0;
+        int p;
+        while(i<mNotesData.length()) {
+            // find the position of the end of line (may be end of block too)
+            p=mNotesData.indexOf('\n',i);
+            if(p<0) { p=mNotesData.length()-1; }
+            noteline=mNotesData.substring(i,p+1);
+            // if an admin line, then decode it
+            // else add it to the memo field
+            if(noteline.indexOf("ADMIN:")==0) {
+                decodeline();
+            } else {
+                notememo.append(noteline);
+            }
+            // advance after the last char eated by line
+            i=p+1;
+        }
     }
 
     // clear the table of fields for an empty note
-    public void clearnote() {
+    private void clearnote() {
         nbnotes=0;
-        notememo="";
+        notememo.setLength(0);
+    }
+
+    // decode the line beginning by ADMIN: and add it to the table
+    private void decodeline() {
+        notetext[nbnotes]=noteline;
+        noteamount[nbnotes]=1.11+(double)nbnotes;
+        nbnotes++;
     }
 
     // return a view for every cell of the grid table
@@ -608,15 +632,15 @@ public class ContactAdminFragment extends Fragment implements
             TextView t = (TextView) layout.findViewById(R.id.contact_transaction_description);
             TextView mnt = (TextView) layout.findViewById(R.id.contact_transaction_amount);
 
-            t.setText("Note " + position);
-            mnt.setText("0.00");
+            t.setText(notetext[position]);
+            mnt.setText( "" + (noteamount[position]));
 
             return layout;
         }
 
 
         public final int getCount() {
-            return 25;
+            return nbnotes;
         }
 
         public final Object getItem(int position) {
