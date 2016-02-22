@@ -32,7 +32,7 @@
             android:layout_weight="8"
             android:layout_gravity="center"
             android:hint="@string/admin_description_texthint"
-            style="@style/adminDetail"/>
+            style="@style/notesDetail"/>
 
         <TextView
             android:id="@+id/contact_transaction_amount"
