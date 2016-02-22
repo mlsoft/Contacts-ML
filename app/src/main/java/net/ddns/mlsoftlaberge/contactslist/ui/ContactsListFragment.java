@@ -70,7 +70,7 @@ import java.util.Locale;
  * This fragment displays a list of contacts stored in the Contacts Provider. Each item in the list
  * shows the contact's thumbnail photo and display name. On devices with large screens, this
  * fragment's UI appears as part of a two-pane layout, along with the UI of
- * {@link ContactDetailFragment}. On smaller screens, this fragment's UI appears as a single pane.
+ * {@link ContactAdminFragment}. On smaller screens, this fragment's UI appears as a single pane.
  *
  * This Fragment retrieves contacts based on a search string. If the user doesn't enter a search
  * string, then the list contains all the contacts in the Contacts Provider. If the user enters a
@@ -278,7 +278,7 @@ public class ContactsListFragment extends ListFragment implements
                 cursor.getString(ContactsQuery.LOOKUP_KEY));
 
         // Notifies the parent activity that the user selected a contact. In a two-pane layout, the
-        // parent activity loads a ContactDetailFragment that displays the details for the selected
+        // parent activity loads a ContactAdminFragment that displays the details for the selected
         // contact. In a single-pane layout, the parent activity starts a new activity that
         // displays contact details in its own Fragment.
         mOnContactSelectedListener.onContactSelected(uri);

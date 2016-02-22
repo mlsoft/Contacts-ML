@@ -35,7 +35,7 @@ import net.ddns.mlsoftlaberge.contactslist.util.Utils;
 
 /**
  * FragmentActivity to hold the main {@link ContactsListFragment}. On larger screen devices which
- * can fit two panes also load {@link ContactDetailFragment}.
+ * can fit two panes also load {@link ContactAdminFragment}.
  */
 public class ContactsListActivity extends FragmentActivity implements
         ContactsListFragment.OnContactsInteractionListener {
@@ -92,9 +92,8 @@ public class ContactsListActivity extends FragmentActivity implements
      */
     @Override
     public void onContactSelected(Uri contactUri) {
-            // start a new ContactDetailActivity with
+            // start a new ContactAdminActivity with
             // the contact Uri
-            // Intent intent = new Intent(this, ContactDetailActivity.class);
             Intent intent = new Intent(this, ContactAdminActivity.class);
             intent.setData(contactUri);
             startActivity(intent);

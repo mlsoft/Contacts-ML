@@ -20,7 +20,7 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.StrictMode;
 
-import net.ddns.mlsoftlaberge.contactslist.ui.ContactDetailActivity;
+import net.ddns.mlsoftlaberge.contactslist.ui.ContactAdminActivity;
 import net.ddns.mlsoftlaberge.contactslist.ui.ContactsListActivity;
 
 /**
@@ -60,7 +60,7 @@ public class Utils {
                 // there could be a memory leak.
                 vmPolicyBuilder
                         .setClassInstanceLimit(ContactsListActivity.class, 1)
-                        .setClassInstanceLimit(ContactDetailActivity.class, 1);
+                        .setClassInstanceLimit(ContactAdminActivity.class, 1);
             }
 
             // Use builders to enable strict mode policies

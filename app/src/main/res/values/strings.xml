@@ -55,6 +55,7 @@
 
 
     <string name="admin_description_texthint">Transaction Description</string>
+    <string name="admin_date_texthint">2016-12-31</string>
 
 
 

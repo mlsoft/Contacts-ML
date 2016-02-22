@@ -18,17 +18,12 @@ package net.ddns.mlsoftlaberge.contactslist.ui;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,7 +34,6 @@ import android.provider.ContactsContract.Contacts.Photo;
 import android.provider.ContactsContract.Data;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.DisplayMetrics;
@@ -504,6 +498,13 @@ public class ContactAdminFragment extends Fragment implements
             return;
         }
 
+        // Each LinearLayout has the same LayoutParams so this can
+        // be created once and used for each address.
+        final LinearLayout.LayoutParams layoutParams =
+                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+
+
         switch (loader.getId()) {
             case ContactDetailQuery.QUERY_ID:
                 // Moves to the first row in the Cursor
@@ -523,12 +524,6 @@ public class ContactAdminFragment extends Fragment implements
                 }
                 break;
             case ContactAddressQuery.QUERY_ID:
-                // Each LinearLayout has the same LayoutParams so this can
-                // be created once and used for each address.
-                final LinearLayout.LayoutParams layoutParams =
-                        new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT);
-
                 // Clears out the details layout first in case the details
                 // layout has addresses from a previous data load still
                 // added as children.
@@ -580,32 +575,24 @@ public class ContactAdminFragment extends Fragment implements
                 }
                 break;
             case ContactNotesQuery.QUERY_ID:
-                // Each LinearLayout has the same LayoutParams so this can
-                // be created once and used for each address.
-                final LinearLayout.LayoutParams nlayoutParams =
-                        new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT);
-
                 // Clears out the details layout first in case the details
                 // layout has addresses from a previous data load still
                 // added as children.
                 mNotesLayout.removeAllViews();
 
-                // Loops through all the rows in the Cursor
+                // Get the first row of the cursor
                 if (data.moveToFirst()) {
-                    do {
-                        // Builds the address layout
-                        final LinearLayout nlayout = buildNotesLayout(
+                    // Builds the address layout
+                    final LinearLayout nlayout = buildNotesLayout(
                                 data.getString(ContactNotesQuery.NOTE));
-                        // Adds the new address layout to the details layout
-                        mNotesLayout.addView(nlayout, nlayoutParams);
-                        // store full note, and process it
-                        mNotesData=data.getString(ContactNotesQuery.NOTE);
-                        expandnote();
-                    } while (data.moveToNext());
+                    // Adds the new address layout to the details layout
+                    mNotesLayout.addView(nlayout, layoutParams);
+                    // store full note, and process it
+                    mNotesData=data.getString(ContactNotesQuery.NOTE);
+                    expandnote();
                 } else {
                     // If nothing found, adds an empty address layout
-                    mNotesLayout.addView(buildNotesLayout(null), nlayoutParams);
+                    mNotesLayout.addView(buildNotesLayout(null), layoutParams);
                     // If nothing found, adds an empty address layout
                     mNotesData="";
                     clearnote();
@@ -769,13 +756,6 @@ public class ContactAdminFragment extends Fragment implements
                 public void onClick(View view) {
                     // Displays a message that no activity can handle the view button.
                     Toast.makeText(getActivity(),"Edit Note", Toast.LENGTH_SHORT).show();
-
-                    // start a new ContactAdminActivity with
-                    // the contact Uri
-                    Intent intent = new Intent(getActivity(), ContactAdminActivity.class);
-                    intent.setData(mContactUri);
-                    startActivity(intent);
-
                 }
             });
 
@@ -804,13 +784,13 @@ public class ContactAdminFragment extends Fragment implements
         // Inflates the address layout
         final LinearLayout addressLayout =
                 (LinearLayout) LayoutInflater.from(getActivity()).inflate(
-                        R.layout.contact_detail_item, mAddressLayout, false);
+                        R.layout.contact_address_item, mAddressLayout, false);
 
         // Gets handles to the view objects in the layout
         final TextView headerTextView =
-                (TextView) addressLayout.findViewById(R.id.contact_detail_header);
+                (TextView) addressLayout.findViewById(R.id.contact_address_header);
         final TextView addressTextView =
-                (TextView) addressLayout.findViewById(R.id.contact_detail_item);
+                (TextView) addressLayout.findViewById(R.id.contact_address_item);
         final ImageButton viewAddressButton =
                 (ImageButton) addressLayout.findViewById(R.id.button_view_address);
 

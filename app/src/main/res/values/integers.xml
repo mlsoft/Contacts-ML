@@ -17,7 +17,7 @@
 <resources>
 
     <!-- These are the default percent values that the contact photo and information should take up
-         in the ContactDetailFragment. -->
+         in the ContactAdminFragment. -->
     <integer name="contact_detail_photo_percent">45</integer>
     <integer name="contact_detail_info_percent">55</integer>
 

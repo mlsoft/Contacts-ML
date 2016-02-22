@@ -14,7 +14,7 @@
   limitations under the License.
 -->
 
-<!-- This layout is used by ContactDetailFragment to show contact details: contact photo, contact
+<!-- This layout is used by ContactAdminFragment to show contact details: contact photo, contact
      display name and a dynamic number of addresses (if the contact has any) inside a ScrollView.
 -->
 
@@ -167,8 +167,6 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:divider="?android:attr/listDivider"
-                    android:dividerPadding="12dp"
                     android:minHeight="32dp"
                     android:orientation="horizontal"
                     android:showDividers="middle">
@@ -239,8 +237,6 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:divider="?android:attr/listDivider"
-                        android:dividerPadding="12dp"
                         android:minHeight="48dp"
                         android:orientation="horizontal"
                         android:showDividers="middle">

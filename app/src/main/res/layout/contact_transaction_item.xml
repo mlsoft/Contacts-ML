@@ -22,17 +22,32 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/padding">
+        android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/contact_transaction_description"
-            android:layout_height="wrap_content"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_weight="8"
             android:layout_gravity="center"
-            android:hint="@string/admin_description_texthint"
-            style="@style/notesDetail"/>
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/contact_transaction_date"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:hint="@string/admin_date_texthint"
+                style="@style/notesDetail"
+                android:layout_width="match_parent" />
+
+            <TextView
+                android:id="@+id/contact_transaction_description"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:hint="@string/admin_description_texthint"
+                style="@style/notesDetail"
+                android:layout_width="match_parent" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/contact_transaction_amount"
