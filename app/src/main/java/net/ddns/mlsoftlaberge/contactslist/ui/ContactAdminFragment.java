@@ -60,17 +60,24 @@ import net.ddns.mlsoftlaberge.contactslist.util.Utils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.ParsePosition;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Vector;
+
+import static java.text.DateFormat.*;
 
 /**
  * This fragment displays admins of a specific contact from the contacts provider. It shows the
  * contact's display photo, name and all its mailing addresses. You can also modify this fragment
  * to show other information, such as phone numbers, email addresses and so forth.
- *
+ * <p/>
  * This fragment appears full-screen in an activity on devices with small screen sizes, and as
  * part of a two-pane layout on devices with larger screens, alongside the
  * {@link ContactsListFragment}.
- *
+ * <p/>
  * To create an instance of this fragment, use the factory method
  * {@link ContactAdminFragment#newInstance(android.net.Uri)}, passing as an argument the contact
  * Uri for the contact you want to display.
@@ -115,7 +122,7 @@ public class ContactAdminFragment extends Fragment implements
     private TextView mMemoItem;
     private ImageButton mMemoEditButton;
 
-    private String mNotesData="";
+    private String mNotesData = "";
 
     private LinearLayout mAddressLayout;
 
@@ -514,7 +521,7 @@ public class ContactAdminFragment extends Fragment implements
                     // name field based on OS version.
                     final String contactName = data.getString(ContactDetailQuery.DISPLAY_NAME);
                     if (mContactName != null) {
-                            mContactName.setText(contactName);
+                        mContactName.setText(contactName);
                     }
                     // In the single pane layout, sets the activity title
                     // to the contact name. On HC+ this will be set as
@@ -584,17 +591,17 @@ public class ContactAdminFragment extends Fragment implements
                 if (data.moveToFirst()) {
                     // Builds the address layout
                     final LinearLayout nlayout = buildNotesLayout(
-                                data.getString(ContactNotesQuery.NOTE));
+                            data.getString(ContactNotesQuery.NOTE));
                     // Adds the new address layout to the details layout
                     mNotesLayout.addView(nlayout, layoutParams);
                     // store full note, and process it
-                    mNotesData=data.getString(ContactNotesQuery.NOTE);
+                    mNotesData = data.getString(ContactNotesQuery.NOTE);
                     expandnote();
                 } else {
                     // If nothing found, adds an empty address layout
                     mNotesLayout.addView(buildNotesLayout(null), layoutParams);
                     // If nothing found, adds an empty address layout
-                    mNotesData="";
+                    mNotesData = "";
                     clearnote();
                 }
                 mMemoItem.setText(notememo);
@@ -604,33 +611,34 @@ public class ContactAdminFragment extends Fragment implements
     }
 
     // string containing the memo part of the note
-    private StringBuffer notememo=new StringBuffer();
+    private StringBuffer notememo = new StringBuffer();
 
     // temporary space for line in treatment
-    private String noteline="";
+    private String noteline = "";
 
     // structure of a row of the table
     private class Transac extends Object {
         double qte;
         double prix;
         double mnt;
+        Date fdate;
         String trdate;
         String amount;
         String descrip;
     }
 
     // tables containing the expanded note data
-    private Vector<Transac> transaclist = new Vector<Transac>(10,10);
+    private Vector<Transac> transaclist = new Vector<Transac>(10, 10);
 
     // one row of the table
     private Transac transac;
 
     // counter of table row
-    private int nbtransac=0;
+    private int nbtransac = 0;
 
     // clear the table of fields for an empty note
     private void clearnote() {
-        nbtransac=0;
+        nbtransac = 0;
         notememo.setLength(0);
         transaclist.removeAllElements();
     }
@@ -641,36 +649,105 @@ public class ContactAdminFragment extends Fragment implements
         clearnote();
 
         // expand note in fields
-        int i=0;
+        int i = 0;
         int p;
-        while(i<mNotesData.length()) {
+        while (i < mNotesData.length()) {
             // find the position of the end of line (may be end of block too)
-            p=mNotesData.indexOf('\n',i);
-            if(p<0) { p=mNotesData.length()-1; }
-            noteline=mNotesData.substring(i,p+1);
+            p = mNotesData.indexOf('\n', i);
+            if (p < 0) {
+                p = mNotesData.length() - 1;
+            }
+            noteline = mNotesData.substring(i, p + 1);
             // if an admin line, then decode it
             // else add it to the memo field
-            if(noteline.indexOf("ADMIN:")==0) {
+            if (noteline.indexOf("ADMIN:") == 0) {
                 decodeline();
             } else {
                 notememo.append(noteline);
             }
             // advance after the last char eated by line
-            i=p+1;
+            i = p + 1;
         }
     }
 
-    // decode the line beginning by ADMIN: and add it to the table
+    // decode the noteline beginning by ADMIN: and add it to the table
     private void decodeline() {
-        transac=new Transac();
-        transac.qte=1.0;
-        transac.prix=0.0;
-        transac.mnt=0.0;
-        transac.trdate="20160101";
-        transac.amount="0.00";
-        transac.descrip=noteline;
+        // create an empty default transaction
+        transac = new Transac();
+        transac.qte = 1.0;
+        transac.prix = 0.0;
+        transac.mnt = 0.0;
+        transac.trdate = "20160101";
+        transac.amount = "0.00";
+        transac.descrip = noteline;
+        // decode the line
+        int i = 6;
+        int p;
+        // search for the date
+        p = noteline.indexOf(':', i);
+        if (p < 0) p = noteline.length() - 1;
+        if (p >= i) {
+            transac.trdate = noteline.substring(i, p);
+            i = p + 1;
+            // search for the amount
+            p = noteline.indexOf(':', i);
+            if (p < 0) p = noteline.length() - 1;
+            if (p >= i) {
+                transac.amount = noteline.substring(i, p);
+                i = p + 1;
+                // search for the description
+                p = noteline.indexOf(':', i);
+                if (p < 0) p = noteline.indexOf('\n', i);
+                if (p < 0) p = noteline.length();
+                if (p >= i) {
+                    transac.descrip = noteline.substring(i, p);
+                    i = p + 1;
+                }
+            }
+        }
+        // reformat the amount
+        transac.mnt = Double.valueOf(transac.amount);
+        transac.prix = transac.mnt;
+        transac.amount = String.format("%.2f", transac.mnt);
+        // reformat the date
+        transac.fdate = stringToDate(transac.trdate);
+        transac.trdate = dateToString(transac.fdate);
+        // add element to the table
         transaclist.addElement(transac);
         nbtransac++;
+    }
+
+    private Date stringToDate(String sdate) {
+        // prepare the date parser.
+        Calendar cal = Calendar.getInstance();
+        int year, month, day, hour, min, sec;
+        String syear, smonth, sday, shour, smin, ssec;
+        syear = sdate.substring(0, 4);
+        smonth = sdate.substring(4, 6);
+        sday = sdate.substring(6, 8);
+        year = Integer.valueOf(syear);
+        month = Integer.valueOf(smonth);
+        day = Integer.valueOf(sday);
+        hour = 0;
+        min = 0;
+        sec = 0;
+        cal.set(year, month - 1, day, hour, min, sec);
+        long ldate = cal.getTimeInMillis();
+        return new Date(ldate);
+    }
+
+    private String dateToString(Date date) {
+        // prepare the date parser.
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        int year, month, day, hour, min, sec;
+        year = cal.get(Calendar.YEAR);
+        month = cal.get(Calendar.MONTH) + 1;
+        day = cal.get(Calendar.DAY_OF_MONTH);
+        hour = cal.get(Calendar.HOUR_OF_DAY);
+        min = cal.get(Calendar.MINUTE);
+        sec = cal.get(Calendar.SECOND);
+        return String.format("%04d-%02d-%02d %02d.%02d.%02d", year, month, day, hour, min, sec);
     }
 
     // return a view for every cell of the grid table
@@ -684,18 +761,21 @@ public class ContactAdminFragment extends Fragment implements
             if (convertView == null) {
                 // Inflates the address layout
                 layout = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
-                                R.layout.contact_transaction_item, null, false);
+                        R.layout.contact_transaction_item, null, false);
             } else {
                 layout = (LinearLayout) convertView;
             }
 
             TextView t = (TextView) layout.findViewById(R.id.contact_transaction_description);
+            TextView dt = (TextView) layout.findViewById(R.id.contact_transaction_date);
             TextView mnt = (TextView) layout.findViewById(R.id.contact_transaction_amount);
 
-            transac=transaclist.elementAt(position);
+            transac = transaclist.elementAt(position);
 
             t.setText(transac.descrip);
+            dt.setText(transac.trdate);
             mnt.setText(transac.amount);
+
             return layout;
         }
 
@@ -718,8 +798,8 @@ public class ContactAdminFragment extends Fragment implements
      * Each note for the contact gets its own LinearLayout object; for example, if the contact
      * has three notes, then 3 LinearLayouts are generated.
      *
-     * @param note          From
-     *                         {@link android.provider.ContactsContract.CommonDataKinds.Note#NOTE}
+     * @param note From
+     *             {@link android.provider.ContactsContract.CommonDataKinds.Note#NOTE}
      * @return A LinearLayout to add to the contact notes layout,
      * populated with the provided notes.
      */
@@ -755,7 +835,7 @@ public class ContactAdminFragment extends Fragment implements
                 @Override
                 public void onClick(View view) {
                     // Displays a message that no activity can handle the view button.
-                    Toast.makeText(getActivity(),"Edit Note", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Edit Note", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -790,7 +870,7 @@ public class ContactAdminFragment extends Fragment implements
         final TextView headerTextView =
                 (TextView) addressLayout.findViewById(R.id.contact_address_header);
         final TextView addressTextView =
-                (TextView) addressLayout.findViewById(R.id.contact_address_item);
+                (TextView) addressLayout.findViewById(R.id.contact_address_full);
         final ImageButton viewAddressButton =
                 (ImageButton) addressLayout.findViewById(R.id.button_view_address);
 

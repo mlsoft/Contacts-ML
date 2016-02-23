@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-    <!--
+<?xml version="1.0" encoding="utf-8"?><!--
       Copyright (C) 2013 The Android Open Source Project
 
       Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,25 +14,26 @@
       limitations under the License.
     -->
 
-    <!-- Main Activity two-pane layout. This layout has two panes, a ContactsListFragment on the left
-         and a ContactAdminFragment on the right. Tapping on a contact in the list loads the details
-         of that contact on the right. -->
+<!-- Main Activity two-pane layout. This layout has two panes, a ContactsListFragment on the left
+     and a ContactAdminFragment on the right. Tapping on a contact in the list loads the details
+     of that contact on the right. -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:orientation="horizontal"
-android:showDividers="middle"
-android:divider="?android:attr/listDivider"
-android:weightSum="100"
-android:baselineAligned="false">
-
-<fragment class="net.ddns.mlsoftlaberge.contactslist.ui.ContactsListFragment"
-    android:id="@+id/contact_list"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_width="0dp"
-    android:layout_weight="@integer/contact_list_percent"
-    tools:layout="@layout/contact_list_fragment" />
+    android:baselineAligned="false"
+    android:divider="?android:attr/listDivider"
+    android:orientation="horizontal"
+    android:showDividers="middle"
+    android:weightSum="100">
+
+    <fragment
+        android:id="@+id/contact_list"
+        class="net.ddns.mlsoftlaberge.contactslist.ui.ContactsListFragment"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="@integer/contact_list_percent"
+        tools:layout="@layout/contact_list_fragment" />
 
 </LinearLayout>

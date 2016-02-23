@@ -92,11 +92,11 @@ public class ContactsListActivity extends FragmentActivity implements
      */
     @Override
     public void onContactSelected(Uri contactUri) {
-            // start a new ContactAdminActivity with
-            // the contact Uri
-            Intent intent = new Intent(this, ContactAdminActivity.class);
-            intent.setData(contactUri);
-            startActivity(intent);
+        // start a new ContactAdminActivity with
+        // the contact Uri
+        Intent intent = new Intent(this, ContactAdminActivity.class);
+        intent.setData(contactUri);
+        startActivity(intent);
     }
 
     /**
@@ -114,7 +114,6 @@ public class ContactsListActivity extends FragmentActivity implements
         // search results. Only used pre-HC.
         return !isSearchResultView && super.onSearchRequested();
     }
-
 
 
 }

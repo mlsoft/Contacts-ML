@@ -69,11 +69,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:divider="?android:attr/listDivider"
-                    android:dividerPadding="12dp"
                     android:minHeight="32dp"
-                    android:orientation="horizontal"
-                    android:showDividers="middle">
+                    android:orientation="horizontal">
 
                     <TextView
                         android:id="@+id/contact_address"
@@ -167,6 +164,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="#9e9e9e"
                     android:minHeight="32dp"
                     android:orientation="horizontal"
                     android:showDividers="middle">
@@ -205,21 +203,22 @@
                     android:id="@+id/transaction_grid"
                     android:layout_width="match_parent"
                     android:layout_height="150dp"
+                    android:background="#cfd8dc"
                     android:clickable="true"
-                    android:contentDescription="Invoice Grid"
 
+                    android:contentDescription="Invoice Grid"
+                    android:fastScrollAlwaysVisible="true"
+                    android:fastScrollEnabled="false"
                     android:gravity="start"
                     android:horizontalSpacing="10dp"
                     android:longClickable="true"
+                    android:nestedScrollingEnabled="true"
                     android:numColumns="1"
                     android:outlineProvider="bounds"
-                    android:stretchMode="columnWidth"
-                    android:verticalSpacing="10dp"
-                    android:nestedScrollingEnabled="true"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:fastScrollAlwaysVisible="true"
-                    android:fastScrollEnabled="false" />
+                    android:stretchMode="columnWidth"
+                    android:verticalSpacing="10dp" />
 
                 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                     android:layout_width="match_parent"
@@ -272,17 +271,15 @@
                     android:id="@+id/contact_address_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingBottom="@dimen/padding"
-                    android:orientation="vertical">
-                </LinearLayout>
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/padding"/>
 
                 <LinearLayout
                     android:id="@+id/contact_notes_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingBottom="@dimen/padding"
-                    android:orientation="vertical">
-                </LinearLayout>
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/padding"/>
 
 
             </LinearLayout>

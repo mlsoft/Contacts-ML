@@ -71,13 +71,13 @@ import java.util.Locale;
  * shows the contact's thumbnail photo and display name. On devices with large screens, this
  * fragment's UI appears as part of a two-pane layout, along with the UI of
  * {@link ContactAdminFragment}. On smaller screens, this fragment's UI appears as a single pane.
- *
+ * <p/>
  * This Fragment retrieves contacts based on a search string. If the user doesn't enter a search
  * string, then the list contains all the contacts in the Contacts Provider. If the user enters a
  * search string, then the list contains only those contacts whose data matches the string. The
  * Contacts Provider itself controls the matching algorithm, which is a "substring" search: if the
  * search string is a substring of any of the contacts data, then there is a match.
- *
+ * <p/>
  * On newer API platforms, the search is implemented in a SearchView in the ActionBar; as the user
  * types the search string, the list automatically refreshes to display results ("type to filter").
  * On older platforms, the user must enter the full string and trigger the search. In response, the
@@ -119,7 +119,8 @@ public class ContactsListFragment extends ListFragment implements
     /**
      * Fragments require an empty constructor.
      */
-    public ContactsListFragment() {}
+    public ContactsListFragment() {
+    }
 
     /**
      * In platform versions prior to Android 3.0, the ActionBar and SearchView are not supported,
@@ -194,7 +195,7 @@ public class ContactsListFragment extends ListFragment implements
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         // Inflate the list fragment layout
         return inflater.inflate(R.layout.contact_list_fragment, container, false);
     }
@@ -219,7 +220,8 @@ public class ContactsListFragment extends ListFragment implements
             }
 
             @Override
-            public void onScroll(AbsListView absListView, int i, int i1, int i2) {}
+            public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+            }
         });
 
         if (mIsTwoPaneLayout) {
@@ -645,6 +647,7 @@ public class ContactsListFragment extends ListFragment implements
 
         /**
          * Instantiates a new Contacts Adapter.
+         *
          * @param context A context that has access to the app's layout.
          */
         public ContactsAdapter(Context context) {
@@ -853,6 +856,7 @@ public class ContactsListFragment extends ListFragment implements
     public interface OnContactsInteractionListener {
         /**
          * Called when a contact is selected from the ListView.
+         *
          * @param contactUri The contact Uri.
          */
         public void onContactSelected(Uri contactUri);
@@ -887,7 +891,7 @@ public class ContactsListFragment extends ListFragment implements
         final static String SELECTION =
                 (Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) + "<>''"
                         + " AND " + Contacts.IN_VISIBLE_GROUP + "=1";
-                        // + " AND " + Contacts.STARRED + "=1";
+        // + " AND " + Contacts.STARRED + "=1";
 
         // The desired sort order for the returned Cursor. In Android 3.0 and later, the primary
         // sort key allows for localization. In earlier versions. use the display name as the sort

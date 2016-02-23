@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   Copyright (C) 2013 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,24 +14,26 @@
   limitations under the License.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <!-- Use standard android.R class list id instead of app specific id. This is just useful for
          consistency. -->
-    <ListView android:id="@id/android:list"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              style="@style/ContactListView"/>
+    <ListView
+        android:id="@id/android:list"
+        style="@style/ContactListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <!-- Use standard android.R class empty id instead of app specific id. This is just useful for
      consistency. -->
-    <TextView android:id="@id/android:empty"
-              android:gravity="center"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:text="@string/no_contacts"
-              android:fontFamily="sans-serif-light"
-              android:textAppearance="?android:attr/textAppearanceLarge"/>
+    <TextView
+        android:id="@id/android:empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fontFamily="sans-serif-light"
+        android:gravity="center"
+        android:text="@string/no_contacts"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </FrameLayout>
