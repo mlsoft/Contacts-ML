@@ -275,6 +275,20 @@
                     android:paddingBottom="@dimen/padding"/>
 
                 <LinearLayout
+                    android:id="@+id/contact_phone_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/padding"/>
+
+                <LinearLayout
+                    android:id="@+id/contact_email_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/padding"/>
+
+                <LinearLayout
                     android:id="@+id/contact_notes_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

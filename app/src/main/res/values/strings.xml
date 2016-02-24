@@ -27,6 +27,8 @@
     <string name="admin_addbutton_description">Add Transaction</string>
     <string name="admin_editbutton_description">Edit Transaction</string>
     <string name="notes_button_description">Edit Notes</string>
+    <string name="phone_button_description">Edit Phone</string>
+    <string name="email_button_description">Edit Email</string>
     <string name="menu_search">Search</string>
     <string name="menu_add_contact">Add Contact</string>
     <string name="menu_edit_contact">Edit Contact</string>

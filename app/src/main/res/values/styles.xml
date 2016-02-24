@@ -81,6 +81,32 @@
 
     <style name="adminButton" parent="@android:style/Widget.Holo.Button.Borderless"/>
 
+    <style name="phoneHeader" parent="@android:style/TextAppearance.Small">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/holo_blue</item>
+    </style>
+
+    <style name="phoneDetail" parent="@android:style/TextAppearance.Medium">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textIsSelectable">true</item>
+    </style>
+
+    <style name="phoneButton" parent="@android:style/Widget.Holo.Button.Borderless"/>
+
+    <style name="emailHeader" parent="@android:style/TextAppearance.Small">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/holo_blue</item>
+    </style>
+
+    <style name="emailDetail" parent="@android:style/TextAppearance.Medium">
+        <item name="android:fontFamily">sans-serif-light</item>
+        <item name="android:textIsSelectable">true</item>
+    </style>
+
+    <style name="emailButton" parent="@android:style/Widget.Holo.Button.Borderless"/>
+
     <style name="contactNameTitle" parent="@android:style/TextAppearance.Large">
         <item name="android:textSize">38sp</item>
         <item name="android:textColor">@color/holo_blue</item>

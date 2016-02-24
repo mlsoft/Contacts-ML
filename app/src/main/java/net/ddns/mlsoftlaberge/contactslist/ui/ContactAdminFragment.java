@@ -126,6 +126,10 @@ public class ContactAdminFragment extends Fragment implements
 
     private LinearLayout mAddressLayout;
 
+    private LinearLayout mPhoneLayout;
+
+    private LinearLayout mEmailLayout;
+
     private LinearLayout mNotesLayout;
 
     /**
@@ -373,6 +377,10 @@ public class ContactAdminFragment extends Fragment implements
 
         mNotesLayout = (LinearLayout) adminView.findViewById(R.id.contact_notes_layout);
 
+        mPhoneLayout = (LinearLayout) adminView.findViewById(R.id.contact_phone_layout);
+
+        mEmailLayout = (LinearLayout) adminView.findViewById(R.id.contact_email_layout);
+
 
         return adminView;
     }
@@ -560,6 +568,12 @@ public class ContactAdminFragment extends Fragment implements
                 // Loops through all the rows in the Cursor
                 if (data.moveToFirst()) {
                     do {
+                        final LinearLayout playout = buildPhoneLayout(
+                                data.getInt(ContactPhoneQuery.TYPE),
+                                data.getString(ContactPhoneQuery.LABEL),
+                                data.getString(ContactPhoneQuery.PHONE));
+                        // Adds the new address layout to the details layout
+                        mPhoneLayout.addView(playout, layoutParams);
                         // Fills the address field
                         mContactPhone.setText(data.getString(ContactPhoneQuery.PHONE));
                     } while (data.moveToNext());
@@ -573,6 +587,13 @@ public class ContactAdminFragment extends Fragment implements
                 // Loops through all the rows in the Cursor
                 if (data.moveToFirst()) {
                     do {
+                        final LinearLayout elayout = buildEmailLayout(
+                                data.getInt(ContactEmailQuery.TYPE),
+                                data.getString(ContactEmailQuery.LABEL),
+                                data.getString(ContactEmailQuery.EMAIL));
+                        // Adds the new address layout to the details layout
+                        mEmailLayout.addView(elayout, layoutParams);
+                        // store full note, and process it
                         // Fills the address field
                         mContactEmail.setText(data.getString(ContactEmailQuery.EMAIL));
                     } while (data.moveToNext());
@@ -841,6 +862,124 @@ public class ContactAdminFragment extends Fragment implements
 
         }
         return notesLayout;
+    }
+
+
+    /**
+     * Builds a notes LinearLayout based on note information from the Contacts Provider.
+     * Each note for the contact gets its own LinearLayout object; for example, if the contact
+     * has three notes, then 3 LinearLayouts are generated.
+     *
+     * @param type      From
+     *                         {@link android.provider.ContactsContract.CommonDataKinds.Phone#TYPE}
+     * @param label From
+     *                         {@link android.provider.ContactsContract.CommonDataKinds.Phone#LABEL}
+     * @param phone From
+     *                         {@link android.provider.ContactsContract.CommonDataKinds.Phone#NUMBER}
+     * @return A LinearLayout to add to the contact notes layout,
+     * populated with the provided notes.
+     */
+    private LinearLayout buildPhoneLayout(final int type, final String label, final String phone) {
+
+        // Inflates the address layout
+        final LinearLayout phoneLayout =
+                (LinearLayout) LayoutInflater.from(getActivity()).inflate(
+                        R.layout.contact_phone_item, mPhoneLayout, false);
+
+        // Gets handles to the view objects in the layout
+        final TextView pheaderTextView =
+                (TextView) phoneLayout.findViewById(R.id.contact_phone_header);
+        final TextView phoneTextView =
+                (TextView) phoneLayout.findViewById(R.id.contact_phone_item);
+        final ImageButton editPhoneButton =
+                (ImageButton) phoneLayout.findViewById(R.id.button_edit_phone);
+
+        // If there's no addresses for the contact, shows the empty view and message, and hides the
+        // header and button.
+        if (phone == null) {
+            pheaderTextView.setVisibility(View.GONE);
+            editPhoneButton.setVisibility(View.GONE);
+            phoneTextView.setText("");
+        } else {
+            // Gets postal address label type
+            CharSequence plabel =
+                    android.provider.ContactsContract.CommonDataKinds.Phone.getTypeLabel(getResources(), type, label);
+
+            // Sets TextView objects in the layout
+            pheaderTextView.setText(plabel + " Phone");
+            phoneTextView.setText(phone);
+
+            // Defines an onClickListener object for the address button
+            editPhoneButton.setOnClickListener(new View.OnClickListener() {
+                // Defines what to do when users click the address button
+                @Override
+                public void onClick(View view) {
+                    // Displays a message that no activity can handle the view button.
+                    Toast.makeText(getActivity(), "Edit Phone", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
+        return phoneLayout;
+    }
+
+
+    /**
+     * Builds a notes LinearLayout based on note information from the Contacts Provider.
+     * Each note for the contact gets its own LinearLayout object; for example, if the contact
+     * has three notes, then 3 LinearLayouts are generated.
+     *
+     * @param type      From
+     *                         {@link android.provider.ContactsContract.CommonDataKinds.Email#TYPE}
+     * @param label From
+     *                         {@link android.provider.ContactsContract.CommonDataKinds.Email#LABEL}
+     * @param email From
+     *                         {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS}
+     * @return A LinearLayout to add to the contact notes layout,
+     * populated with the provided notes.
+     */
+    private LinearLayout buildEmailLayout(final int type, final String label, final String email) {
+
+        // Inflates the address layout
+        final LinearLayout emailLayout =
+                (LinearLayout) LayoutInflater.from(getActivity()).inflate(
+                        R.layout.contact_email_item, mEmailLayout, false);
+
+        // Gets handles to the view objects in the layout
+        final TextView eheaderTextView =
+                (TextView) emailLayout.findViewById(R.id.contact_email_header);
+        final TextView emailTextView =
+                (TextView) emailLayout.findViewById(R.id.contact_email_item);
+        final ImageButton editEmailButton =
+                (ImageButton) emailLayout.findViewById(R.id.button_edit_email);
+
+        // If there's no addresses for the contact, shows the empty view and message, and hides the
+        // header and button.
+        if (email == null) {
+            eheaderTextView.setVisibility(View.GONE);
+            editEmailButton.setVisibility(View.GONE);
+            emailTextView.setText("");
+        } else {
+            // Gets postal address label type
+            CharSequence elabel =
+                    android.provider.ContactsContract.CommonDataKinds.Email.getTypeLabel(getResources(), type, label);
+
+            // Sets TextView objects in the layout
+            eheaderTextView.setText(elabel + " Email");
+            emailTextView.setText(email);
+
+            // Defines an onClickListener object for the address button
+            editEmailButton.setOnClickListener(new View.OnClickListener() {
+                // Defines what to do when users click the address button
+                @Override
+                public void onClick(View view) {
+                    // Displays a message that no activity can handle the view button.
+                    Toast.makeText(getActivity(), "Edit Email", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
+        return emailLayout;
     }
 
 
@@ -1157,6 +1296,8 @@ public class ContactAdminFragment extends Fragment implements
         final static String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Phone._ID,
                 ContactsContract.CommonDataKinds.Phone.NUMBER,
+                ContactsContract.CommonDataKinds.Phone.TYPE,
+                ContactsContract.CommonDataKinds.Phone.LABEL,
         };
 
         // The query selection criteria. In this case matching against the
@@ -1167,6 +1308,8 @@ public class ContactAdminFragment extends Fragment implements
         // The query column numbers which map to each value in the projection
         final static int ID = 0;
         final static int PHONE = 1;
+        final static int TYPE = 2;
+        final static int LABEL = 3;
     }
 
     /**
@@ -1181,6 +1324,8 @@ public class ContactAdminFragment extends Fragment implements
         final static String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Email._ID,
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
+                ContactsContract.CommonDataKinds.Email.TYPE,
+                ContactsContract.CommonDataKinds.Email.LABEL,
         };
 
         // The query selection criteria. In this case matching against the
@@ -1191,6 +1336,8 @@ public class ContactAdminFragment extends Fragment implements
         // The query column numbers which map to each value in the projection
         final static int ID = 0;
         final static int EMAIL = 1;
+        final static int TYPE = 2;
+        final static int LABEL = 3;
     }
 
 
