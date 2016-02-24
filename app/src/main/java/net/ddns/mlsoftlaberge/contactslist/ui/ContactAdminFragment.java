@@ -122,8 +122,6 @@ public class ContactAdminFragment extends Fragment implements
     private TextView mMemoItem;
     private ImageButton mMemoEditButton;
 
-    private String mNotesData = "";
-
     private LinearLayout mAddressLayout;
 
     private LinearLayout mPhoneLayout;
@@ -131,6 +129,8 @@ public class ContactAdminFragment extends Fragment implements
     private LinearLayout mEmailLayout;
 
     private LinearLayout mNotesLayout;
+
+    private TextView mReformattedItem;
 
     /**
      * Factory method to generate a new instance of the fragment given a contact Uri. A factory
@@ -381,6 +381,7 @@ public class ContactAdminFragment extends Fragment implements
 
         mEmailLayout = (LinearLayout) adminView.findViewById(R.id.contact_email_layout);
 
+        mReformattedItem = (TextView) adminView.findViewById(R.id.contact_reformatted_item);
 
         return adminView;
     }
@@ -514,7 +515,7 @@ public class ContactAdminFragment extends Fragment implements
         }
 
         // Each LinearLayout has the same LayoutParams so this can
-        // be created once and used for each address.
+        // be created once and used for each cumulative layouts of data
         final LinearLayout.LayoutParams layoutParams =
                 new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -543,49 +544,61 @@ public class ContactAdminFragment extends Fragment implements
                 // layout has addresses from a previous data load still
                 // added as children.
                 mAddressLayout.removeAllViews();
-
                 // This query loads the contact address .
                 // Loops through all the rows in the Cursor
                 if (data.moveToFirst()) {
+                    // Fills the address field with the first address
+                    mContactAddress.setText(data.getString(ContactAddressQuery.ADDRESS));
+                    // loop thru all addresses for the bottom layout
                     do {
-                        // Fills the address field
-                        mContactAddress.setText(data.getString(ContactAddressQuery.ADDRESS));
                         // Builds the address layout
-                        final LinearLayout layout = buildAddressLayout(
+                        final LinearLayout alayout = buildAddressLayout(
                                 data.getInt(ContactAddressQuery.TYPE),
                                 data.getString(ContactAddressQuery.LABEL),
                                 data.getString(ContactAddressQuery.ADDRESS));
-                        // Adds the new address layout to the details layout
-                        mAddressLayout.addView(layout, layoutParams);
+                        // Adds the new address layout to the addresses layout
+                        mAddressLayout.addView(alayout, layoutParams);
                     } while (data.moveToNext());
                 } else {
-                    // If nothing found, adds an empty address layout
+                    // If nothing found, clear the address field
                     mContactAddress.setText("");
                 }
                 break;
             case ContactPhoneQuery.QUERY_ID:
-                // This query loads the contact address .
+                // Clears out the details layout first in case the details
+                // layout has data from a previous data load still
+                // added as children.
+                mPhoneLayout.removeAllViews();
+                // This query loads the contact phone
                 // Loops through all the rows in the Cursor
                 if (data.moveToFirst()) {
+                    // Fills the phone field with the primary phone
+                    mContactPhone.setText(data.getString(ContactPhoneQuery.PHONE));
+                    // loop thru all phones for the bottom layout
                     do {
                         final LinearLayout playout = buildPhoneLayout(
                                 data.getInt(ContactPhoneQuery.TYPE),
                                 data.getString(ContactPhoneQuery.LABEL),
                                 data.getString(ContactPhoneQuery.PHONE));
-                        // Adds the new address layout to the details layout
+                        // Adds the new phone layout to the phones layout
                         mPhoneLayout.addView(playout, layoutParams);
-                        // Fills the address field
-                        mContactPhone.setText(data.getString(ContactPhoneQuery.PHONE));
                     } while (data.moveToNext());
                 } else {
-                    // If nothing found, adds an empty address layout
+                    // If nothing found, clear the phone field
                     mContactPhone.setText("");
                 }
                 break;
             case ContactEmailQuery.QUERY_ID:
-                // This query loads the contact address .
+                // Clears out the details layout first in case the details
+                // layout has data from a previous data load still
+                // added as children.
+                mEmailLayout.removeAllViews();
+                // This query loads the contact email
                 // Loops through all the rows in the Cursor
                 if (data.moveToFirst()) {
+                    // Fills the email field with primary email
+                    mContactEmail.setText(data.getString(ContactEmailQuery.EMAIL));
+                    // loop thru all emails for the bottom layout
                     do {
                         final LinearLayout elayout = buildEmailLayout(
                                 data.getInt(ContactEmailQuery.TYPE),
@@ -594,8 +607,6 @@ public class ContactAdminFragment extends Fragment implements
                         // Adds the new address layout to the details layout
                         mEmailLayout.addView(elayout, layoutParams);
                         // store full note, and process it
-                        // Fills the address field
-                        mContactEmail.setText(data.getString(ContactEmailQuery.EMAIL));
                     } while (data.moveToNext());
                 } else {
                     // If nothing found, adds an empty address layout
@@ -604,35 +615,48 @@ public class ContactAdminFragment extends Fragment implements
                 break;
             case ContactNotesQuery.QUERY_ID:
                 // Clears out the details layout first in case the details
-                // layout has addresses from a previous data load still
+                // layout has data from a previous data load still
                 // added as children.
                 mNotesLayout.removeAllViews();
-
-                // Get the first row of the cursor
+                // This query loads the contact notes
+                // Get the first row of the cursor (table contains only one row)
                 if (data.moveToFirst()) {
-                    // Builds the address layout
-                    final LinearLayout nlayout = buildNotesLayout(
-                            data.getString(ContactNotesQuery.NOTE));
-                    // Adds the new address layout to the details layout
-                    mNotesLayout.addView(nlayout, layoutParams);
                     // store full note, and process it
                     mNotesData = data.getString(ContactNotesQuery.NOTE);
                     expandnote();
+                    compactnote();
+                    // loop thru all notes for the bottom layout (only one)
+                    do {
+                        // Builds the notes layout
+                        final LinearLayout nlayout = buildNotesLayout(
+                                data.getString(ContactNotesQuery.NOTE));
+                        // Adds the new note layout to the notes layout
+                        mNotesLayout.addView(nlayout, layoutParams);
+                    } while (data.moveToNext());
                 } else {
-                    // If nothing found, adds an empty address layout
-                    mNotesLayout.addView(buildNotesLayout(null), layoutParams);
-                    // If nothing found, adds an empty address layout
+                    // If nothing found, clear the data
                     mNotesData = "";
                     clearnote();
                 }
+                // display the memo part of the note in the memo field (decoded note)
                 mMemoItem.setText(notememo);
+                // initialise the adapter for the grid of transactions to fill
                 mTransactionGrid.setAdapter(new TransactionAdapter());
                 break;
         }
     }
 
+    // --------------------------------------------------------------------
+    // this is the decoding/encoding part of the transaction table
+    // --------------------------------------------------------------------
+    // feed string user by the note decoder
+    private String mNotesData = "";
+
     // string containing the memo part of the note
     private StringBuffer notememo = new StringBuffer();
+
+    // string containing the reformatted part of the note
+    private StringBuffer notereformat = new StringBuffer();
 
     // temporary space for line in treatment
     private String noteline = "";
@@ -681,7 +705,7 @@ public class ContactAdminFragment extends Fragment implements
             noteline = mNotesData.substring(i, p + 1);
             // if an admin line, then decode it
             // else add it to the memo field
-            if (noteline.indexOf("ADMIN:") == 0) {
+            if (noteline.indexOf("ADMIN|") == 0) {
                 decodeline();
             } else {
                 notememo.append(noteline);
@@ -691,7 +715,7 @@ public class ContactAdminFragment extends Fragment implements
         }
     }
 
-    // decode the noteline beginning by ADMIN: and add it to the table
+    // decode the noteline beginning by ADMIN| and add it to the table
     private void decodeline() {
         // create an empty default transaction
         transac = new Transac();
@@ -705,19 +729,19 @@ public class ContactAdminFragment extends Fragment implements
         int i = 6;
         int p;
         // search for the date
-        p = noteline.indexOf(':', i);
+        p = noteline.indexOf('|', i);
         if (p < 0) p = noteline.length() - 1;
         if (p >= i) {
             transac.trdate = noteline.substring(i, p);
             i = p + 1;
             // search for the amount
-            p = noteline.indexOf(':', i);
+            p = noteline.indexOf('|', i);
             if (p < 0) p = noteline.length() - 1;
             if (p >= i) {
                 transac.amount = noteline.substring(i, p);
                 i = p + 1;
                 // search for the description
-                p = noteline.indexOf(':', i);
+                p = noteline.indexOf('|', i);
                 if (p < 0) p = noteline.indexOf('\n', i);
                 if (p < 0) p = noteline.length();
                 if (p >= i) {
@@ -738,6 +762,25 @@ public class ContactAdminFragment extends Fragment implements
         nbtransac++;
     }
 
+    // transform the transaction table in a memo form, and display it in the last bottom debug field
+    private void compactnote() {
+        int i;
+        notereformat.setLength(0);
+        // refill the string with the transactions list in readable mode
+        for(i=0;i<nbtransac;++i) {
+            transac = transaclist.elementAt(i);
+            notereformat.append("ADMIN|");
+            notereformat.append(transac.trdate);
+            notereformat.append("|");
+            notereformat.append(transac.amount);
+            notereformat.append("|");
+            notereformat.append(transac.descrip);
+            notereformat.append("\n");
+        }
+        mReformattedItem.setText(notereformat);
+    }
+
+    // convert a string to a date field
     private Date stringToDate(String sdate) {
         // prepare the date parser.
         Calendar cal = Calendar.getInstance();
@@ -757,6 +800,7 @@ public class ContactAdminFragment extends Fragment implements
         return new Date(ldate);
     }
 
+    // convert a date field to a readable string
     private String dateToString(Date date) {
         // prepare the date parser.
         Calendar cal = Calendar.getInstance();
@@ -768,7 +812,7 @@ public class ContactAdminFragment extends Fragment implements
         hour = cal.get(Calendar.HOUR_OF_DAY);
         min = cal.get(Calendar.MINUTE);
         sec = cal.get(Calendar.SECOND);
-        return String.format("%04d-%02d-%02d %02d.%02d.%02d", year, month, day, hour, min, sec);
+        return String.format("%04d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, min, sec);
     }
 
     // return a view for every cell of the grid table
