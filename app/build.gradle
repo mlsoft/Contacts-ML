@@ -4,9 +4,9 @@ android {
     signingConfigs {
         config {
             keyAlias 'mlsoft'
-            keyPassword 'josbinne'
+            keyPassword 'password'
             storeFile file('/home/mlsoft/AndroidStudioProjects/keystore.jks')
-            storePassword 'josbinne'
+            storePassword 'password'
         }
     }
     compileSdkVersion 21
