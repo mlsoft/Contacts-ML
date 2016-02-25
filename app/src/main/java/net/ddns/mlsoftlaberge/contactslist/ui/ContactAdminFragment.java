@@ -44,6 +44,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
@@ -83,7 +84,7 @@ import static java.text.DateFormat.*;
  * Uri for the contact you want to display.
  */
 public class ContactAdminFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<Cursor> {
+        AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String EXTRA_CONTACT_URI =
             "net.ddns.mlsoftlaberge.contactslist.ui.EXTRA_CONTACT_URI";
@@ -356,9 +357,9 @@ public class ContactAdminFragment extends Fragment implements
             }
         });
 
-
+        // extract and initialize the transaction grid
         mTransactionGrid = (GridView) adminView.findViewById(R.id.transaction_grid);
-        // mTransactionGrid.setAdapter(new TransactionAdapter());
+        mTransactionGrid.setAdapter(new TransactionAdapter());
 
         mMemoItem = (TextView) adminView.findViewById(R.id.contact_memo_item);
         // Defines an onClickListener object for the add-admin button
@@ -384,6 +385,12 @@ public class ContactAdminFragment extends Fragment implements
         mReformattedItem = (TextView) adminView.findViewById(R.id.contact_reformatted_item);
 
         return adminView;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        // Displays a message that no activity can handle the view button.
+        Toast.makeText(getActivity(), "Edit OnClick " + position, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -641,7 +648,7 @@ public class ContactAdminFragment extends Fragment implements
                 // display the memo part of the note in the memo field (decoded note)
                 mMemoItem.setText(notememo);
                 // initialise the adapter for the grid of transactions to fill
-                mTransactionGrid.setAdapter(new TransactionAdapter());
+                // mTransactionGrid.setAdapter(new TransactionAdapter());
                 break;
         }
     }
