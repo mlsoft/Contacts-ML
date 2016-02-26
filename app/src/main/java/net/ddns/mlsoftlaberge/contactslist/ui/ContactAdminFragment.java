@@ -132,6 +132,8 @@ public class ContactAdminFragment extends Fragment implements
 
     private LinearLayout mNotesLayout;
 
+    private LinearLayout mTransactionLayout;
+
     private TextView mReformattedItem;
 
     /**
@@ -371,6 +373,7 @@ public class ContactAdminFragment extends Fragment implements
             }
         });
 
+        mTransactionLayout = (LinearLayout) adminView.findViewById(R.id.contact_transaction_layout);
 
         mAddressLayout = (LinearLayout) adminView.findViewById(R.id.contact_address_layout);
 
@@ -662,11 +665,61 @@ public class ContactAdminFragment extends Fragment implements
                 }
                 // display the memo part of the note in the memo field (decoded note)
                 mMemoItem.setText(notememo);
-                // initialise the adapter for the list of transactions to fill
-                // mTransactionList.setAdapter(new TransactionAdapter());
+                // fill the layout of editables transactions
+                filltransactionlayout();
                 break;
         }
     }
+
+    // fill the transactions layout with
+    private void filltransactionlayout() {
+        // Each LinearLayout has the same LayoutParams so this can
+        // be created once and used for each cumulative layouts of data
+        final LinearLayout.LayoutParams tlayoutParams =
+                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+        // Clears out the details layout first in case the details
+        // layout has data from a previous data load still
+        // added as children.
+        mTransactionLayout.removeAllViews();
+        int i;
+        for (i=0;i<nbtransac;++i) {
+            // Builds the transaction layout
+            // Inflates the transaction layout
+            LinearLayout tlayout = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
+                        R.layout.contact_transaction_item, null, false);
+
+            // point to the 4 fields of the layout
+            TextView t = (TextView) tlayout.findViewById(R.id.contact_transaction_description);
+            TextView dt = (TextView) tlayout.findViewById(R.id.contact_transaction_date);
+            TextView mnt = (TextView) tlayout.findViewById(R.id.contact_transaction_amount);
+            ImageButton butt = (ImageButton) tlayout.findViewById(R.id.button_edit_transaction);
+
+            // get the current transaction
+            transac = transaclist.elementAt(i);
+
+            // fill the fields with the table data
+            t.setText(transac.descrip);
+            dt.setText(transac.trdate);
+            mnt.setText(transac.amount);
+            butt.setId(i);
+            // Defines an onClickListener object for the address button
+            butt.setOnClickListener(new View.OnClickListener() {
+                // Defines what to do when users click the address button
+                @Override
+                public void onClick(View view) {
+                    // Displays a message that no activity can handle the view button.
+                    Toast.makeText(getActivity(), "Edit Transaction " + view.getId(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            // Adds the new note layout to the notes layout
+            mTransactionLayout.addView(tlayout, tlayoutParams);
+        }
+    }
+
+
+
 
     // --------------------------------------------------------------------
     // this is the decoding/encoding part of the transaction table

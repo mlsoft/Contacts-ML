@@ -21,7 +21,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#f5f5f5"
+    android:background="#f0f0f0"
+    android:paddingTop="2dp"
+    android:paddingLeft="@dimen/padding"
     android:orientation="horizontal">
 
     <LinearLayout
@@ -59,15 +61,16 @@
         android:gravity="right"
         android:hint="0.00" />
 
-    <TextView
-        android:id="@+id/contact_transaction_select"
-        style="@style/adminDetail"
-        android:layout_width="0dp"
+    <ImageButton
+        android:id="@+id/button_edit_transaction"
+        style="@style/notesButton"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_weight="2"
-        android:gravity="right"
-        android:hint="" />
+        android:contentDescription="@string/transaction_button_description"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp"
+        android:src="@drawable/ic_action_edit" />
 
 </LinearLayout>
 

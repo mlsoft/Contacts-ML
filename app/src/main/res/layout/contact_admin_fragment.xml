@@ -97,7 +97,6 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="32dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -130,7 +129,6 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="32dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -160,11 +158,54 @@
 
                 </LinearLayout>
 
+                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingLeft="@dimen/padding">
+
+                    <TextView
+                        style="@style/notesHeader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Memo" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="32dp"
+                        android:orientation="horizontal"
+                        android:showDividers="middle">
+
+                        <TextView
+                            android:id="@+id/contact_memo_item"
+                            style="@style/notesDetail"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="1"
+                            android:hint="Text Note"
+                            android:paddingRight="@dimen/padding"
+                            android:text="" />
+
+                        <ImageButton
+                            android:id="@+id/button_edit_memo"
+                            style="@style/notesButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:contentDescription="@string/notes_button_description"
+                            android:src="@drawable/ic_action_edit" />
+
+                    </LinearLayout>
+
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#9e9e9e"
+                    android:background="#e4e4e4"
                     android:minHeight="32dp"
                     android:orientation="horizontal"
                     android:showDividers="middle">
@@ -199,71 +240,49 @@
 
                 </LinearLayout>
 
-
-                <ListView
-                    android:id="@+id/transaction_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="150dp"
-                    android:layout_gravity="center_horizontal"
-                    android:background="#cfd8dc"
-                    android:clickable="true"
-
-                    android:contentDescription="Invoice List"
-                    android:fastScrollAlwaysVisible="true"
-                    android:fastScrollEnabled="false"
-                    android:gravity="start"
-                    android:horizontalSpacing="10dp"
-                    android:nestedScrollingEnabled="true"
-                    android:numColumns="1"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:stretchMode="columnWidth"
-                    android:verticalSpacing="10dp" />
-
-                <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                <LinearLayout
+                    android:id="@+id/contact_transaction_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingLeft="@dimen/padding"
-                    android:paddingTop="@dimen/padding">
+                    android:orientation="vertical" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#e4e4e4"
+                    android:minHeight="32dp"
+                    android:orientation="horizontal"
+                    android:showDividers="middle">
 
                     <TextView
-                        style="@style/notesHeader"
+                        style="@style/adminHeader"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="8"
+                        android:paddingLeft="@dimen/padding"
+                        android:paddingRight="@dimen/padding"
+                        android:gravity="right"
+                        android:text="Total" />
+
+                    <TextView
+                        style="@style/adminDetail"
+                        android:id="@+id/contact_transaction_total"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="3"
+                        android:gravity="right"
+                        android:text="0.00" />
+
+                    <ImageButton
+                        android:id="@+id/button_save_admin"
+                        style="@style/adminButton"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Memo" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:orientation="horizontal"
-                        android:showDividers="middle">
-
-                        <TextView
-                            android:id="@+id/contact_memo_item"
-                            style="@style/notesDetail"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:hint="Text Note"
-                            android:paddingRight="@dimen/padding"
-                            android:text="" />
-
-                        <ImageButton
-                            android:id="@+id/button_edit_memo"
-                            style="@style/notesButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:contentDescription="@string/notes_button_description"
-                            android:paddingBottom="8dp"
-                            android:paddingTop="8dp"
-                            android:src="@drawable/ic_action_edit" />
-
-                    </LinearLayout>
-
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/admin_addbutton_description"
+                        android:src="@drawable/btn_check_off" />
 
                 </LinearLayout>
 
@@ -299,8 +318,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingLeft="@dimen/padding"
-                    android:paddingTop="@dimen/padding">
+                    android:paddingLeft="@dimen/padding">
 
                     <TextView
                         style="@style/notesHeader"
@@ -317,6 +335,27 @@
                             android:text="" />
 
                 </LinearLayout>
+
+                <ListView
+                    android:id="@+id/transaction_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:background="#cfd8dc"
+                    android:clickable="true"
+
+                    android:contentDescription="Invoice List"
+                    android:fastScrollAlwaysVisible="true"
+                    android:fastScrollEnabled="false"
+                    android:gravity="start"
+                    android:horizontalSpacing="10dp"
+                    android:nestedScrollingEnabled="true"
+                    android:numColumns="1"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:stretchMode="columnWidth"
+                    android:verticalSpacing="10dp" />
+
 
             </LinearLayout>
 
