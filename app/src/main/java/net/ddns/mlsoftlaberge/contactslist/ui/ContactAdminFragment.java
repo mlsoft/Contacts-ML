@@ -33,6 +33,7 @@ import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Contacts.Photo;
 import android.provider.ContactsContract.Data;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -47,7 +48,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.GridView;
+import android.widget.ListView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -84,7 +85,7 @@ import static java.text.DateFormat.*;
  * Uri for the contact you want to display.
  */
 public class ContactAdminFragment extends Fragment implements
-        AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String EXTRA_CONTACT_URI =
             "net.ddns.mlsoftlaberge.contactslist.ui.EXTRA_CONTACT_URI";
@@ -118,7 +119,7 @@ public class ContactAdminFragment extends Fragment implements
 
     private ImageButton mAddAdminButton;
 
-    private GridView mTransactionGrid;
+    private ListView mTransactionList;
 
     private TextView mMemoItem;
     private ImageButton mMemoEditButton;
@@ -357,10 +358,7 @@ public class ContactAdminFragment extends Fragment implements
             }
         });
 
-        // extract and initialize the transaction grid
-        mTransactionGrid = (GridView) adminView.findViewById(R.id.transaction_grid);
-        mTransactionGrid.setAdapter(new TransactionAdapter());
-
+        // the textview for the memo part of the note
         mMemoItem = (TextView) adminView.findViewById(R.id.contact_memo_item);
         // Defines an onClickListener object for the add-admin button
         mMemoEditButton = (ImageButton) adminView.findViewById(R.id.button_edit_memo);
@@ -384,14 +382,31 @@ public class ContactAdminFragment extends Fragment implements
 
         mReformattedItem = (TextView) adminView.findViewById(R.id.contact_reformatted_item);
 
+        // extract and initialize the transaction list
+        mTransactionList = (ListView) adminView.findViewById(R.id.transaction_list);
+        mTransactionList.setAdapter(new TransactionAdapter());
+        mTransactionList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        // Defines an onClickListener object for the transaction list
+        // this clicking mechanism doesnt work at all, cant make it work
+        // i am missing something in the understanding of the mechanism (ML)
+        mTransactionList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            // Defines what to do when users click the address button
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                // Displays a message that no activity can handle the view button.
+                Toast.makeText(getActivity(), "List Click", Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onNothingSelected(AdapterView view) {
+                // Displays a message that no activity can handle the view button.
+                Toast.makeText(getActivity(), "List NoClick", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
         return adminView;
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // Displays a message that no activity can handle the view button.
-        Toast.makeText(getActivity(), "Edit OnClick " + position, Toast.LENGTH_SHORT).show();
-    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -647,8 +662,8 @@ public class ContactAdminFragment extends Fragment implements
                 }
                 // display the memo part of the note in the memo field (decoded note)
                 mMemoItem.setText(notememo);
-                // initialise the adapter for the grid of transactions to fill
-                // mTransactionGrid.setAdapter(new TransactionAdapter());
+                // initialise the adapter for the list of transactions to fill
+                // mTransactionList.setAdapter(new TransactionAdapter());
                 break;
         }
     }
@@ -822,7 +837,7 @@ public class ContactAdminFragment extends Fragment implements
         return String.format("%04d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, min, sec);
     }
 
-    // return a view for every cell of the grid table
+    // return a view for every cell of the list table
     public class TransactionAdapter extends BaseAdapter {
         public TransactionAdapter() {
         }
