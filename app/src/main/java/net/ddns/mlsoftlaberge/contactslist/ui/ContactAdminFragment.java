@@ -119,8 +119,6 @@ public class ContactAdminFragment extends Fragment implements
 
     private ImageButton mAddAdminButton;
 
-    private ListView mTransactionList;
-
     private TextView mMemoItem;
     private ImageButton mMemoEditButton;
 
@@ -133,6 +131,9 @@ public class ContactAdminFragment extends Fragment implements
     private LinearLayout mNotesLayout;
 
     private LinearLayout mTransactionLayout;
+
+    private TextView mTransactionTotal;
+    private ImageButton mTransactionSaveButton;
 
     private TextView mReformattedItem;
 
@@ -348,18 +349,6 @@ public class ContactAdminFragment extends Fragment implements
             }
         });
 
-
-        // Defines an onClickListener object for the add-admin button
-        mAddAdminButton = (ImageButton) adminView.findViewById(R.id.button_add_admin);
-        mAddAdminButton.setOnClickListener(new View.OnClickListener() {
-            // Defines what to do when users click the address button
-            @Override
-            public void onClick(View view) {
-                // Displays a message that no activity can handle the view button.
-                Toast.makeText(getActivity(), "Add Admin", Toast.LENGTH_SHORT).show();
-            }
-        });
-
         // the textview for the memo part of the note
         mMemoItem = (TextView) adminView.findViewById(R.id.contact_memo_item);
         // Defines an onClickListener object for the add-admin button
@@ -373,39 +362,39 @@ public class ContactAdminFragment extends Fragment implements
             }
         });
 
+        // Defines an onClickListener object for the add-admin button
+        mAddAdminButton = (ImageButton) adminView.findViewById(R.id.button_add_admin);
+        mAddAdminButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Displays a message that no activity can handle the view button.
+                Toast.makeText(getActivity(), "Add Admin", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         mTransactionLayout = (LinearLayout) adminView.findViewById(R.id.contact_transaction_layout);
 
-        mAddressLayout = (LinearLayout) adminView.findViewById(R.id.contact_address_layout);
+        mTransactionTotal = (TextView) adminView.findViewById(R.id.contact_transaction_total);
 
-        mNotesLayout = (LinearLayout) adminView.findViewById(R.id.contact_notes_layout);
+        mTransactionSaveButton = (ImageButton) adminView.findViewById(R.id.button_save_transaction);
+        mTransactionSaveButton.setOnClickListener(new View.OnClickListener() {
+            // Defines what to do when users click the address button
+            @Override
+            public void onClick(View view) {
+                // Displays a message that no activity can handle the view button.
+                Toast.makeText(getActivity(), "Save Transaction", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mAddressLayout = (LinearLayout) adminView.findViewById(R.id.contact_address_layout);
 
         mPhoneLayout = (LinearLayout) adminView.findViewById(R.id.contact_phone_layout);
 
         mEmailLayout = (LinearLayout) adminView.findViewById(R.id.contact_email_layout);
 
+        mNotesLayout = (LinearLayout) adminView.findViewById(R.id.contact_notes_layout);
+
         mReformattedItem = (TextView) adminView.findViewById(R.id.contact_reformatted_item);
-
-        // extract and initialize the transaction list
-        mTransactionList = (ListView) adminView.findViewById(R.id.transaction_list);
-        mTransactionList.setAdapter(new TransactionAdapter());
-        mTransactionList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        // Defines an onClickListener object for the transaction list
-        // this clicking mechanism doesnt work at all, cant make it work
-        // i am missing something in the understanding of the mechanism (ML)
-        mTransactionList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            // Defines what to do when users click the address button
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Displays a message that no activity can handle the view button.
-                Toast.makeText(getActivity(), "List Click", Toast.LENGTH_SHORT).show();
-            }
-            @Override
-            public void onNothingSelected(AdapterView view) {
-                // Displays a message that no activity can handle the view button.
-                Toast.makeText(getActivity(), "List NoClick", Toast.LENGTH_SHORT).show();
-            }
-        });
-
 
         return adminView;
     }
@@ -683,6 +672,7 @@ public class ContactAdminFragment extends Fragment implements
         // added as children.
         mTransactionLayout.removeAllViews();
         int i;
+        double tot=0.0;
         for (i=0;i<nbtransac;++i) {
             // Builds the transaction layout
             // Inflates the transaction layout
@@ -702,7 +692,13 @@ public class ContactAdminFragment extends Fragment implements
             t.setText(transac.descrip);
             dt.setText(transac.trdate);
             mnt.setText(transac.amount);
+
+            // cumulate the total amount
+            tot+=transac.mnt;
+
+            //save the position of the line in button id
             butt.setId(i);
+
             // Defines an onClickListener object for the address button
             butt.setOnClickListener(new View.OnClickListener() {
                 // Defines what to do when users click the address button
@@ -716,8 +712,10 @@ public class ContactAdminFragment extends Fragment implements
             // Adds the new note layout to the notes layout
             mTransactionLayout.addView(tlayout, tlayoutParams);
         }
+        // stamp the total amount in bottom view after the transaction layout
+        String stot=String.format("%.2f",tot);
+        mTransactionTotal.setText(stot);
     }
-
 
 
 
@@ -855,21 +853,43 @@ public class ContactAdminFragment extends Fragment implements
         mReformattedItem.setText(notereformat);
     }
 
+    private String onlyNumbers(String from) {
+        StringBuffer tonum=new StringBuffer();
+        tonum.setLength(14);
+        int i;
+        int j=0;
+        for(i=0;i<from.length();++i) {
+            char c=from.charAt(i);
+            if(c>='0' && c<='9') {
+                tonum.setCharAt(j,c);
+                j++;
+            }
+        }
+        tonum.setLength(j);
+        return tonum.toString();
+    }
+
     // convert a string to a date field
     private Date stringToDate(String sdate) {
         // prepare the date parser.
         Calendar cal = Calendar.getInstance();
         int year, month, day, hour, min, sec;
-        String syear, smonth, sday, shour, smin, ssec;
-        syear = sdate.substring(0, 4);
-        smonth = sdate.substring(4, 6);
-        sday = sdate.substring(6, 8);
-        year = Integer.valueOf(syear);
-        month = Integer.valueOf(smonth);
-        day = Integer.valueOf(sday);
-        hour = 0;
-        min = 0;
-        sec = 0;
+        // extract only numbers from the string received
+        String ndate=onlyNumbers(sdate);
+        // extract all subvalues
+        if(ndate.length()>=4) year = Integer.valueOf(ndate.substring(0, 4));
+        else year=0;
+        if(ndate.length()>=6) month = Integer.valueOf(ndate.substring(4, 6));
+        else month=1;
+        if(ndate.length()>=8) day = Integer.valueOf(ndate.substring(6, 8));
+        else day=0;
+        if(ndate.length()>=10) hour = Integer.valueOf(ndate.substring(8, 10));
+        else hour=0;
+        if(ndate.length()>=12) min = Integer.valueOf(ndate.substring(10, 12));
+        else min=0;
+        if(ndate.length()>=14) sec = Integer.valueOf(ndate.substring(12, 14));
+        else sec=0;
+        // use calendar to format date/time
         cal.set(year, month - 1, day, hour, min, sec);
         long ldate = cal.getTimeInMillis();
         return new Date(ldate);
@@ -888,49 +908,6 @@ public class ContactAdminFragment extends Fragment implements
         min = cal.get(Calendar.MINUTE);
         sec = cal.get(Calendar.SECOND);
         return String.format("%04d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, min, sec);
-    }
-
-    // return a view for every cell of the list table
-    public class TransactionAdapter extends BaseAdapter {
-        public TransactionAdapter() {
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            LinearLayout layout;
-
-            if (convertView == null) {
-                // Inflates the address layout
-                layout = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
-                        R.layout.contact_transaction_item, null, false);
-            } else {
-                layout = (LinearLayout) convertView;
-            }
-
-            TextView t = (TextView) layout.findViewById(R.id.contact_transaction_description);
-            TextView dt = (TextView) layout.findViewById(R.id.contact_transaction_date);
-            TextView mnt = (TextView) layout.findViewById(R.id.contact_transaction_amount);
-
-            transac = transaclist.elementAt(position);
-
-            t.setText(transac.descrip);
-            dt.setText(transac.trdate);
-            mnt.setText(transac.amount);
-
-            return layout;
-        }
-
-
-        public final int getCount() {
-            return nbtransac;
-        }
-
-        public final Object getItem(int position) {
-            return transaclist.elementAt(position);
-        }
-
-        public final long getItemId(int position) {
-            return position;
-        }
     }
 
     /**

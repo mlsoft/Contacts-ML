@@ -244,6 +244,7 @@
                     android:id="@+id/contact_transaction_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="32dp"
                     android:orientation="vertical" />
 
                 <LinearLayout
@@ -276,7 +277,7 @@
                         android:text="0.00" />
 
                     <ImageButton
-                        android:id="@+id/button_save_admin"
+                        android:id="@+id/button_save_transaction"
                         style="@style/adminButton"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
@@ -335,27 +336,6 @@
                             android:text="" />
 
                 </LinearLayout>
-
-                <ListView
-                    android:id="@+id/transaction_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:background="#cfd8dc"
-                    android:clickable="true"
-
-                    android:contentDescription="Invoice List"
-                    android:fastScrollAlwaysVisible="true"
-                    android:fastScrollEnabled="false"
-                    android:gravity="start"
-                    android:horizontalSpacing="10dp"
-                    android:nestedScrollingEnabled="true"
-                    android:numColumns="1"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:stretchMode="columnWidth"
-                    android:verticalSpacing="10dp" />
-
 
             </LinearLayout>
 
