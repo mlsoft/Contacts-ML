@@ -18,7 +18,9 @@ package net.ddns.mlsoftlaberge.contactslist.ui;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
@@ -32,6 +34,11 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Contacts.Photo;
 import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.provider.ContactsContract.RawContacts;
+
+
+
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
@@ -65,6 +72,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Vector;
@@ -383,6 +391,15 @@ public class ContactAdminFragment extends Fragment implements
             public void onClick(View view) {
                 // Displays a message that no activity can handle the view button.
                 Toast.makeText(getActivity(), "Save Transaction", Toast.LENGTH_SHORT).show();
+                // try to update the note field in database
+                compactnote();
+                if(mNotesRawId.isEmpty()) {
+                    mNotesRawId=mRawContactId;
+                    mNotesId=mContactId;
+                    insertnote();
+                } else {
+                    updatenote();
+                }
             }
         });
 
@@ -543,6 +560,8 @@ public class ContactAdminFragment extends Fragment implements
                     // ContactDetailQuery.DISPLAY_NAME maps to the appropriate display
                     // name field based on OS version.
                     final String contactName = data.getString(ContactDetailQuery.DISPLAY_NAME);
+                    mContactId = data.getString(ContactDetailQuery.ID);
+                    mRawContactId = data.getString(ContactDetailQuery.RAWID);
                     if (mContactName != null) {
                         mContactName.setText(contactName);
                     }
@@ -637,6 +656,8 @@ public class ContactAdminFragment extends Fragment implements
                 if (data.moveToFirst()) {
                     // store full note, and process it
                     mNotesData = data.getString(ContactNotesQuery.NOTE);
+                    mNotesRawId = data.getString(ContactNotesQuery.RAWID);
+                    mNotesId = data.getString(ContactNotesQuery.ID);
                     expandnote();
                     compactnote();
                     // loop thru all notes for the bottom layout (only one)
@@ -650,6 +671,8 @@ public class ContactAdminFragment extends Fragment implements
                 } else {
                     // If nothing found, clear the data
                     mNotesData = "";
+                    mNotesRawId="";
+                    mNotesId="";
                     clearnote();
                 }
                 // display the memo part of the note in the memo field (decoded note)
@@ -717,19 +740,65 @@ public class ContactAdminFragment extends Fragment implements
         mTransactionTotal.setText(stot);
     }
 
+    // update the note record in the database from the modified data in table
+    private void updatenote() {
+        newnote = notememo.toString() + notereformat.toString() ;
+        // update the record
+        try {
+            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
 
+            ops.add(ContentProviderOperation.newUpdate(Data.CONTENT_URI)
+                    .withSelection(Data.RAW_CONTACT_ID + " = ?", new String[]{mNotesRawId})
+                    .withSelection(Data._ID + " = ?", new String[]{mNotesId})
+                    .withValue(Data.MIMETYPE, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE)
+                    .withValue(Data.DATA1, newnote)
+                    .build());
+            getActivity().getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+            // inform of success
+            Toast.makeText(getActivity(), "Transaction Updated", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(getActivity(), "Transaction Not Updated", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void insertnote() {
+        newnote = notememo.toString() + notereformat.toString() ;
+        try {
+            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+
+            ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+                    .withValue(Data.RAW_CONTACT_ID, mNotesRawId)
+                    .withValue(Data.MIMETYPE, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE)
+                    .withValue(Data.DATA1, newnote)
+                    .build());
+            getActivity().getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+            Toast.makeText(getActivity(), "Transaction Inserted", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(getActivity(), "Transaction Not Inserted", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
 
     // --------------------------------------------------------------------
     // this is the decoding/encoding part of the transaction table
     // --------------------------------------------------------------------
     // feed string user by the note decoder
-    private String mNotesData = "";
+    private String mNotesData = "";         // from notes row
+    private String mNotesRawId = "";        // from notes row
+    private String mNotesId = "";           // from notes row
+
+    private String mContactId = "";         // from contact name
+    private String mRawContactId = "";      // from contact name
 
     // string containing the memo part of the note
     private StringBuffer notememo = new StringBuffer();
 
     // string containing the reformatted part of the note
     private StringBuffer notereformat = new StringBuffer();
+
+    // string containing the full note reassembled and ready to write back on disk
+    private String newnote;
 
     // temporary space for line in treatment
     private String noteline = "";
@@ -1318,6 +1387,7 @@ public class ContactAdminFragment extends Fragment implements
                 Contacts.STARRED,
                 Contacts.LOOKUP_KEY,
                 Contacts.PHOTO_URI,
+                Contacts.NAME_RAW_CONTACT_ID,
         };
 
         // The query column numbers which map to each value in the projection
@@ -1326,6 +1396,7 @@ public class ContactAdminFragment extends Fragment implements
         final static int STARRED = 2;
         final static int LOOKUP_KEY = 3;
         final static int PHOTO_URI = 4;
+        final static int RAWID=5;
     }
 
     /**
@@ -1368,6 +1439,7 @@ public class ContactAdminFragment extends Fragment implements
         final static String[] PROJECTION = {
                 ContactsContract.CommonDataKinds.Note._ID,
                 ContactsContract.CommonDataKinds.Note.NOTE,
+                ContactsContract.CommonDataKinds.Note.RAW_CONTACT_ID,
         };
 
         // The query selection criteria. In this case matching against the
@@ -1378,6 +1450,7 @@ public class ContactAdminFragment extends Fragment implements
         // The query column numbers which map to each value in the projection
         final static int ID = 0;
         final static int NOTE = 1;
+        final static int RAWID = 2;
     }
 
     /**
