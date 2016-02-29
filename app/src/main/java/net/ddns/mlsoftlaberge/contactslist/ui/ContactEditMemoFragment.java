@@ -1,28 +1,18 @@
 package net.ddns.mlsoftlaberge.contactslist.ui;
 
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.Fragment;
 
 import net.ddns.mlsoftlaberge.contactslist.R;
-import net.ddns.mlsoftlaberge.contactslist.util.ImageLoader;
 import net.ddns.mlsoftlaberge.contactslist.util.Utils;
 
 /**
@@ -37,11 +27,16 @@ public class ContactEditMemoFragment extends Fragment {
 
     private Uri mContactUri; // Stores the contact Uri for this fragment instance
 
-    private TextView mContactName;
+    public String contactName="";   // stores the contact name for this instance
 
-    private EditText mEditMemo;
+    public String contactMemo="";   // stores the memo data for this instance
 
-    private Button mEditMemoButton;
+
+    private TextView mContactName;  // display contact name
+
+    private EditText mEditMemo;     // display and edit the memo field
+
+    private Button mEditMemoButton; // save the data and return to previous avtivity
 
     /**
      * Factory method to generate a new instance of the fragment given a contact Uri. A factory
@@ -51,9 +46,12 @@ public class ContactEditMemoFragment extends Fragment {
      * @param contactUri The contact Uri to load
      * @return A new instance of {@link ContactEditMemoFragment}
      */
-    public static ContactEditMemoFragment newInstance(Uri contactUri) {
+    public static ContactEditMemoFragment newInstance(Uri contactUri, String name, String memo) {
         // Create new instance of this fragment
         final ContactEditMemoFragment fragment = new ContactEditMemoFragment();
+
+        fragment.contactName=name;
+        fragment.contactMemo=memo;
 
         // Create and populate the args bundle
         final Bundle args = new Bundle();
@@ -96,8 +94,11 @@ public class ContactEditMemoFragment extends Fragment {
             mContactUri = ContactsContract.Contacts.lookupContact(getActivity().getContentResolver(),
                     contactLookupUri);
         }
+        if(mContactName != null) {
+            mContactName.setText(contactName);
+        }
         if(mEditMemo != null) {
-            mEditMemo.setText(mContactUri.toString());
+            mEditMemo.setText(contactMemo);
         }
     }
 
@@ -123,7 +124,6 @@ public class ContactEditMemoFragment extends Fragment {
 
         mEditMemo = (EditText) adminView.findViewById(R.id.contact_memo);
         mEditMemo.setVisibility(View.VISIBLE);
-        // mEditMemo.setText(mContactUri.toString());
 
         // Defines an onClickListener object for the add-admin button
         mEditMemoButton = (Button) adminView.findViewById(R.id.button_save_editmemo);
@@ -166,5 +166,9 @@ public class ContactEditMemoFragment extends Fragment {
         // Saves the contact Uri
         outState.putParcelable(EXTRA_CONTACT_URI, mContactUri);
     }
+
+
+
+
 
 }

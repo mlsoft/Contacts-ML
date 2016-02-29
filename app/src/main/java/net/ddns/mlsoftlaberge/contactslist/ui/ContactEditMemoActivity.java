@@ -42,7 +42,8 @@ public class ContactEditMemoActivity extends FragmentActivity {
 
             // Fetch the data Uri from the intent provided to this activity
             final Uri uri = getIntent().getData();
-
+            final String name = "name";
+            final String memo = "memo";
             // Checks to see if fragment has already been added, otherwise adds a new
             // ContactEditMemoFragment with the Uri provided in the intent
             if (getSupportFragmentManager().findFragmentByTag(TAG) == null) {
@@ -50,7 +51,7 @@ public class ContactEditMemoActivity extends FragmentActivity {
 
                 // Adds a newly created ContactEditMemoFragment that is instantiated with the
                 // data Uri
-                ft.add(android.R.id.content, ContactEditMemoFragment.newInstance(uri), TAG);
+                ft.add(android.R.id.content, ContactEditMemoFragment.newInstance(uri,name,memo), TAG);
                 ft.commit();
             }
         } else {
