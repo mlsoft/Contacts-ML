@@ -365,8 +365,12 @@ public class ContactAdminFragment extends Fragment implements
             // Defines what to do when users click the address button
             @Override
             public void onClick(View view) {
-                // Displays a message that no activity can handle the view button.
+                // Displays a message that describe the action to take
                 Toast.makeText(getActivity(), "Edit Notes", Toast.LENGTH_SHORT).show();
+                // start an activity to edit the memo
+                Intent intent = new Intent(getActivity(), ContactEditMemoActivity.class);
+                intent.setData(mContactUri);
+                startActivityForResult(intent,1);
             }
         });
 
