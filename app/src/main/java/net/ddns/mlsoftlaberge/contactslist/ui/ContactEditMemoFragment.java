@@ -1,5 +1,7 @@
 package net.ddns.mlsoftlaberge.contactslist.ui;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -133,6 +135,7 @@ public class ContactEditMemoFragment extends Fragment {
             public void onClick(View view) {
                 // Displays a message that no activity can handle the view button.
                 Toast.makeText(getActivity(), "Save EditMemo", Toast.LENGTH_SHORT).show();
+                returnresult();
             }
         });
 
@@ -167,7 +170,13 @@ public class ContactEditMemoFragment extends Fragment {
         outState.putParcelable(EXTRA_CONTACT_URI, mContactUri);
     }
 
-
+    // returns the contents of edited data to the caller activity
+    public void returnresult() {
+        final Intent data = new Intent();
+        data.putExtra("MEMO",mEditMemo.getText().toString());
+        getActivity().setResult(Activity.RESULT_OK,data);
+        getActivity().finish();
+    }
 
 
 

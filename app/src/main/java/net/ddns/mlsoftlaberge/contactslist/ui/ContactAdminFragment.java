@@ -18,6 +18,7 @@ package net.ddns.mlsoftlaberge.contactslist.ui;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -100,6 +101,8 @@ public class ContactAdminFragment extends Fragment implements
 
     // Defines a tag for identifying log entries
     private static final String TAG = "ContactAdminFragment";
+
+    private static final int EDITMEMO_REQUEST=1;
 
     // The geo Uri scheme prefix, used with Intent.ACTION_VIEW to form a geographical address
     // intent that will trigger available apps to handle viewing a location (such as Maps)
@@ -370,7 +373,9 @@ public class ContactAdminFragment extends Fragment implements
                 // start an activity to edit the memo
                 Intent intent = new Intent(getActivity(), ContactEditMemoActivity.class);
                 intent.setData(mContactUri);
-                startActivityForResult(intent,1);
+                intent.putExtra("NAME",mContactName.getText().toString());
+                intent.putExtra("MEMO", notememo.toString());
+                startActivityForResult(intent,EDITMEMO_REQUEST);
             }
         });
 
@@ -396,14 +401,7 @@ public class ContactAdminFragment extends Fragment implements
                 // Displays a message that no activity can handle the view button.
                 Toast.makeText(getActivity(), "Save Transaction", Toast.LENGTH_SHORT).show();
                 // try to update the note field in database
-                compactnote();
-                if(mNotesRawId.isEmpty()) {
-                    mNotesRawId=mRawContactId;
-                    mNotesId=mContactId;
-                    insertnote();
-                } else {
-                    updatenote();
-                }
+                savenote();
             }
         });
 
@@ -420,6 +418,28 @@ public class ContactAdminFragment extends Fragment implements
         return adminView;
     }
 
+    // try to update the note field in database, or insert it if new
+    public void savenote() {
+        compactnote();
+        if(mNotesRawId.isEmpty()) {
+            mNotesRawId=mRawContactId;
+            mNotesId=mContactId;
+            insertnote();
+        } else {
+            updatenote();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
+        if (resultCode == Activity.RESULT_OK && requestCode == EDITMEMO_REQUEST) {
+            notememo.setLength(0);
+            notememo.append(data.getStringExtra("MEMO"));
+            mMemoItem.setText(notememo);
+            savenote();
+        }
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -744,8 +764,15 @@ public class ContactAdminFragment extends Fragment implements
         mTransactionTotal.setText(stot);
     }
 
+    // normalize the memo field, so the last line finish with a newline
+    private void normalizememo() {
+        if(notememo.length()==0) return;
+        if(notememo.charAt(notememo.length()-1)!='\n') notememo.append("\n");
+    }
+
     // update the note record in the database from the modified data in table
     private void updatenote() {
+        normalizememo();
         newnote = notememo.toString() + notereformat.toString() ;
         // update the record
         try {
@@ -767,6 +794,7 @@ public class ContactAdminFragment extends Fragment implements
     }
 
     public void insertnote() {
+        normalizememo();
         newnote = notememo.toString() + notereformat.toString() ;
         try {
             ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
