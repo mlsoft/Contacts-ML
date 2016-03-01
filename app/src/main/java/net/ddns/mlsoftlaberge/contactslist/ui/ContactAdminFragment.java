@@ -308,26 +308,7 @@ public class ContactAdminFragment extends Fragment implements
             // Defines what to do when users click the address button
             @Override
             public void onClick(View view) {
-
-                final Intent viewIntent =
-                        new Intent(Intent.ACTION_VIEW, constructGeoUri(mContactAddress.getText().toString()));
-
-                // A PackageManager instance is needed to verify that there's a default app
-                // that handles ACTION_VIEW and a geo Uri.
-                final PackageManager packageManager = getActivity().getPackageManager();
-
-                // Checks for an activity that can handle this intent. Preferred in this
-                // case over Intent.createChooser() as it will still let the user choose
-                // a default (or use a previously set default) for geo Uris.
-                if (packageManager.resolveActivity(
-                        viewIntent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
-                    startActivity(viewIntent);
-                } else {
-                    // If no default is found, displays a message that no activity can handle
-                    // the view button.
-                    Toast.makeText(getActivity(),
-                            R.string.no_intent_found, Toast.LENGTH_SHORT).show();
-                }
+                openaddress();
             }
         });
 
@@ -342,7 +323,8 @@ public class ContactAdminFragment extends Fragment implements
             @Override
             public void onClick(View view) {
                 // Displays a message that no activity can handle the view button.
-                Toast.makeText(getActivity(), "Phone Admin", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Phone Contact", Toast.LENGTH_SHORT).show();
+                phonecontact();
             }
         });
 
@@ -355,8 +337,9 @@ public class ContactAdminFragment extends Fragment implements
             // Defines what to do when users click the address button
             @Override
             public void onClick(View view) {
-                // Displays a message that no activity can handle the view button.
-                Toast.makeText(getActivity(), "Email Admin", Toast.LENGTH_SHORT).show();
+                // Displays a message that an email will be sent
+                Toast.makeText(getActivity(), "Email Contact", Toast.LENGTH_SHORT).show();
+                emailcontact();
             }
         });
 
@@ -414,6 +397,50 @@ public class ContactAdminFragment extends Fragment implements
         return adminView;
     }
 
+    // open the main address on google-map
+    public void openaddress() {
+        final Intent viewIntent =
+                new Intent(Intent.ACTION_VIEW, constructGeoUri(mContactAddress.getText().toString()));
+
+        // A PackageManager instance is needed to verify that there's a default app
+        // that handles ACTION_VIEW and a geo Uri.
+        final PackageManager packageManager = getActivity().getPackageManager();
+
+        // Checks for an activity that can handle this intent. Preferred in this
+        // case over Intent.createChooser() as it will still let the user choose
+        // a default (or use a previously set default) for geo Uris.
+        if (packageManager.resolveActivity(
+                viewIntent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
+            startActivity(viewIntent);
+        } else {
+            // If no default is found, displays a message that no activity can handle
+            // the view button.
+            Toast.makeText(getActivity(),
+                    R.string.no_intent_found, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // open the phone-dialer with the phone number pre-dialed
+    public void phonecontact() {
+        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + mContactPhone.getText().toString()));
+        startActivity(intent);
+    }
+
+    // email the note-transaction part to the contact
+    public void emailcontact() {
+        Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+        emailIntent.setType("message/rfc822");
+        emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{mContactName.getText().toString()});
+        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Invoice");
+        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, notereformat.toString());
+        try {
+            startActivity(Intent.createChooser(emailIntent, "Send Email."));
+        } catch (Exception ex) {
+            Toast.makeText(getActivity(), "Email Error", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // start the editing activity for the memo part
     private void editmemo() {
         // start an activity to edit the memo
         Intent intent = new Intent(getActivity(), ContactEditMemoActivity.class);
@@ -423,6 +450,7 @@ public class ContactAdminFragment extends Fragment implements
         startActivityForResult(intent, EDITMEMO_REQUEST);
     }
 
+    // start the editing activity for a new transaction
     private void addtransaction() {
         // create an empty default transaction
         transac = new Transac();
@@ -445,6 +473,7 @@ public class ContactAdminFragment extends Fragment implements
         edittransaction(nbtransac-1);
     }
 
+    // start the editing activity for editing a transaction
     private void edittransaction(int i) {
         transac=transaclist.elementAt(i);
         curtransac=i;
@@ -458,6 +487,8 @@ public class ContactAdminFragment extends Fragment implements
         startActivityForResult(intent, EDITTRANS_REQUEST);
     }
 
+    // capture the results of editing activities, and process them
+    // save the resulting data when needed
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // If the request went well (OK) and the request was EDITMEMO_REQUEST
@@ -484,6 +515,7 @@ public class ContactAdminFragment extends Fragment implements
         }
     }
 
+    // set the contact URI with the new activity or saved activity state
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -510,6 +542,7 @@ public class ContactAdminFragment extends Fragment implements
         outState.putParcelable(EXTRA_CONTACT_URI, mContactUri);
     }
 
+    // open the edit-contact activity when asked by the top menu option
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -534,6 +567,7 @@ public class ContactAdminFragment extends Fragment implements
         return super.onOptionsItemSelected(item);
     }
 
+    // create the menu option to modify this contact
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
@@ -549,6 +583,7 @@ public class ContactAdminFragment extends Fragment implements
         mModifContactMenuItem.setVisible(mContactUri != null);
     }
 
+    // create a loader to find the results of the contact URI for every querys
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
@@ -595,6 +630,7 @@ public class ContactAdminFragment extends Fragment implements
         return null;
     }
 
+    // reset the loader
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         // Nothing to do here. The Cursor does not need to be released as it was never directly
@@ -602,6 +638,8 @@ public class ContactAdminFragment extends Fragment implements
     }
 
 
+    // process the loader finished request
+    // fill all fields on screen, and all layouts with data from the querys
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
@@ -750,7 +788,7 @@ public class ContactAdminFragment extends Fragment implements
         }
     }
 
-    // fill the transactions layout with
+    // fill the transactions layout with the transaction views
     private void filltransactionlayout() {
         // Each LinearLayout has the same LayoutParams so this can
         // be created once and used for each cumulative layouts of data
@@ -849,6 +887,7 @@ public class ContactAdminFragment extends Fragment implements
         }
     }
 
+    // insert a new note in the database
     public void insertnote() {
         normalizememo();
         newnote = notememo.toString() + notereformat.toString();

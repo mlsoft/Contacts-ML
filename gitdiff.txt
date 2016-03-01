@@ -1,1003 +1,1204 @@
-diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
-index c3aa5b3..0079731 100644
---- a/app/src/main/AndroidManifest.xml
-+++ b/app/src/main/AndroidManifest.xml
-@@ -82,5 +82,18 @@
-             <meta-data android:name="android.support.PARENT_ACTIVITY"
-                 android:value=".ui.ContactAdminActivity" />
-         </activity>
-+        <activity
-+            android:name=".ui.ContactEditTransActivity"
-+            android:label="@string/activity_contact_edittrans"
-+            android:parentActivityName=".ui.ContactAdminActivity">
-+            <!-- Define hierarchical parent of this activity, both via the system
-+                 parentActivityName attribute (added in API Level 16) and via meta-data annotation.
-+                 This allows use of the support library NavUtils class in a way that works over
-+                 all Android versions. See the "Tasks and Back Stack" guide for more information:
-+                 http://developer.android.com/guide/components/tasks-and-back-stack.html
-+            -->
-+            <meta-data android:name="android.support.PARENT_ACTIVITY"
-+                android:value=".ui.ContactAdminActivity" />
-+        </activity>
-     </application>
- </manifest>
 diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
-index 2b8dbef..572a240 100644
+index 572a240..8049e09 100644
 --- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
 +++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
-@@ -39,7 +39,6 @@ import android.provider.ContactsContract.CommonDataKinds.Email;
- import android.provider.ContactsContract.RawContacts;
- 
- 
--
- import android.support.v4.app.Fragment;
- import android.support.v4.app.ListFragment;
- import android.support.v4.app.LoaderManager;
-@@ -102,7 +101,8 @@ public class ContactAdminFragment extends Fragment implements
-     // Defines a tag for identifying log entries
-     private static final String TAG = "ContactAdminFragment";
- 
--    private static final int EDITMEMO_REQUEST=1;
-+    private static final int EDITMEMO_REQUEST = 1;
-+    private static final int EDITTRANS_REQUEST = 2;
- 
-     // The geo Uri scheme prefix, used with Intent.ACTION_VIEW to form a geographical address
-     // intent that will trigger available apps to handle viewing a location (such as Maps)
-@@ -370,12 +370,7 @@ public class ContactAdminFragment extends Fragment implements
+@@ -308,26 +308,7 @@ public class ContactAdminFragment extends Fragment implements
+             // Defines what to do when users click the address button
+             @Override
              public void onClick(View view) {
-                 // Displays a message that describe the action to take
-                 Toast.makeText(getActivity(), "Edit Notes", Toast.LENGTH_SHORT).show();
--                // start an activity to edit the memo
--                Intent intent = new Intent(getActivity(), ContactEditMemoActivity.class);
--                intent.setData(mContactUri);
--                intent.putExtra("NAME",mContactName.getText().toString());
--                intent.putExtra("MEMO", notememo.toString());
--                startActivityForResult(intent,EDITMEMO_REQUEST);
-+                editmemo();
+-
+-                final Intent viewIntent =
+-                        new Intent(Intent.ACTION_VIEW, constructGeoUri(mContactAddress.getText().toString()));
+-
+-                // A PackageManager instance is needed to verify that there's a default app
+-                // that handles ACTION_VIEW and a geo Uri.
+-                final PackageManager packageManager = getActivity().getPackageManager();
+-
+-                // Checks for an activity that can handle this intent. Preferred in this
+-                // case over Intent.createChooser() as it will still let the user choose
+-                // a default (or use a previously set default) for geo Uris.
+-                if (packageManager.resolveActivity(
+-                        viewIntent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
+-                    startActivity(viewIntent);
+-                } else {
+-                    // If no default is found, displays a message that no activity can handle
+-                    // the view button.
+-                    Toast.makeText(getActivity(),
+-                            R.string.no_intent_found, Toast.LENGTH_SHORT).show();
+-                }
++                openaddress();
              }
          });
  
-@@ -386,6 +381,7 @@ public class ContactAdminFragment extends Fragment implements
+@@ -342,7 +323,8 @@ public class ContactAdminFragment extends Fragment implements
+             @Override
              public void onClick(View view) {
                  // Displays a message that no activity can handle the view button.
-                 Toast.makeText(getActivity(), "Add Admin", Toast.LENGTH_SHORT).show();
-+                addtransaction();
+-                Toast.makeText(getActivity(), "Phone Admin", Toast.LENGTH_SHORT).show();
++                Toast.makeText(getActivity(), "Phone Contact", Toast.LENGTH_SHORT).show();
++                phonecontact();
              }
          });
  
-@@ -418,27 +414,74 @@ public class ContactAdminFragment extends Fragment implements
+@@ -355,8 +337,9 @@ public class ContactAdminFragment extends Fragment implements
+             // Defines what to do when users click the address button
+             @Override
+             public void onClick(View view) {
+-                // Displays a message that no activity can handle the view button.
+-                Toast.makeText(getActivity(), "Email Admin", Toast.LENGTH_SHORT).show();
++                // Displays a message that an email will be sent
++                Toast.makeText(getActivity(), "Email Contact", Toast.LENGTH_SHORT).show();
++                emailcontact();
+             }
+         });
+ 
+@@ -414,6 +397,50 @@ public class ContactAdminFragment extends Fragment implements
          return adminView;
      }
  
--    // try to update the note field in database, or insert it if new
--    public void savenote() {
--        compactnote();
--        if(mNotesRawId.isEmpty()) {
--            mNotesRawId=mRawContactId;
--            mNotesId=mContactId;
--            insertnote();
--        } else {
--            updatenote();
--        }
-+    private void editmemo() {
-+        // start an activity to edit the memo
-+        Intent intent = new Intent(getActivity(), ContactEditMemoActivity.class);
-+        intent.setData(mContactUri);
-+        intent.putExtra("NAME", mContactName.getText().toString());
-+        intent.putExtra("MEMO", notememo.toString());
-+        startActivityForResult(intent, EDITMEMO_REQUEST);
++    // open the main address on google-map
++    public void openaddress() {
++        final Intent viewIntent =
++                new Intent(Intent.ACTION_VIEW, constructGeoUri(mContactAddress.getText().toString()));
++
++        // A PackageManager instance is needed to verify that there's a default app
++        // that handles ACTION_VIEW and a geo Uri.
++        final PackageManager packageManager = getActivity().getPackageManager();
++
++        // Checks for an activity that can handle this intent. Preferred in this
++        // case over Intent.createChooser() as it will still let the user choose
++        // a default (or use a previously set default) for geo Uris.
++        if (packageManager.resolveActivity(
++                viewIntent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
++            startActivity(viewIntent);
++        } else {
++            // If no default is found, displays a message that no activity can handle
++            // the view button.
++            Toast.makeText(getActivity(),
++                    R.string.no_intent_found, Toast.LENGTH_SHORT).show();
++        }
 +    }
 +
-+    private void addtransaction() {
-+        // create an empty default transaction
-+        transac = new Transac();
-+        transac.qte = 1.0;
-+        transac.prix = 0.0;
-+        transac.mnt = 0.0;
-+        transac.trdate = "20160101";
-+        transac.amount = "0.00";
-+        transac.descrip = "";
-+        // reformat the amount
-+        transac.mnt = Double.valueOf(transac.amount);
-+        transac.prix = transac.mnt;
-+        transac.amount = String.format("%.2f", transac.mnt);
-+        // reformat the date
-+        transac.fdate = stringToDate(transac.trdate);
-+        transac.trdate = dateToString(transac.fdate);
-+        // add element to the table
-+        transaclist.addElement(transac);
-+        nbtransac++;
-+        edittransaction(nbtransac-1);
++    // open the phone-dialer with the phone number pre-dialed
++    public void phonecontact() {
++        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + mContactPhone.getText().toString()));
++        startActivity(intent);
 +    }
 +
-+    private void edittransaction(int i) {
-+        transac=transaclist.elementAt(i);
-+        curtransac=i;
-+        // start an activity to edit the transaction
-+        Intent intent = new Intent(getActivity(), ContactEditTransActivity.class);
-+        intent.setData(mContactUri);
-+        intent.putExtra("NAME", mContactName.getText().toString());
-+        intent.putExtra("DESCRIP", transac.descrip);
-+        intent.putExtra("AMOUNT", transac.amount);
-+        intent.putExtra("DATE", transac.trdate);
-+        startActivityForResult(intent, EDITTRANS_REQUEST);
++    // email the note-transaction part to the contact
++    public void emailcontact() {
++        Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
++        emailIntent.setType("message/rfc822");
++        emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{mContactName.getText().toString()});
++        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Invoice");
++        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, notereformat.toString());
++        try {
++            startActivity(Intent.createChooser(emailIntent, "Send Email."));
++        } catch (Exception ex) {
++            Toast.makeText(getActivity(), "Email Error", Toast.LENGTH_SHORT).show();
++        }
++    }
++
++    // start the editing activity for the memo part
+     private void editmemo() {
+         // start an activity to edit the memo
+         Intent intent = new Intent(getActivity(), ContactEditMemoActivity.class);
+@@ -423,6 +450,7 @@ public class ContactAdminFragment extends Fragment implements
+         startActivityForResult(intent, EDITMEMO_REQUEST);
      }
  
++    // start the editing activity for a new transaction
+     private void addtransaction() {
+         // create an empty default transaction
+         transac = new Transac();
+@@ -445,6 +473,7 @@ public class ContactAdminFragment extends Fragment implements
+         edittransaction(nbtransac-1);
+     }
+ 
++    // start the editing activity for editing a transaction
+     private void edittransaction(int i) {
+         transac=transaclist.elementAt(i);
+         curtransac=i;
+@@ -458,6 +487,8 @@ public class ContactAdminFragment extends Fragment implements
+         startActivityForResult(intent, EDITTRANS_REQUEST);
+     }
+ 
++    // capture the results of editing activities, and process them
++    // save the resulting data when needed
      @Override
      public void onActivityResult(int requestCode, int resultCode, Intent data) {
--        // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
-+        // If the request went well (OK) and the request was EDITMEMO_REQUEST
-         if (resultCode == Activity.RESULT_OK && requestCode == EDITMEMO_REQUEST) {
-             notememo.setLength(0);
-             notememo.append(data.getStringExtra("MEMO"));
-             mMemoItem.setText(notememo);
-             savenote();
+         // If the request went well (OK) and the request was EDITMEMO_REQUEST
+@@ -484,6 +515,7 @@ public class ContactAdminFragment extends Fragment implements
          }
-+        // If the request went well (OK) and the request was EDITTRANS_REQUEST
-+        if (resultCode == Activity.RESULT_OK && requestCode == EDITTRANS_REQUEST) {
-+            transac.descrip=data.getStringExtra("DESCRIP");
-+            transac.amount=data.getStringExtra("AMOUNT");
-+            transac.trdate=data.getStringExtra("DATE");
-+            // reformat the amount
-+            transac.mnt = Double.valueOf(transac.amount);
-+            transac.prix = transac.mnt;
-+            transac.amount = String.format("%.2f", transac.mnt);
-+            // reformat the date
-+            transac.fdate = stringToDate(transac.trdate);
-+            transac.trdate = dateToString(transac.fdate);
-+            compactnote();
-+            savenote();
-+        }
      }
  
++    // set the contact URI with the new activity or saved activity state
      @Override
-@@ -695,8 +738,8 @@ public class ContactAdminFragment extends Fragment implements
-                 } else {
-                     // If nothing found, clear the data
-                     mNotesData = "";
--                    mNotesRawId="";
--                    mNotesId="";
-+                    mNotesRawId = "";
-+                    mNotesId = "";
-                     clearnote();
-                 }
-                 // display the memo part of the note in the memo field (decoded note)
-@@ -719,12 +762,12 @@ public class ContactAdminFragment extends Fragment implements
-         // added as children.
-         mTransactionLayout.removeAllViews();
-         int i;
--        double tot=0.0;
--        for (i=0;i<nbtransac;++i) {
-+        double tot = 0.0;
-+        for (i = 0; i < nbtransac; ++i) {
-             // Builds the transaction layout
-             // Inflates the transaction layout
-             LinearLayout tlayout = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
--                        R.layout.contact_transaction_item, null, false);
-+                    R.layout.contact_transaction_item, null, false);
+     public void onActivityCreated(Bundle savedInstanceState) {
+         super.onActivityCreated(savedInstanceState);
+@@ -510,6 +542,7 @@ public class ContactAdminFragment extends Fragment implements
+         outState.putParcelable(EXTRA_CONTACT_URI, mContactUri);
+     }
  
-             // point to the 4 fields of the layout
-             TextView t = (TextView) tlayout.findViewById(R.id.contact_transaction_description);
-@@ -741,7 +784,7 @@ public class ContactAdminFragment extends Fragment implements
-             mnt.setText(transac.amount);
++    // open the edit-contact activity when asked by the top menu option
+     @Override
+     public boolean onOptionsItemSelected(MenuItem item) {
+         switch (item.getItemId()) {
+@@ -534,6 +567,7 @@ public class ContactAdminFragment extends Fragment implements
+         return super.onOptionsItemSelected(item);
+     }
  
-             // cumulate the total amount
--            tot+=transac.mnt;
-+            tot += transac.mnt;
++    // create the menu option to modify this contact
+     @Override
+     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+         super.onCreateOptionsMenu(menu, inflater);
+@@ -549,6 +583,7 @@ public class ContactAdminFragment extends Fragment implements
+         mModifContactMenuItem.setVisible(mContactUri != null);
+     }
  
-             //save the position of the line in button id
-             butt.setId(i);
-@@ -753,6 +796,7 @@ public class ContactAdminFragment extends Fragment implements
-                 public void onClick(View view) {
-                     // Displays a message that no activity can handle the view button.
-                     Toast.makeText(getActivity(), "Edit Transaction " + view.getId(), Toast.LENGTH_SHORT).show();
-+                    edittransaction(view.getId());
-                 }
-             });
++    // create a loader to find the results of the contact URI for every querys
+     @Override
+     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+         switch (id) {
+@@ -595,6 +630,7 @@ public class ContactAdminFragment extends Fragment implements
+         return null;
+     }
  
-@@ -760,20 +804,32 @@ public class ContactAdminFragment extends Fragment implements
-             mTransactionLayout.addView(tlayout, tlayoutParams);
++    // reset the loader
+     @Override
+     public void onLoaderReset(Loader<Cursor> loader) {
+         // Nothing to do here. The Cursor does not need to be released as it was never directly
+@@ -602,6 +638,8 @@ public class ContactAdminFragment extends Fragment implements
+     }
+ 
+ 
++    // process the loader finished request
++    // fill all fields on screen, and all layouts with data from the querys
+     @Override
+     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+ 
+@@ -750,7 +788,7 @@ public class ContactAdminFragment extends Fragment implements
          }
-         // stamp the total amount in bottom view after the transaction layout
--        String stot=String.format("%.2f",tot);
-+        String stot = String.format("%.2f", tot);
-         mTransactionTotal.setText(stot);
      }
  
-+    // try to update the note field in database, or insert it if new
-+    public void savenote() {
-+        compactnote();
-+        if (mNotesRawId.isEmpty()) {
-+            mNotesRawId = mRawContactId;
-+            mNotesId = mContactId;
-+            insertnote();
-+        } else {
-+            updatenote();
-+        }
-+    }
-+
-     // normalize the memo field, so the last line finish with a newline
-     private void normalizememo() {
--        if(notememo.length()==0) return;
--        if(notememo.charAt(notememo.length()-1)!='\n') notememo.append("\n");
-+        if (notememo.length() == 0) return;
-+        if (notememo.charAt(notememo.length() - 1) != '\n') notememo.append("\n");
+-    // fill the transactions layout with
++    // fill the transactions layout with the transaction views
+     private void filltransactionlayout() {
+         // Each LinearLayout has the same LayoutParams so this can
+         // be created once and used for each cumulative layouts of data
+@@ -849,6 +887,7 @@ public class ContactAdminFragment extends Fragment implements
+         }
      }
  
-     // update the note record in the database from the modified data in table
-     private void updatenote() {
-         normalizememo();
--        newnote = notememo.toString() + notereformat.toString() ;
-+        newnote = notememo.toString() + notereformat.toString();
-         // update the record
-         try {
-             ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-@@ -795,7 +851,7 @@ public class ContactAdminFragment extends Fragment implements
- 
++    // insert a new note in the database
      public void insertnote() {
          normalizememo();
--        newnote = notememo.toString() + notereformat.toString() ;
-+        newnote = notememo.toString() + notereformat.toString();
-         try {
-             ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
- 
-@@ -855,6 +911,9 @@ public class ContactAdminFragment extends Fragment implements
-     // counter of table row
-     private int nbtransac = 0;
- 
-+    // current table row in edition
-+    private int curtransac = 0;
-+
-     // clear the table of fields for an empty note
-     private void clearnote() {
-         nbtransac = 0;
-@@ -941,7 +1000,7 @@ public class ContactAdminFragment extends Fragment implements
-         int i;
-         notereformat.setLength(0);
-         // refill the string with the transactions list in readable mode
--        for(i=0;i<nbtransac;++i) {
-+        for (i = 0; i < nbtransac; ++i) {
-             transac = transaclist.elementAt(i);
-             notereformat.append("ADMIN|");
-             notereformat.append(transac.trdate);
-@@ -955,14 +1014,14 @@ public class ContactAdminFragment extends Fragment implements
-     }
- 
-     private String onlyNumbers(String from) {
--        StringBuffer tonum=new StringBuffer();
-+        StringBuffer tonum = new StringBuffer();
-         tonum.setLength(14);
-         int i;
--        int j=0;
--        for(i=0;i<from.length();++i) {
--            char c=from.charAt(i);
--            if(c>='0' && c<='9') {
--                tonum.setCharAt(j,c);
-+        int j = 0;
-+        for (i = 0; i < from.length(); ++i) {
-+            char c = from.charAt(i);
-+            if (c >= '0' && c <= '9') {
-+                tonum.setCharAt(j, c);
-                 j++;
-             }
-         }
-@@ -976,20 +1035,20 @@ public class ContactAdminFragment extends Fragment implements
-         Calendar cal = Calendar.getInstance();
-         int year, month, day, hour, min, sec;
-         // extract only numbers from the string received
--        String ndate=onlyNumbers(sdate);
-+        String ndate = onlyNumbers(sdate);
-         // extract all subvalues
--        if(ndate.length()>=4) year = Integer.valueOf(ndate.substring(0, 4));
--        else year=0;
--        if(ndate.length()>=6) month = Integer.valueOf(ndate.substring(4, 6));
--        else month=1;
--        if(ndate.length()>=8) day = Integer.valueOf(ndate.substring(6, 8));
--        else day=0;
--        if(ndate.length()>=10) hour = Integer.valueOf(ndate.substring(8, 10));
--        else hour=0;
--        if(ndate.length()>=12) min = Integer.valueOf(ndate.substring(10, 12));
--        else min=0;
--        if(ndate.length()>=14) sec = Integer.valueOf(ndate.substring(12, 14));
--        else sec=0;
-+        if (ndate.length() >= 4) year = Integer.valueOf(ndate.substring(0, 4));
-+        else year = 0;
-+        if (ndate.length() >= 6) month = Integer.valueOf(ndate.substring(4, 6));
-+        else month = 1;
-+        if (ndate.length() >= 8) day = Integer.valueOf(ndate.substring(6, 8));
-+        else day = 0;
-+        if (ndate.length() >= 10) hour = Integer.valueOf(ndate.substring(8, 10));
-+        else hour = 0;
-+        if (ndate.length() >= 12) min = Integer.valueOf(ndate.substring(10, 12));
-+        else min = 0;
-+        if (ndate.length() >= 14) sec = Integer.valueOf(ndate.substring(12, 14));
-+        else sec = 0;
-         // use calendar to format date/time
-         cal.set(year, month - 1, day, hour, min, sec);
-         long ldate = cal.getTimeInMillis();
-@@ -1067,12 +1126,12 @@ public class ContactAdminFragment extends Fragment implements
-      * Each note for the contact gets its own LinearLayout object; for example, if the contact
-      * has three notes, then 3 LinearLayouts are generated.
-      *
--     * @param type      From
--     *                         {@link android.provider.ContactsContract.CommonDataKinds.Phone#TYPE}
-+     * @param type  From
-+     *              {@link android.provider.ContactsContract.CommonDataKinds.Phone#TYPE}
-      * @param label From
--     *                         {@link android.provider.ContactsContract.CommonDataKinds.Phone#LABEL}
-+     *              {@link android.provider.ContactsContract.CommonDataKinds.Phone#LABEL}
-      * @param phone From
--     *                         {@link android.provider.ContactsContract.CommonDataKinds.Phone#NUMBER}
-+     *              {@link android.provider.ContactsContract.CommonDataKinds.Phone#NUMBER}
-      * @return A LinearLayout to add to the contact notes layout,
-      * populated with the provided notes.
-      */
-@@ -1126,12 +1185,12 @@ public class ContactAdminFragment extends Fragment implements
-      * Each note for the contact gets its own LinearLayout object; for example, if the contact
-      * has three notes, then 3 LinearLayouts are generated.
-      *
--     * @param type      From
--     *                         {@link android.provider.ContactsContract.CommonDataKinds.Email#TYPE}
-+     * @param type  From
-+     *              {@link android.provider.ContactsContract.CommonDataKinds.Email#TYPE}
-      * @param label From
--     *                         {@link android.provider.ContactsContract.CommonDataKinds.Email#LABEL}
-+     *              {@link android.provider.ContactsContract.CommonDataKinds.Email#LABEL}
-      * @param email From
--     *                         {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS}
-+     *              {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS}
-      * @return A LinearLayout to add to the contact notes layout,
-      * populated with the provided notes.
-      */
-@@ -1428,7 +1487,7 @@ public class ContactAdminFragment extends Fragment implements
-         final static int STARRED = 2;
-         final static int LOOKUP_KEY = 3;
-         final static int PHOTO_URI = 4;
--        final static int RAWID=5;
-+        final static int RAWID = 5;
-     }
- 
-     /**
-diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransActivity.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransActivity.java
-index 190e4fa..b731966 100644
---- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransActivity.java
-+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransActivity.java
-@@ -1,7 +1,84 @@
- package net.ddns.mlsoftlaberge.contactslist.ui;
- 
-+import android.annotation.TargetApi;
-+import android.net.Uri;
-+import android.os.Build;
-+import android.os.Bundle;
-+import android.support.v4.app.Fragment;
-+import android.support.v4.app.FragmentActivity;
-+import android.support.v4.app.FragmentTransaction;
-+import android.support.v4.app.NavUtils;
-+
-+import android.view.MenuItem;
-+
-+import net.ddns.mlsoftlaberge.contactslist.BuildConfig;
-+import net.ddns.mlsoftlaberge.contactslist.R;
-+import net.ddns.mlsoftlaberge.contactslist.util.Utils;
-+
- /**
-- * Created by mlsoft on 01/03/16.
-+ * Created by mlsoft on 28/02/16.
-  */
--public class ContactEditTransActivity {
-+public class ContactEditTransActivity extends FragmentActivity {
-+    // Defines a tag for identifying the single fragment that this activity holds
-+    private static final String TAG = "ContactEditTransActivity";
-+
-+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-+    @Override
-+    protected void onCreate(Bundle savedInstanceState) {
-+        if (BuildConfig.DEBUG) {
-+            // Enable strict mode checks when in debug modes
-+            Utils.enableStrictMode();
-+        }
-+        super.onCreate(savedInstanceState);
-+
-+        // This activity expects to receive an intent that contains the uri of a contact
-+        if (getIntent() != null) {
-+
-+            // For OS versions honeycomb and higher use action bar
-+            if (Utils.hasHoneycomb()) {
-+                // Enables action bar "up" navigation
-+                getActionBar().setDisplayHomeAsUpEnabled(true);
-+            }
-+
-+            // Fetch the data Uri from the intent provided to this activity
-+            final Uri uri = getIntent().getData();
-+            final String name = getIntent().getStringExtra("NAME");
-+            final String descrip = getIntent().getStringExtra("DESCRIP");
-+            final String amount = getIntent().getStringExtra("AMOUNT");
-+            final String date = getIntent().getStringExtra("DATE");
-+            // Checks to see if fragment has already been added, otherwise adds a new
-+            // ContactEditMemoFragment with the Uri provided in the intent
-+            if (getSupportFragmentManager().findFragmentByTag(TAG) == null) {
-+                final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-+
-+                // Adds a newly created ContactEditMemoFragment that is instantiated with the
-+                // data Uri
-+                ft.add(android.R.id.content, ContactEditTransFragment.newInstance(uri,name,descrip,amount,date), TAG);
-+                ft.commit();
-+            }
-+        } else {
-+            // No intent provided, nothing to do so finish()
-+            finish();
-+        }
-+    }
-+
-+    @Override
-+    public boolean onOptionsItemSelected(MenuItem item) {
-+        switch (item.getItemId()) {
-+            case android.R.id.home:
-+                // Tapping on top left ActionBar icon navigates "up" to hierarchical parent screen.
-+                // The parent is defined in the AndroidManifest entry for this activity via the
-+                // parentActivityName attribute (and via meta-data tag for OS versions before API
-+                // Level 16). See the "Tasks and Back Stack" guide for more information:
-+                // http://developer.android.com/guide/components/tasks-and-back-stack.html
-+                NavUtils.navigateUpFromSameTask(this);
-+                return true;
-+        }
-+
-+        // Otherwise, pass the item to the super implementation for handling, as described in the
-+        // documentation.
-+        return super.onOptionsItemSelected(item);
-+    }
-+
-+
- }
-diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransFragment.java
-index df24afb..04687e0 100644
---- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransFragment.java
-+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransFragment.java
-@@ -1,7 +1,204 @@
- package net.ddns.mlsoftlaberge.contactslist.ui;
- 
-+import android.app.Activity;
-+import android.content.Intent;
-+import android.net.Uri;
-+import android.os.Bundle;
-+import android.provider.ContactsContract;
-+import android.view.LayoutInflater;
-+import android.view.View;
-+import android.view.ViewGroup;
-+import android.widget.Button;
-+import android.widget.EditText;
-+import android.widget.TextView;
-+import android.widget.Toast;
-+import android.support.v4.app.Fragment;
-+
-+import net.ddns.mlsoftlaberge.contactslist.R;
-+import net.ddns.mlsoftlaberge.contactslist.util.Utils;
-+
- /**
-- * Created by mlsoft on 01/03/16.
-+ * Created by mlsoft on 28/02/16.
-  */
--public class ContactEditTransFragment {
-+public class ContactEditTransFragment extends Fragment {
-+    public static final String EXTRA_CONTACT_URI =
-+            "net.ddns.mlsoftlaberge.contactslist.ui.EXTRA_CONTACT_URI";
-+
-+    // Defines a tag for identifying log entries
-+    private static final String TAG = "ContactEditTransFragment";
-+
-+    private Uri mContactUri; // Stores the contact Uri for this fragment instance
-+
-+    public String contactName="";   // stores the contact name for this instance
-+
-+    public String transDescrip="";   // stores the transaction description for this instance
-+
-+    public String transAmount="";   // stores the amount data for this instance
-+
-+    public String transDate="";     // stores the date of transaction
-+
-+    private TextView mContactName;  // display contact name
-+
-+    private EditText mEditDescrip;     // display and edit the memo field
-+    private EditText mEditAmount;     // display and edit the memo field
-+    private EditText mEditDate;     // display and edit the memo field
-+
-+    private Button mEditTransButton; // save the data and return to previous avtivity
-+
-+    /**
-+     * Factory method to generate a new instance of the fragment given a contact Uri. A factory
-+     * method is preferable to simply using the constructor as it handles creating the bundle and
-+     * setting the bundle as an argument.
-+     *
-+     * @param contactUri The contact Uri to load
-+     * @return A new instance of {@link ContactEditMemoFragment}
-+     */
-+    public static ContactEditTransFragment newInstance(Uri contactUri, String name, String descrip, String amount, String date) {
-+        // Create new instance of this fragment
-+        final ContactEditTransFragment fragment = new ContactEditTransFragment();
-+
-+        fragment.contactName=name;
-+        fragment.transDescrip=descrip;
-+        fragment.transAmount=amount;
-+        fragment.transDate=date;
-+
-+        // Create and populate the args bundle
-+        final Bundle args = new Bundle();
-+        args.putParcelable(EXTRA_CONTACT_URI, contactUri);
-+
-+        // Assign the args bundle to the new fragment
-+        fragment.setArguments(args);
-+
-+        // Return fragment
-+        return fragment;
-+    }
-+
-+    /**
-+     * Fragments require an empty constructor.
-+     */
-+    public ContactEditTransFragment() {
-+    }
-+
-+    /**
-+     * Sets the contact that this Fragment displays, or clears the display if the contact argument
-+     * is null. This will re-initialize all the views and start the queries to the system contacts
-+     * provider to populate the contact information.
-+     *
-+     * @param contactLookupUri The contact lookup Uri to load and display in this fragment. Passing
-+     *                         null is valid and the fragment will display a message that no
-+     *                         contact is currently selected instead.
-+     */
-+    public void setContact(Uri contactLookupUri) {
-+
-+        // In version 3.0 and later, stores the provided contact lookup Uri in a class field. This
-+        // Uri is then used at various points in this class to map to the provided contact.
-+        if (Utils.hasHoneycomb()) {
-+            mContactUri = contactLookupUri;
-+        } else {
-+            // For versions earlier than Android 3.0, stores a contact Uri that's constructed from
-+            // contactLookupUri. Later on, the resulting Uri is combined with
-+            // Contacts.Data.CONTENT_DIRECTORY to map to the provided contact. It's done
-+            // differently for these earlier versions because Contacts.Data.CONTENT_DIRECTORY works
-+            // differently for Android versions before 3.0.
-+            mContactUri = ContactsContract.Contacts.lookupContact(getActivity().getContentResolver(),
-+                    contactLookupUri);
-+        }
-+        if(mContactName != null) {
-+            mContactName.setText(contactName);
-+        }
-+        if(mEditDescrip != null) {
-+            mEditDescrip.setText(transDescrip);
-+        }
-+        if(mEditAmount != null) {
-+            mEditAmount.setText(transAmount);
-+        }
-+        if(mEditDate != null) {
-+            mEditDate.setText(transDate);
-+        }
-+    }
-+
-+    /**
-+     * When the Fragment is first created, this callback is invoked. It initializes some key
-+     * class fields.
-+     */
-+    @Override
-+    public void onCreate(Bundle savedInstanceState) {
-+        super.onCreate(savedInstanceState);
-+    }
-+
-+    @Override
-+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-+                             Bundle savedInstanceState) {
-+
-+        // Inflates the main layout to be used by this fragment
-+        final View adminView =
-+                inflater.inflate(R.layout.contact_edittrans_fragment, container, false);
-+
-+        mContactName = (TextView) adminView.findViewById(R.id.contact_name);
-+        mContactName.setVisibility(View.VISIBLE);
-+
-+        mEditDescrip = (EditText) adminView.findViewById(R.id.trans_description);
-+        mEditDescrip.setVisibility(View.VISIBLE);
-+
-+        mEditAmount = (EditText) adminView.findViewById(R.id.trans_amount);
-+        mEditAmount.setVisibility(View.VISIBLE);
-+
-+        mEditDate = (EditText) adminView.findViewById(R.id.trans_date);
-+        mEditDate.setVisibility(View.VISIBLE);
-+
-+        // Defines an onClickListener object for the add-admin button
-+        mEditTransButton = (Button) adminView.findViewById(R.id.button_save_edittrans);
-+        mEditTransButton.setOnClickListener(new View.OnClickListener() {
-+            // Defines what to do when users click the address button
-+            @Override
-+            public void onClick(View view) {
-+                // Displays a message that no activity can handle the view button.
-+                Toast.makeText(getActivity(), "Save EditTrans", Toast.LENGTH_SHORT).show();
-+                returnresult();
-+            }
-+        });
-+
-+
-+        return adminView;
-+    }
-+
-+
-+    @Override
-+    public void onActivityCreated(Bundle savedInstanceState) {
-+        super.onActivityCreated(savedInstanceState);
-+        // If not being created from a previous state
-+        if (savedInstanceState == null) {
-+            // Sets the argument extra as the currently displayed contact
-+            setContact(getArguments() != null ?
-+                    (Uri) getArguments().getParcelable(EXTRA_CONTACT_URI) : null);
-+        } else {
-+            // If being recreated from a saved state, sets the contact from the incoming
-+            // savedInstanceState Bundle
-+            setContact((Uri) savedInstanceState.getParcelable(EXTRA_CONTACT_URI));
-+        }
-+    }
-+
-+    /**
-+     * When the Fragment is being saved in order to change activity state, save the
-+     * currently-selected contact.
-+     */
-+    @Override
-+    public void onSaveInstanceState(Bundle outState) {
-+        super.onSaveInstanceState(outState);
-+        // Saves the contact Uri
-+        outState.putParcelable(EXTRA_CONTACT_URI, mContactUri);
-+    }
-+
-+    // returns the contents of edited data to the caller activity
-+    public void returnresult() {
-+        final Intent data = new Intent();
-+        data.putExtra("DESCRIP",mEditDescrip.getText().toString());
-+        data.putExtra("AMOUNT",mEditAmount.getText().toString());
-+        data.putExtra("DATE",mEditDate.getText().toString());
-+        getActivity().setResult(Activity.RESULT_OK,data);
-+        getActivity().finish();
-+    }
-+
-+
-+
- }
-diff --git a/app/src/main/res/layout/contact_edittrans_fragment.xml b/app/src/main/res/layout/contact_edittrans_fragment.xml
-index 3509b84..ce48815 100644
---- a/app/src/main/res/layout/contact_edittrans_fragment.xml
-+++ b/app/src/main/res/layout/contact_edittrans_fragment.xml
-@@ -1,6 +1,148 @@
--<?xml version="1.0" encoding="utf-8"?>
--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
--    android:orientation="vertical" android:layout_width="match_parent"
-+<?xml version="1.0" encoding="utf-8"?><!--
-+  Copyright (C) 2013 The Android Open Source Project
-+
-+  Licensed under the Apache License, Version 2.0 (the "License");
-+  you may not use this file except in compliance with the License.
-+  You may obtain a copy of the License at
-+
-+       http://www.apache.org/licenses/LICENSE-2.0
-+
-+  Unless required by applicable law or agreed to in writing, software
-+  distributed under the License is distributed on an "AS IS" BASIS,
-+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-+  See the License for the specific language governing permissions and
-+  limitations under the License.
-+-->
-+
-+<!-- This layout is used by ContactAdminFragment to show contact details: contact photo, contact
-+     display name and a dynamic number of addresses (if the contact has any) inside a ScrollView.
-+-->
-+
-+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-+    android:layout_width="match_parent"
-     android:layout_height="match_parent">
- 
--</LinearLayout>
-\ No newline at end of file
-+    <ScrollView
-+        android:layout_width="match_parent"
-+        android:layout_height="match_parent"
-+        android:orientation="vertical"
-+        android:weightSum="100">
-+
-+        <LinearLayout
-+            android:layout_width="match_parent"
-+            android:layout_height="wrap_content"
-+            android:orientation="vertical">
-+
-+            <LinearLayout
-+                android:layout_width="match_parent"
-+                android:layout_height="wrap_content"
-+                android:orientation="horizontal"
-+                android:weightSum="100">
-+
-+                <TextView
-+                    android:id="@+id/contact_name"
-+                    style="@style/contactNameTitle"
-+                    android:layout_width="0dp"
-+                    android:layout_height="match_parent"
-+                    android:layout_weight="65"
-+                    android:paddingLeft="@dimen/padding"
-+                    android:paddingRight="@dimen/padding"
-+                    android:paddingTop="8dp"
-+                    android:text="Full Name" />
-+
-+            </LinearLayout>
-+
-+            <LinearLayout
-+                android:layout_width="match_parent"
-+                android:layout_height="wrap_content"
-+                android:orientation="horizontal">
-+
-+                <TextView
-+                    style="@style/adminHeader"
-+                    android:layout_width="wrap_content"
-+                    android:layout_height="wrap_content"
-+                    android:layout_gravity="center"
-+                    android:paddingLeft="@dimen/padding"
-+                    android:paddingRight="@dimen/padding"
-+                    android:text="Description" />
-+
-+            </LinearLayout>
-+
-+            <LinearLayout
-+                android:layout_width="match_parent"
-+                android:layout_height="wrap_content"
-+                android:orientation="vertical">
-+
-+                <EditText
-+                    android:id="@+id/trans_description"
-+                    android:layout_width="match_parent"
-+                    android:layout_height="wrap_content"
-+                    android:layout_gravity="center"
-+                    android:layout_marginLeft="16dp"
-+                    android:layout_marginRight="16dp"
-+                    android:gravity="left"
-+                    android:minHeight="64dp" />
-+
-+                <LinearLayout
-+                    android:layout_width="match_parent"
-+                    android:layout_height="wrap_content"
-+                    android:background="#e4e4e4"
-+                    android:minHeight="32dp"
-+                    android:orientation="horizontal"
-+                    android:showDividers="middle">
-+
-+                    <TextView
-+                        style="@style/adminHeader"
-+                        android:layout_width="0dp"
-+                        android:layout_height="wrap_content"
-+                        android:layout_gravity="center"
-+                        android:layout_weight="8"
-+                        android:gravity="right"
-+                        android:paddingLeft="@dimen/padding"
-+                        android:paddingRight="@dimen/padding"
-+                        android:text="Amount" />
-+
-+                    <EditText
-+                        android:id="@+id/trans_amount"
-+                        android:layout_width="0dp"
-+                        android:layout_height="wrap_content"
-+                        android:layout_gravity="center"
-+                        android:layout_weight="3"
-+                        android:gravity="right"
-+                        android:paddingLeft="@dimen/padding"
-+                        android:paddingRight="@dimen/padding"
-+                        android:text="0.00" />
-+
-+                </LinearLayout>
-+
-+                <LinearLayout
-+                    android:layout_width="match_parent"
-+                    android:layout_height="wrap_content"
-+                    android:orientation="horizontal">
-+
-+
-+                    <EditText
-+                        android:id="@+id/trans_date"
-+                        android:layout_width="0dp"
-+                        android:layout_height="wrap_content"
-+                        android:layout_weight="8"
-+                        android:ems="10"
-+                        android:inputType="date" />
-+
-+                    <Button
-+                        android:id="@+id/button_save_edittrans"
-+                        android:layout_width="wrap_content"
-+                        android:layout_height="wrap_content"
-+                        android:layout_gravity="right"
-+                        android:layout_marginLeft="16dp"
-+                        android:layout_marginRight="16dp"
-+                        android:text="Save" />
-+
-+                </LinearLayout>
-+            </LinearLayout>
-+
-+
-+        </LinearLayout>
-+    </ScrollView>
-+
-+</FrameLayout>
-diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
-index 109a884..79bae1a 100644
---- a/app/src/main/res/values/strings.xml
-+++ b/app/src/main/res/values/strings.xml
-@@ -21,6 +21,7 @@
-     <string name="activity_contact_detail">Contact Detail</string>
-     <string name="activity_contact_admin">Contact Admin</string>
-     <string name="activity_contact_editmemo">Contact Edit Memo</string>
-+    <string name="activity_contact_edittrans">Contact Edit Transaction</string>
-     <string name="contacts_list_search_results_title">Contacts List Search for \"%s\"</string>
-     <string name="app_description">This is a sample app, demonstrating use of the Android system Contacts Provider.</string>
-     <string name="imageview_description">Contact Thumbnail</string>
+         newnote = notememo.toString() + notereformat.toString();
 diff --git a/gitdiff.txt b/gitdiff.txt
-index 10684b7..e69de29 100644
+index 7c74fae..c99ec11 100644
 --- a/gitdiff.txt
 +++ b/gitdiff.txt
-@@ -1,166 +0,0 @@
--diff --git a/.gitignore b/.gitignore
--index f880e3d..2c4b95a 100644
----- a/.gitignore
--+++ b/.gitignore
--@@ -3,3 +3,5 @@
-- build/
-- app/build/
-- local.properties
--+gitdiff.txt
--+gitall.sh
+@@ -1,1003 +0,0 @@
+-diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+-index c3aa5b3..0079731 100644
+---- a/app/src/main/AndroidManifest.xml
+-+++ b/app/src/main/AndroidManifest.xml
+-@@ -82,5 +82,18 @@
+-             <meta-data android:name="android.support.PARENT_ACTIVITY"
+-                 android:value=".ui.ContactAdminActivity" />
+-         </activity>
+-+        <activity
+-+            android:name=".ui.ContactEditTransActivity"
+-+            android:label="@string/activity_contact_edittrans"
+-+            android:parentActivityName=".ui.ContactAdminActivity">
+-+            <!-- Define hierarchical parent of this activity, both via the system
+-+                 parentActivityName attribute (added in API Level 16) and via meta-data annotation.
+-+                 This allows use of the support library NavUtils class in a way that works over
+-+                 all Android versions. See the "Tasks and Back Stack" guide for more information:
+-+                 http://developer.android.com/guide/components/tasks-and-back-stack.html
+-+            -->
+-+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+-+                android:value=".ui.ContactAdminActivity" />
+-+        </activity>
+-     </application>
+- </manifest>
+-diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
+-index 2b8dbef..572a240 100644
+---- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
+-+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
+-@@ -39,7 +39,6 @@ import android.provider.ContactsContract.CommonDataKinds.Email;
+- import android.provider.ContactsContract.RawContacts;
+- 
+- 
+--
+- import android.support.v4.app.Fragment;
+- import android.support.v4.app.ListFragment;
+- import android.support.v4.app.LoaderManager;
+-@@ -102,7 +101,8 @@ public class ContactAdminFragment extends Fragment implements
+-     // Defines a tag for identifying log entries
+-     private static final String TAG = "ContactAdminFragment";
+- 
+--    private static final int EDITMEMO_REQUEST=1;
+-+    private static final int EDITMEMO_REQUEST = 1;
+-+    private static final int EDITTRANS_REQUEST = 2;
+- 
+-     // The geo Uri scheme prefix, used with Intent.ACTION_VIEW to form a geographical address
+-     // intent that will trigger available apps to handle viewing a location (such as Maps)
+-@@ -370,12 +370,7 @@ public class ContactAdminFragment extends Fragment implements
+-             public void onClick(View view) {
+-                 // Displays a message that describe the action to take
+-                 Toast.makeText(getActivity(), "Edit Notes", Toast.LENGTH_SHORT).show();
+--                // start an activity to edit the memo
+--                Intent intent = new Intent(getActivity(), ContactEditMemoActivity.class);
+--                intent.setData(mContactUri);
+--                intent.putExtra("NAME",mContactName.getText().toString());
+--                intent.putExtra("MEMO", notememo.toString());
+--                startActivityForResult(intent,EDITMEMO_REQUEST);
+-+                editmemo();
+-             }
+-         });
+- 
+-@@ -386,6 +381,7 @@ public class ContactAdminFragment extends Fragment implements
+-             public void onClick(View view) {
+-                 // Displays a message that no activity can handle the view button.
+-                 Toast.makeText(getActivity(), "Add Admin", Toast.LENGTH_SHORT).show();
+-+                addtransaction();
+-             }
+-         });
+- 
+-@@ -418,27 +414,74 @@ public class ContactAdminFragment extends Fragment implements
+-         return adminView;
+-     }
+- 
+--    // try to update the note field in database, or insert it if new
+--    public void savenote() {
+--        compactnote();
+--        if(mNotesRawId.isEmpty()) {
+--            mNotesRawId=mRawContactId;
+--            mNotesId=mContactId;
+--            insertnote();
+--        } else {
+--            updatenote();
+--        }
+-+    private void editmemo() {
+-+        // start an activity to edit the memo
+-+        Intent intent = new Intent(getActivity(), ContactEditMemoActivity.class);
+-+        intent.setData(mContactUri);
+-+        intent.putExtra("NAME", mContactName.getText().toString());
+-+        intent.putExtra("MEMO", notememo.toString());
+-+        startActivityForResult(intent, EDITMEMO_REQUEST);
+-+    }
+-+
+-+    private void addtransaction() {
+-+        // create an empty default transaction
+-+        transac = new Transac();
+-+        transac.qte = 1.0;
+-+        transac.prix = 0.0;
+-+        transac.mnt = 0.0;
+-+        transac.trdate = "20160101";
+-+        transac.amount = "0.00";
+-+        transac.descrip = "";
+-+        // reformat the amount
+-+        transac.mnt = Double.valueOf(transac.amount);
+-+        transac.prix = transac.mnt;
+-+        transac.amount = String.format("%.2f", transac.mnt);
+-+        // reformat the date
+-+        transac.fdate = stringToDate(transac.trdate);
+-+        transac.trdate = dateToString(transac.fdate);
+-+        // add element to the table
+-+        transaclist.addElement(transac);
+-+        nbtransac++;
+-+        edittransaction(nbtransac-1);
+-+    }
+-+
+-+    private void edittransaction(int i) {
+-+        transac=transaclist.elementAt(i);
+-+        curtransac=i;
+-+        // start an activity to edit the transaction
+-+        Intent intent = new Intent(getActivity(), ContactEditTransActivity.class);
+-+        intent.setData(mContactUri);
+-+        intent.putExtra("NAME", mContactName.getText().toString());
+-+        intent.putExtra("DESCRIP", transac.descrip);
+-+        intent.putExtra("AMOUNT", transac.amount);
+-+        intent.putExtra("DATE", transac.trdate);
+-+        startActivityForResult(intent, EDITTRANS_REQUEST);
+-     }
+- 
+-     @Override
+-     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+--        // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
+-+        // If the request went well (OK) and the request was EDITMEMO_REQUEST
+-         if (resultCode == Activity.RESULT_OK && requestCode == EDITMEMO_REQUEST) {
+-             notememo.setLength(0);
+-             notememo.append(data.getStringExtra("MEMO"));
+-             mMemoItem.setText(notememo);
+-             savenote();
+-         }
+-+        // If the request went well (OK) and the request was EDITTRANS_REQUEST
+-+        if (resultCode == Activity.RESULT_OK && requestCode == EDITTRANS_REQUEST) {
+-+            transac.descrip=data.getStringExtra("DESCRIP");
+-+            transac.amount=data.getStringExtra("AMOUNT");
+-+            transac.trdate=data.getStringExtra("DATE");
+-+            // reformat the amount
+-+            transac.mnt = Double.valueOf(transac.amount);
+-+            transac.prix = transac.mnt;
+-+            transac.amount = String.format("%.2f", transac.mnt);
+-+            // reformat the date
+-+            transac.fdate = stringToDate(transac.trdate);
+-+            transac.trdate = dateToString(transac.fdate);
+-+            compactnote();
+-+            savenote();
+-+        }
+-     }
+- 
+-     @Override
+-@@ -695,8 +738,8 @@ public class ContactAdminFragment extends Fragment implements
+-                 } else {
+-                     // If nothing found, clear the data
+-                     mNotesData = "";
+--                    mNotesRawId="";
+--                    mNotesId="";
+-+                    mNotesRawId = "";
+-+                    mNotesId = "";
+-                     clearnote();
+-                 }
+-                 // display the memo part of the note in the memo field (decoded note)
+-@@ -719,12 +762,12 @@ public class ContactAdminFragment extends Fragment implements
+-         // added as children.
+-         mTransactionLayout.removeAllViews();
+-         int i;
+--        double tot=0.0;
+--        for (i=0;i<nbtransac;++i) {
+-+        double tot = 0.0;
+-+        for (i = 0; i < nbtransac; ++i) {
+-             // Builds the transaction layout
+-             // Inflates the transaction layout
+-             LinearLayout tlayout = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
+--                        R.layout.contact_transaction_item, null, false);
+-+                    R.layout.contact_transaction_item, null, false);
+- 
+-             // point to the 4 fields of the layout
+-             TextView t = (TextView) tlayout.findViewById(R.id.contact_transaction_description);
+-@@ -741,7 +784,7 @@ public class ContactAdminFragment extends Fragment implements
+-             mnt.setText(transac.amount);
+- 
+-             // cumulate the total amount
+--            tot+=transac.mnt;
+-+            tot += transac.mnt;
+- 
+-             //save the position of the line in button id
+-             butt.setId(i);
+-@@ -753,6 +796,7 @@ public class ContactAdminFragment extends Fragment implements
+-                 public void onClick(View view) {
+-                     // Displays a message that no activity can handle the view button.
+-                     Toast.makeText(getActivity(), "Edit Transaction " + view.getId(), Toast.LENGTH_SHORT).show();
+-+                    edittransaction(view.getId());
+-                 }
+-             });
+- 
+-@@ -760,20 +804,32 @@ public class ContactAdminFragment extends Fragment implements
+-             mTransactionLayout.addView(tlayout, tlayoutParams);
+-         }
+-         // stamp the total amount in bottom view after the transaction layout
+--        String stot=String.format("%.2f",tot);
+-+        String stot = String.format("%.2f", tot);
+-         mTransactionTotal.setText(stot);
+-     }
+- 
+-+    // try to update the note field in database, or insert it if new
+-+    public void savenote() {
+-+        compactnote();
+-+        if (mNotesRawId.isEmpty()) {
+-+            mNotesRawId = mRawContactId;
+-+            mNotesId = mContactId;
+-+            insertnote();
+-+        } else {
+-+            updatenote();
+-+        }
+-+    }
+-+
+-     // normalize the memo field, so the last line finish with a newline
+-     private void normalizememo() {
+--        if(notememo.length()==0) return;
+--        if(notememo.charAt(notememo.length()-1)!='\n') notememo.append("\n");
+-+        if (notememo.length() == 0) return;
+-+        if (notememo.charAt(notememo.length() - 1) != '\n') notememo.append("\n");
+-     }
+- 
+-     // update the note record in the database from the modified data in table
+-     private void updatenote() {
+-         normalizememo();
+--        newnote = notememo.toString() + notereformat.toString() ;
+-+        newnote = notememo.toString() + notereformat.toString();
+-         // update the record
+-         try {
+-             ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+-@@ -795,7 +851,7 @@ public class ContactAdminFragment extends Fragment implements
+- 
+-     public void insertnote() {
+-         normalizememo();
+--        newnote = notememo.toString() + notereformat.toString() ;
+-+        newnote = notememo.toString() + notereformat.toString();
+-         try {
+-             ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+- 
+-@@ -855,6 +911,9 @@ public class ContactAdminFragment extends Fragment implements
+-     // counter of table row
+-     private int nbtransac = 0;
+- 
+-+    // current table row in edition
+-+    private int curtransac = 0;
+-+
+-     // clear the table of fields for an empty note
+-     private void clearnote() {
+-         nbtransac = 0;
+-@@ -941,7 +1000,7 @@ public class ContactAdminFragment extends Fragment implements
+-         int i;
+-         notereformat.setLength(0);
+-         // refill the string with the transactions list in readable mode
+--        for(i=0;i<nbtransac;++i) {
+-+        for (i = 0; i < nbtransac; ++i) {
+-             transac = transaclist.elementAt(i);
+-             notereformat.append("ADMIN|");
+-             notereformat.append(transac.trdate);
+-@@ -955,14 +1014,14 @@ public class ContactAdminFragment extends Fragment implements
+-     }
+- 
+-     private String onlyNumbers(String from) {
+--        StringBuffer tonum=new StringBuffer();
+-+        StringBuffer tonum = new StringBuffer();
+-         tonum.setLength(14);
+-         int i;
+--        int j=0;
+--        for(i=0;i<from.length();++i) {
+--            char c=from.charAt(i);
+--            if(c>='0' && c<='9') {
+--                tonum.setCharAt(j,c);
+-+        int j = 0;
+-+        for (i = 0; i < from.length(); ++i) {
+-+            char c = from.charAt(i);
+-+            if (c >= '0' && c <= '9') {
+-+                tonum.setCharAt(j, c);
+-                 j++;
+-             }
+-         }
+-@@ -976,20 +1035,20 @@ public class ContactAdminFragment extends Fragment implements
+-         Calendar cal = Calendar.getInstance();
+-         int year, month, day, hour, min, sec;
+-         // extract only numbers from the string received
+--        String ndate=onlyNumbers(sdate);
+-+        String ndate = onlyNumbers(sdate);
+-         // extract all subvalues
+--        if(ndate.length()>=4) year = Integer.valueOf(ndate.substring(0, 4));
+--        else year=0;
+--        if(ndate.length()>=6) month = Integer.valueOf(ndate.substring(4, 6));
+--        else month=1;
+--        if(ndate.length()>=8) day = Integer.valueOf(ndate.substring(6, 8));
+--        else day=0;
+--        if(ndate.length()>=10) hour = Integer.valueOf(ndate.substring(8, 10));
+--        else hour=0;
+--        if(ndate.length()>=12) min = Integer.valueOf(ndate.substring(10, 12));
+--        else min=0;
+--        if(ndate.length()>=14) sec = Integer.valueOf(ndate.substring(12, 14));
+--        else sec=0;
+-+        if (ndate.length() >= 4) year = Integer.valueOf(ndate.substring(0, 4));
+-+        else year = 0;
+-+        if (ndate.length() >= 6) month = Integer.valueOf(ndate.substring(4, 6));
+-+        else month = 1;
+-+        if (ndate.length() >= 8) day = Integer.valueOf(ndate.substring(6, 8));
+-+        else day = 0;
+-+        if (ndate.length() >= 10) hour = Integer.valueOf(ndate.substring(8, 10));
+-+        else hour = 0;
+-+        if (ndate.length() >= 12) min = Integer.valueOf(ndate.substring(10, 12));
+-+        else min = 0;
+-+        if (ndate.length() >= 14) sec = Integer.valueOf(ndate.substring(12, 14));
+-+        else sec = 0;
+-         // use calendar to format date/time
+-         cal.set(year, month - 1, day, hour, min, sec);
+-         long ldate = cal.getTimeInMillis();
+-@@ -1067,12 +1126,12 @@ public class ContactAdminFragment extends Fragment implements
+-      * Each note for the contact gets its own LinearLayout object; for example, if the contact
+-      * has three notes, then 3 LinearLayouts are generated.
+-      *
+--     * @param type      From
+--     *                         {@link android.provider.ContactsContract.CommonDataKinds.Phone#TYPE}
+-+     * @param type  From
+-+     *              {@link android.provider.ContactsContract.CommonDataKinds.Phone#TYPE}
+-      * @param label From
+--     *                         {@link android.provider.ContactsContract.CommonDataKinds.Phone#LABEL}
+-+     *              {@link android.provider.ContactsContract.CommonDataKinds.Phone#LABEL}
+-      * @param phone From
+--     *                         {@link android.provider.ContactsContract.CommonDataKinds.Phone#NUMBER}
+-+     *              {@link android.provider.ContactsContract.CommonDataKinds.Phone#NUMBER}
+-      * @return A LinearLayout to add to the contact notes layout,
+-      * populated with the provided notes.
+-      */
+-@@ -1126,12 +1185,12 @@ public class ContactAdminFragment extends Fragment implements
+-      * Each note for the contact gets its own LinearLayout object; for example, if the contact
+-      * has three notes, then 3 LinearLayouts are generated.
+-      *
+--     * @param type      From
+--     *                         {@link android.provider.ContactsContract.CommonDataKinds.Email#TYPE}
+-+     * @param type  From
+-+     *              {@link android.provider.ContactsContract.CommonDataKinds.Email#TYPE}
+-      * @param label From
+--     *                         {@link android.provider.ContactsContract.CommonDataKinds.Email#LABEL}
+-+     *              {@link android.provider.ContactsContract.CommonDataKinds.Email#LABEL}
+-      * @param email From
+--     *                         {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS}
+-+     *              {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS}
+-      * @return A LinearLayout to add to the contact notes layout,
+-      * populated with the provided notes.
+-      */
+-@@ -1428,7 +1487,7 @@ public class ContactAdminFragment extends Fragment implements
+-         final static int STARRED = 2;
+-         final static int LOOKUP_KEY = 3;
+-         final static int PHOTO_URI = 4;
+--        final static int RAWID=5;
+-+        final static int RAWID = 5;
+-     }
+- 
+-     /**
+-diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransActivity.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransActivity.java
+-index 190e4fa..b731966 100644
+---- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransActivity.java
+-+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransActivity.java
+-@@ -1,7 +1,84 @@
+- package net.ddns.mlsoftlaberge.contactslist.ui;
+- 
+-+import android.annotation.TargetApi;
+-+import android.net.Uri;
+-+import android.os.Build;
+-+import android.os.Bundle;
+-+import android.support.v4.app.Fragment;
+-+import android.support.v4.app.FragmentActivity;
+-+import android.support.v4.app.FragmentTransaction;
+-+import android.support.v4.app.NavUtils;
+-+
+-+import android.view.MenuItem;
+-+
+-+import net.ddns.mlsoftlaberge.contactslist.BuildConfig;
+-+import net.ddns.mlsoftlaberge.contactslist.R;
+-+import net.ddns.mlsoftlaberge.contactslist.util.Utils;
+-+
+- /**
+-- * Created by mlsoft on 01/03/16.
+-+ * Created by mlsoft on 28/02/16.
+-  */
+--public class ContactEditTransActivity {
+-+public class ContactEditTransActivity extends FragmentActivity {
+-+    // Defines a tag for identifying the single fragment that this activity holds
+-+    private static final String TAG = "ContactEditTransActivity";
+-+
+-+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+-+    @Override
+-+    protected void onCreate(Bundle savedInstanceState) {
+-+        if (BuildConfig.DEBUG) {
+-+            // Enable strict mode checks when in debug modes
+-+            Utils.enableStrictMode();
+-+        }
+-+        super.onCreate(savedInstanceState);
+-+
+-+        // This activity expects to receive an intent that contains the uri of a contact
+-+        if (getIntent() != null) {
+-+
+-+            // For OS versions honeycomb and higher use action bar
+-+            if (Utils.hasHoneycomb()) {
+-+                // Enables action bar "up" navigation
+-+                getActionBar().setDisplayHomeAsUpEnabled(true);
+-+            }
+-+
+-+            // Fetch the data Uri from the intent provided to this activity
+-+            final Uri uri = getIntent().getData();
+-+            final String name = getIntent().getStringExtra("NAME");
+-+            final String descrip = getIntent().getStringExtra("DESCRIP");
+-+            final String amount = getIntent().getStringExtra("AMOUNT");
+-+            final String date = getIntent().getStringExtra("DATE");
+-+            // Checks to see if fragment has already been added, otherwise adds a new
+-+            // ContactEditMemoFragment with the Uri provided in the intent
+-+            if (getSupportFragmentManager().findFragmentByTag(TAG) == null) {
+-+                final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+-+
+-+                // Adds a newly created ContactEditMemoFragment that is instantiated with the
+-+                // data Uri
+-+                ft.add(android.R.id.content, ContactEditTransFragment.newInstance(uri,name,descrip,amount,date), TAG);
+-+                ft.commit();
+-+            }
+-+        } else {
+-+            // No intent provided, nothing to do so finish()
+-+            finish();
+-+        }
+-+    }
+-+
+-+    @Override
+-+    public boolean onOptionsItemSelected(MenuItem item) {
+-+        switch (item.getItemId()) {
+-+            case android.R.id.home:
+-+                // Tapping on top left ActionBar icon navigates "up" to hierarchical parent screen.
+-+                // The parent is defined in the AndroidManifest entry for this activity via the
+-+                // parentActivityName attribute (and via meta-data tag for OS versions before API
+-+                // Level 16). See the "Tasks and Back Stack" guide for more information:
+-+                // http://developer.android.com/guide/components/tasks-and-back-stack.html
+-+                NavUtils.navigateUpFromSameTask(this);
+-+                return true;
+-+        }
+-+
+-+        // Otherwise, pass the item to the super implementation for handling, as described in the
+-+        // documentation.
+-+        return super.onOptionsItemSelected(item);
+-+    }
+-+
+-+
+- }
+-diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransFragment.java
+-index df24afb..04687e0 100644
+---- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransFragment.java
+-+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransFragment.java
+-@@ -1,7 +1,204 @@
+- package net.ddns.mlsoftlaberge.contactslist.ui;
+- 
+-+import android.app.Activity;
+-+import android.content.Intent;
+-+import android.net.Uri;
+-+import android.os.Bundle;
+-+import android.provider.ContactsContract;
+-+import android.view.LayoutInflater;
+-+import android.view.View;
+-+import android.view.ViewGroup;
+-+import android.widget.Button;
+-+import android.widget.EditText;
+-+import android.widget.TextView;
+-+import android.widget.Toast;
+-+import android.support.v4.app.Fragment;
+-+
+-+import net.ddns.mlsoftlaberge.contactslist.R;
+-+import net.ddns.mlsoftlaberge.contactslist.util.Utils;
+-+
+- /**
+-- * Created by mlsoft on 01/03/16.
+-+ * Created by mlsoft on 28/02/16.
+-  */
+--public class ContactEditTransFragment {
+-+public class ContactEditTransFragment extends Fragment {
+-+    public static final String EXTRA_CONTACT_URI =
+-+            "net.ddns.mlsoftlaberge.contactslist.ui.EXTRA_CONTACT_URI";
+-+
+-+    // Defines a tag for identifying log entries
+-+    private static final String TAG = "ContactEditTransFragment";
+-+
+-+    private Uri mContactUri; // Stores the contact Uri for this fragment instance
+-+
+-+    public String contactName="";   // stores the contact name for this instance
+-+
+-+    public String transDescrip="";   // stores the transaction description for this instance
+-+
+-+    public String transAmount="";   // stores the amount data for this instance
+-+
+-+    public String transDate="";     // stores the date of transaction
+-+
+-+    private TextView mContactName;  // display contact name
+-+
+-+    private EditText mEditDescrip;     // display and edit the memo field
+-+    private EditText mEditAmount;     // display and edit the memo field
+-+    private EditText mEditDate;     // display and edit the memo field
+-+
+-+    private Button mEditTransButton; // save the data and return to previous avtivity
+-+
+-+    /**
+-+     * Factory method to generate a new instance of the fragment given a contact Uri. A factory
+-+     * method is preferable to simply using the constructor as it handles creating the bundle and
+-+     * setting the bundle as an argument.
+-+     *
+-+     * @param contactUri The contact Uri to load
+-+     * @return A new instance of {@link ContactEditMemoFragment}
+-+     */
+-+    public static ContactEditTransFragment newInstance(Uri contactUri, String name, String descrip, String amount, String date) {
+-+        // Create new instance of this fragment
+-+        final ContactEditTransFragment fragment = new ContactEditTransFragment();
+-+
+-+        fragment.contactName=name;
+-+        fragment.transDescrip=descrip;
+-+        fragment.transAmount=amount;
+-+        fragment.transDate=date;
+-+
+-+        // Create and populate the args bundle
+-+        final Bundle args = new Bundle();
+-+        args.putParcelable(EXTRA_CONTACT_URI, contactUri);
+-+
+-+        // Assign the args bundle to the new fragment
+-+        fragment.setArguments(args);
+-+
+-+        // Return fragment
+-+        return fragment;
+-+    }
+-+
+-+    /**
+-+     * Fragments require an empty constructor.
+-+     */
+-+    public ContactEditTransFragment() {
+-+    }
+-+
+-+    /**
+-+     * Sets the contact that this Fragment displays, or clears the display if the contact argument
+-+     * is null. This will re-initialize all the views and start the queries to the system contacts
+-+     * provider to populate the contact information.
+-+     *
+-+     * @param contactLookupUri The contact lookup Uri to load and display in this fragment. Passing
+-+     *                         null is valid and the fragment will display a message that no
+-+     *                         contact is currently selected instead.
+-+     */
+-+    public void setContact(Uri contactLookupUri) {
+-+
+-+        // In version 3.0 and later, stores the provided contact lookup Uri in a class field. This
+-+        // Uri is then used at various points in this class to map to the provided contact.
+-+        if (Utils.hasHoneycomb()) {
+-+            mContactUri = contactLookupUri;
+-+        } else {
+-+            // For versions earlier than Android 3.0, stores a contact Uri that's constructed from
+-+            // contactLookupUri. Later on, the resulting Uri is combined with
+-+            // Contacts.Data.CONTENT_DIRECTORY to map to the provided contact. It's done
+-+            // differently for these earlier versions because Contacts.Data.CONTENT_DIRECTORY works
+-+            // differently for Android versions before 3.0.
+-+            mContactUri = ContactsContract.Contacts.lookupContact(getActivity().getContentResolver(),
+-+                    contactLookupUri);
+-+        }
+-+        if(mContactName != null) {
+-+            mContactName.setText(contactName);
+-+        }
+-+        if(mEditDescrip != null) {
+-+            mEditDescrip.setText(transDescrip);
+-+        }
+-+        if(mEditAmount != null) {
+-+            mEditAmount.setText(transAmount);
+-+        }
+-+        if(mEditDate != null) {
+-+            mEditDate.setText(transDate);
+-+        }
+-+    }
+-+
+-+    /**
+-+     * When the Fragment is first created, this callback is invoked. It initializes some key
+-+     * class fields.
+-+     */
+-+    @Override
+-+    public void onCreate(Bundle savedInstanceState) {
+-+        super.onCreate(savedInstanceState);
+-+    }
+-+
+-+    @Override
+-+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+-+                             Bundle savedInstanceState) {
+-+
+-+        // Inflates the main layout to be used by this fragment
+-+        final View adminView =
+-+                inflater.inflate(R.layout.contact_edittrans_fragment, container, false);
+-+
+-+        mContactName = (TextView) adminView.findViewById(R.id.contact_name);
+-+        mContactName.setVisibility(View.VISIBLE);
+-+
+-+        mEditDescrip = (EditText) adminView.findViewById(R.id.trans_description);
+-+        mEditDescrip.setVisibility(View.VISIBLE);
+-+
+-+        mEditAmount = (EditText) adminView.findViewById(R.id.trans_amount);
+-+        mEditAmount.setVisibility(View.VISIBLE);
+-+
+-+        mEditDate = (EditText) adminView.findViewById(R.id.trans_date);
+-+        mEditDate.setVisibility(View.VISIBLE);
+-+
+-+        // Defines an onClickListener object for the add-admin button
+-+        mEditTransButton = (Button) adminView.findViewById(R.id.button_save_edittrans);
+-+        mEditTransButton.setOnClickListener(new View.OnClickListener() {
+-+            // Defines what to do when users click the address button
+-+            @Override
+-+            public void onClick(View view) {
+-+                // Displays a message that no activity can handle the view button.
+-+                Toast.makeText(getActivity(), "Save EditTrans", Toast.LENGTH_SHORT).show();
+-+                returnresult();
+-+            }
+-+        });
+-+
+-+
+-+        return adminView;
+-+    }
+-+
+-+
+-+    @Override
+-+    public void onActivityCreated(Bundle savedInstanceState) {
+-+        super.onActivityCreated(savedInstanceState);
+-+        // If not being created from a previous state
+-+        if (savedInstanceState == null) {
+-+            // Sets the argument extra as the currently displayed contact
+-+            setContact(getArguments() != null ?
+-+                    (Uri) getArguments().getParcelable(EXTRA_CONTACT_URI) : null);
+-+        } else {
+-+            // If being recreated from a saved state, sets the contact from the incoming
+-+            // savedInstanceState Bundle
+-+            setContact((Uri) savedInstanceState.getParcelable(EXTRA_CONTACT_URI));
+-+        }
+-+    }
+-+
+-+    /**
+-+     * When the Fragment is being saved in order to change activity state, save the
+-+     * currently-selected contact.
+-+     */
+-+    @Override
+-+    public void onSaveInstanceState(Bundle outState) {
+-+        super.onSaveInstanceState(outState);
+-+        // Saves the contact Uri
+-+        outState.putParcelable(EXTRA_CONTACT_URI, mContactUri);
+-+    }
+-+
+-+    // returns the contents of edited data to the caller activity
+-+    public void returnresult() {
+-+        final Intent data = new Intent();
+-+        data.putExtra("DESCRIP",mEditDescrip.getText().toString());
+-+        data.putExtra("AMOUNT",mEditAmount.getText().toString());
+-+        data.putExtra("DATE",mEditDate.getText().toString());
+-+        getActivity().setResult(Activity.RESULT_OK,data);
+-+        getActivity().finish();
+-+    }
+-+
+-+
+-+
+- }
+-diff --git a/app/src/main/res/layout/contact_edittrans_fragment.xml b/app/src/main/res/layout/contact_edittrans_fragment.xml
+-index 3509b84..ce48815 100644
+---- a/app/src/main/res/layout/contact_edittrans_fragment.xml
+-+++ b/app/src/main/res/layout/contact_edittrans_fragment.xml
+-@@ -1,6 +1,148 @@
+--<?xml version="1.0" encoding="utf-8"?>
+--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+--    android:orientation="vertical" android:layout_width="match_parent"
+-+<?xml version="1.0" encoding="utf-8"?><!--
+-+  Copyright (C) 2013 The Android Open Source Project
+-+
+-+  Licensed under the Apache License, Version 2.0 (the "License");
+-+  you may not use this file except in compliance with the License.
+-+  You may obtain a copy of the License at
+-+
+-+       http://www.apache.org/licenses/LICENSE-2.0
+-+
+-+  Unless required by applicable law or agreed to in writing, software
+-+  distributed under the License is distributed on an "AS IS" BASIS,
+-+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-+  See the License for the specific language governing permissions and
+-+  limitations under the License.
+-+-->
+-+
+-+<!-- This layout is used by ContactAdminFragment to show contact details: contact photo, contact
+-+     display name and a dynamic number of addresses (if the contact has any) inside a ScrollView.
+-+-->
+-+
+-+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-+    android:layout_width="match_parent"
+-     android:layout_height="match_parent">
+- 
+--</LinearLayout>
+-\ No newline at end of file
+-+    <ScrollView
+-+        android:layout_width="match_parent"
+-+        android:layout_height="match_parent"
+-+        android:orientation="vertical"
+-+        android:weightSum="100">
+-+
+-+        <LinearLayout
+-+            android:layout_width="match_parent"
+-+            android:layout_height="wrap_content"
+-+            android:orientation="vertical">
+-+
+-+            <LinearLayout
+-+                android:layout_width="match_parent"
+-+                android:layout_height="wrap_content"
+-+                android:orientation="horizontal"
+-+                android:weightSum="100">
+-+
+-+                <TextView
+-+                    android:id="@+id/contact_name"
+-+                    style="@style/contactNameTitle"
+-+                    android:layout_width="0dp"
+-+                    android:layout_height="match_parent"
+-+                    android:layout_weight="65"
+-+                    android:paddingLeft="@dimen/padding"
+-+                    android:paddingRight="@dimen/padding"
+-+                    android:paddingTop="8dp"
+-+                    android:text="Full Name" />
+-+
+-+            </LinearLayout>
+-+
+-+            <LinearLayout
+-+                android:layout_width="match_parent"
+-+                android:layout_height="wrap_content"
+-+                android:orientation="horizontal">
+-+
+-+                <TextView
+-+                    style="@style/adminHeader"
+-+                    android:layout_width="wrap_content"
+-+                    android:layout_height="wrap_content"
+-+                    android:layout_gravity="center"
+-+                    android:paddingLeft="@dimen/padding"
+-+                    android:paddingRight="@dimen/padding"
+-+                    android:text="Description" />
+-+
+-+            </LinearLayout>
+-+
+-+            <LinearLayout
+-+                android:layout_width="match_parent"
+-+                android:layout_height="wrap_content"
+-+                android:orientation="vertical">
+-+
+-+                <EditText
+-+                    android:id="@+id/trans_description"
+-+                    android:layout_width="match_parent"
+-+                    android:layout_height="wrap_content"
+-+                    android:layout_gravity="center"
+-+                    android:layout_marginLeft="16dp"
+-+                    android:layout_marginRight="16dp"
+-+                    android:gravity="left"
+-+                    android:minHeight="64dp" />
+-+
+-+                <LinearLayout
+-+                    android:layout_width="match_parent"
+-+                    android:layout_height="wrap_content"
+-+                    android:background="#e4e4e4"
+-+                    android:minHeight="32dp"
+-+                    android:orientation="horizontal"
+-+                    android:showDividers="middle">
+-+
+-+                    <TextView
+-+                        style="@style/adminHeader"
+-+                        android:layout_width="0dp"
+-+                        android:layout_height="wrap_content"
+-+                        android:layout_gravity="center"
+-+                        android:layout_weight="8"
+-+                        android:gravity="right"
+-+                        android:paddingLeft="@dimen/padding"
+-+                        android:paddingRight="@dimen/padding"
+-+                        android:text="Amount" />
+-+
+-+                    <EditText
+-+                        android:id="@+id/trans_amount"
+-+                        android:layout_width="0dp"
+-+                        android:layout_height="wrap_content"
+-+                        android:layout_gravity="center"
+-+                        android:layout_weight="3"
+-+                        android:gravity="right"
+-+                        android:paddingLeft="@dimen/padding"
+-+                        android:paddingRight="@dimen/padding"
+-+                        android:text="0.00" />
+-+
+-+                </LinearLayout>
+-+
+-+                <LinearLayout
+-+                    android:layout_width="match_parent"
+-+                    android:layout_height="wrap_content"
+-+                    android:orientation="horizontal">
+-+
+-+
+-+                    <EditText
+-+                        android:id="@+id/trans_date"
+-+                        android:layout_width="0dp"
+-+                        android:layout_height="wrap_content"
+-+                        android:layout_weight="8"
+-+                        android:ems="10"
+-+                        android:inputType="date" />
+-+
+-+                    <Button
+-+                        android:id="@+id/button_save_edittrans"
+-+                        android:layout_width="wrap_content"
+-+                        android:layout_height="wrap_content"
+-+                        android:layout_gravity="right"
+-+                        android:layout_marginLeft="16dp"
+-+                        android:layout_marginRight="16dp"
+-+                        android:text="Save" />
+-+
+-+                </LinearLayout>
+-+            </LinearLayout>
+-+
+-+
+-+        </LinearLayout>
+-+    </ScrollView>
+-+
+-+</FrameLayout>
+-diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+-index 109a884..79bae1a 100644
+---- a/app/src/main/res/values/strings.xml
+-+++ b/app/src/main/res/values/strings.xml
+-@@ -21,6 +21,7 @@
+-     <string name="activity_contact_detail">Contact Detail</string>
+-     <string name="activity_contact_admin">Contact Admin</string>
+-     <string name="activity_contact_editmemo">Contact Edit Memo</string>
+-+    <string name="activity_contact_edittrans">Contact Edit Transaction</string>
+-     <string name="contacts_list_search_results_title">Contacts List Search for \"%s\"</string>
+-     <string name="app_description">This is a sample app, demonstrating use of the Android system Contacts Provider.</string>
+-     <string name="imageview_description">Contact Thumbnail</string>
 -diff --git a/gitdiff.txt b/gitdiff.txt
--index b42e177..e69de29 100644
+-index 10684b7..e69de29 100644
 ---- a/gitdiff.txt
 -+++ b/gitdiff.txt
--@@ -1,151 +0,0 @@
---diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
---index 6fc3809..2b8dbef 100644
------ a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
---+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
---@@ -18,6 +18,7 @@ package net.ddns.mlsoftlaberge.contactslist.ui;
--- 
--- import android.annotation.SuppressLint;
--- import android.annotation.TargetApi;
---+import android.app.Activity;
--- import android.content.ContentProviderOperation;
--- import android.content.ContentResolver;
--- import android.content.Context;
---@@ -101,6 +102,8 @@ public class ContactAdminFragment extends Fragment implements
---     // Defines a tag for identifying log entries
---     private static final String TAG = "ContactAdminFragment";
--- 
---+    private static final int EDITMEMO_REQUEST=1;
---+
---     // The geo Uri scheme prefix, used with Intent.ACTION_VIEW to form a geographical address
---     // intent that will trigger available apps to handle viewing a location (such as Maps)
---     private static final String GEO_URI_SCHEME_PREFIX = "geo:0,0?q=";
---@@ -370,7 +373,9 @@ public class ContactAdminFragment extends Fragment implements
---                 // start an activity to edit the memo
---                 Intent intent = new Intent(getActivity(), ContactEditMemoActivity.class);
---                 intent.setData(mContactUri);
----                startActivityForResult(intent,1);
---+                intent.putExtra("NAME",mContactName.getText().toString());
---+                intent.putExtra("MEMO", notememo.toString());
---+                startActivityForResult(intent,EDITMEMO_REQUEST);
---             }
---         });
--- 
---@@ -396,14 +401,7 @@ public class ContactAdminFragment extends Fragment implements
---                 // Displays a message that no activity can handle the view button.
---                 Toast.makeText(getActivity(), "Save Transaction", Toast.LENGTH_SHORT).show();
---                 // try to update the note field in database
----                compactnote();
----                if(mNotesRawId.isEmpty()) {
----                    mNotesRawId=mRawContactId;
----                    mNotesId=mContactId;
----                    insertnote();
----                } else {
----                    updatenote();
----                }
---+                savenote();
---             }
---         });
--- 
---@@ -420,6 +418,28 @@ public class ContactAdminFragment extends Fragment implements
---         return adminView;
---     }
--- 
---+    // try to update the note field in database, or insert it if new
---+    public void savenote() {
---+        compactnote();
---+        if(mNotesRawId.isEmpty()) {
---+            mNotesRawId=mRawContactId;
---+            mNotesId=mContactId;
---+            insertnote();
---+        } else {
---+            updatenote();
---+        }
---+    }
---+
---+    @Override
---+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
---+        // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
---+        if (resultCode == Activity.RESULT_OK && requestCode == EDITMEMO_REQUEST) {
---+            notememo.setLength(0);
---+            notememo.append(data.getStringExtra("MEMO"));
---+            mMemoItem.setText(notememo);
---+            savenote();
---+        }
---+    }
--- 
---     @Override
---     public void onActivityCreated(Bundle savedInstanceState) {
---@@ -744,8 +764,15 @@ public class ContactAdminFragment extends Fragment implements
---         mTransactionTotal.setText(stot);
---     }
--- 
---+    // normalize the memo field, so the last line finish with a newline
---+    private void normalizememo() {
---+        if(notememo.length()==0) return;
---+        if(notememo.charAt(notememo.length()-1)!='\n') notememo.append("\n");
---+    }
---+
---     // update the note record in the database from the modified data in table
---     private void updatenote() {
---+        normalizememo();
---         newnote = notememo.toString() + notereformat.toString() ;
---         // update the record
---         try {
---@@ -767,6 +794,7 @@ public class ContactAdminFragment extends Fragment implements
---     }
--- 
---     public void insertnote() {
---+        normalizememo();
---         newnote = notememo.toString() + notereformat.toString() ;
---         try {
---             ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
---diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoActivity.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoActivity.java
---index 30f2ddb..55d5f45 100644
------ a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoActivity.java
---+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoActivity.java
---@@ -42,8 +42,8 @@ public class ContactEditMemoActivity extends FragmentActivity {
--- 
---             // Fetch the data Uri from the intent provided to this activity
---             final Uri uri = getIntent().getData();
----            final String name = "name";
----            final String memo = "memo";
---+            final String name = getIntent().getStringExtra("NAME");
---+            final String memo = getIntent().getStringExtra("MEMO");
---             // Checks to see if fragment has already been added, otherwise adds a new
---             // ContactEditMemoFragment with the Uri provided in the intent
---             if (getSupportFragmentManager().findFragmentByTag(TAG) == null) {
---diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoFragment.java
---index d23da5b..485f277 100644
------ a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoFragment.java
---+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoFragment.java
---@@ -1,5 +1,7 @@
--- package net.ddns.mlsoftlaberge.contactslist.ui;
--- 
---+import android.app.Activity;
---+import android.content.Intent;
--- import android.net.Uri;
--- import android.os.Bundle;
--- import android.provider.ContactsContract;
---@@ -133,6 +135,7 @@ public class ContactEditMemoFragment extends Fragment {
---             public void onClick(View view) {
---                 // Displays a message that no activity can handle the view button.
---                 Toast.makeText(getActivity(), "Save EditMemo", Toast.LENGTH_SHORT).show();
---+                returnresult();
---             }
---         });
--- 
---@@ -167,7 +170,13 @@ public class ContactEditMemoFragment extends Fragment {
---         outState.putParcelable(EXTRA_CONTACT_URI, mContactUri);
---     }
--- 
----
---+    // returns the contents of edited data to the caller activity
---+    public void returnresult() {
---+        final Intent data = new Intent();
---+        data.putExtra("MEMO",mEditMemo.getText().toString());
---+        getActivity().setResult(Activity.RESULT_OK,data);
---+        getActivity().finish();
---+    }
--- 
--- 
--- 
+-@@ -1,166 +0,0 @@
+--diff --git a/.gitignore b/.gitignore
+--index f880e3d..2c4b95a 100644
+----- a/.gitignore
+--+++ b/.gitignore
+--@@ -3,3 +3,5 @@
+-- build/
+-- app/build/
+-- local.properties
+--+gitdiff.txt
+--+gitall.sh
+--diff --git a/gitdiff.txt b/gitdiff.txt
+--index b42e177..e69de29 100644
+----- a/gitdiff.txt
+--+++ b/gitdiff.txt
+--@@ -1,151 +0,0 @@
+---diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
+---index 6fc3809..2b8dbef 100644
+------ a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
+---+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
+---@@ -18,6 +18,7 @@ package net.ddns.mlsoftlaberge.contactslist.ui;
+--- 
+--- import android.annotation.SuppressLint;
+--- import android.annotation.TargetApi;
+---+import android.app.Activity;
+--- import android.content.ContentProviderOperation;
+--- import android.content.ContentResolver;
+--- import android.content.Context;
+---@@ -101,6 +102,8 @@ public class ContactAdminFragment extends Fragment implements
+---     // Defines a tag for identifying log entries
+---     private static final String TAG = "ContactAdminFragment";
+--- 
+---+    private static final int EDITMEMO_REQUEST=1;
+---+
+---     // The geo Uri scheme prefix, used with Intent.ACTION_VIEW to form a geographical address
+---     // intent that will trigger available apps to handle viewing a location (such as Maps)
+---     private static final String GEO_URI_SCHEME_PREFIX = "geo:0,0?q=";
+---@@ -370,7 +373,9 @@ public class ContactAdminFragment extends Fragment implements
+---                 // start an activity to edit the memo
+---                 Intent intent = new Intent(getActivity(), ContactEditMemoActivity.class);
+---                 intent.setData(mContactUri);
+----                startActivityForResult(intent,1);
+---+                intent.putExtra("NAME",mContactName.getText().toString());
+---+                intent.putExtra("MEMO", notememo.toString());
+---+                startActivityForResult(intent,EDITMEMO_REQUEST);
+---             }
+---         });
+--- 
+---@@ -396,14 +401,7 @@ public class ContactAdminFragment extends Fragment implements
+---                 // Displays a message that no activity can handle the view button.
+---                 Toast.makeText(getActivity(), "Save Transaction", Toast.LENGTH_SHORT).show();
+---                 // try to update the note field in database
+----                compactnote();
+----                if(mNotesRawId.isEmpty()) {
+----                    mNotesRawId=mRawContactId;
+----                    mNotesId=mContactId;
+----                    insertnote();
+----                } else {
+----                    updatenote();
+----                }
+---+                savenote();
+---             }
+---         });
+--- 
+---@@ -420,6 +418,28 @@ public class ContactAdminFragment extends Fragment implements
+---         return adminView;
+---     }
+--- 
+---+    // try to update the note field in database, or insert it if new
+---+    public void savenote() {
+---+        compactnote();
+---+        if(mNotesRawId.isEmpty()) {
+---+            mNotesRawId=mRawContactId;
+---+            mNotesId=mContactId;
+---+            insertnote();
+---+        } else {
+---+            updatenote();
+---+        }
+---+    }
+---+
+---+    @Override
+---+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+---+        // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
+---+        if (resultCode == Activity.RESULT_OK && requestCode == EDITMEMO_REQUEST) {
+---+            notememo.setLength(0);
+---+            notememo.append(data.getStringExtra("MEMO"));
+---+            mMemoItem.setText(notememo);
+---+            savenote();
+---+        }
+---+    }
+--- 
+---     @Override
+---     public void onActivityCreated(Bundle savedInstanceState) {
+---@@ -744,8 +764,15 @@ public class ContactAdminFragment extends Fragment implements
+---         mTransactionTotal.setText(stot);
+---     }
+--- 
+---+    // normalize the memo field, so the last line finish with a newline
+---+    private void normalizememo() {
+---+        if(notememo.length()==0) return;
+---+        if(notememo.charAt(notememo.length()-1)!='\n') notememo.append("\n");
+---+    }
+---+
+---     // update the note record in the database from the modified data in table
+---     private void updatenote() {
+---+        normalizememo();
+---         newnote = notememo.toString() + notereformat.toString() ;
+---         // update the record
+---         try {
+---@@ -767,6 +794,7 @@ public class ContactAdminFragment extends Fragment implements
+---     }
+--- 
+---     public void insertnote() {
+---+        normalizememo();
+---         newnote = notememo.toString() + notereformat.toString() ;
+---         try {
+---             ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+---diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoActivity.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoActivity.java
+---index 30f2ddb..55d5f45 100644
+------ a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoActivity.java
+---+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoActivity.java
+---@@ -42,8 +42,8 @@ public class ContactEditMemoActivity extends FragmentActivity {
+--- 
+---             // Fetch the data Uri from the intent provided to this activity
+---             final Uri uri = getIntent().getData();
+----            final String name = "name";
+----            final String memo = "memo";
+---+            final String name = getIntent().getStringExtra("NAME");
+---+            final String memo = getIntent().getStringExtra("MEMO");
+---             // Checks to see if fragment has already been added, otherwise adds a new
+---             // ContactEditMemoFragment with the Uri provided in the intent
+---             if (getSupportFragmentManager().findFragmentByTag(TAG) == null) {
+---diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoFragment.java
+---index d23da5b..485f277 100644
+------ a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoFragment.java
+---+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoFragment.java
+---@@ -1,5 +1,7 @@
+--- package net.ddns.mlsoftlaberge.contactslist.ui;
+--- 
+---+import android.app.Activity;
+---+import android.content.Intent;
+--- import android.net.Uri;
+--- import android.os.Bundle;
+--- import android.provider.ContactsContract;
+---@@ -133,6 +135,7 @@ public class ContactEditMemoFragment extends Fragment {
+---             public void onClick(View view) {
+---                 // Displays a message that no activity can handle the view button.
+---                 Toast.makeText(getActivity(), "Save EditMemo", Toast.LENGTH_SHORT).show();
+---+                returnresult();
+---             }
+---         });
+--- 
+---@@ -167,7 +170,13 @@ public class ContactEditMemoFragment extends Fragment {
+---         outState.putParcelable(EXTRA_CONTACT_URI, mContactUri);
+---     }
+--- 
+----
+---+    // returns the contents of edited data to the caller activity
+---+    public void returnresult() {
+---+        final Intent data = new Intent();
+---+        data.putExtra("MEMO",mEditMemo.getText().toString());
+---+        getActivity().setResult(Activity.RESULT_OK,data);
+---+        getActivity().finish();
+---+    }
+--- 
+--- 
+--- 
