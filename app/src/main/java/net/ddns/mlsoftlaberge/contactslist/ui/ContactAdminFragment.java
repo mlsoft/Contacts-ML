@@ -39,7 +39,6 @@ import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.RawContacts;
 
 
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
@@ -102,7 +101,8 @@ public class ContactAdminFragment extends Fragment implements
     // Defines a tag for identifying log entries
     private static final String TAG = "ContactAdminFragment";
 
-    private static final int EDITMEMO_REQUEST=1;
+    private static final int EDITMEMO_REQUEST = 1;
+    private static final int EDITTRANS_REQUEST = 2;
 
     // The geo Uri scheme prefix, used with Intent.ACTION_VIEW to form a geographical address
     // intent that will trigger available apps to handle viewing a location (such as Maps)
@@ -370,12 +370,7 @@ public class ContactAdminFragment extends Fragment implements
             public void onClick(View view) {
                 // Displays a message that describe the action to take
                 Toast.makeText(getActivity(), "Edit Notes", Toast.LENGTH_SHORT).show();
-                // start an activity to edit the memo
-                Intent intent = new Intent(getActivity(), ContactEditMemoActivity.class);
-                intent.setData(mContactUri);
-                intent.putExtra("NAME",mContactName.getText().toString());
-                intent.putExtra("MEMO", notememo.toString());
-                startActivityForResult(intent,EDITMEMO_REQUEST);
+                editmemo();
             }
         });
 
@@ -386,6 +381,7 @@ public class ContactAdminFragment extends Fragment implements
             public void onClick(View view) {
                 // Displays a message that no activity can handle the view button.
                 Toast.makeText(getActivity(), "Add Admin", Toast.LENGTH_SHORT).show();
+                addtransaction();
             }
         });
 
@@ -418,25 +414,72 @@ public class ContactAdminFragment extends Fragment implements
         return adminView;
     }
 
-    // try to update the note field in database, or insert it if new
-    public void savenote() {
-        compactnote();
-        if(mNotesRawId.isEmpty()) {
-            mNotesRawId=mRawContactId;
-            mNotesId=mContactId;
-            insertnote();
-        } else {
-            updatenote();
-        }
+    private void editmemo() {
+        // start an activity to edit the memo
+        Intent intent = new Intent(getActivity(), ContactEditMemoActivity.class);
+        intent.setData(mContactUri);
+        intent.putExtra("NAME", mContactName.getText().toString());
+        intent.putExtra("MEMO", notememo.toString());
+        startActivityForResult(intent, EDITMEMO_REQUEST);
+    }
+
+    private void addtransaction() {
+        // create an empty default transaction
+        transac = new Transac();
+        transac.qte = 1.0;
+        transac.prix = 0.0;
+        transac.mnt = 0.0;
+        transac.trdate = "20160101";
+        transac.amount = "0.00";
+        transac.descrip = "";
+        // reformat the amount
+        transac.mnt = Double.valueOf(transac.amount);
+        transac.prix = transac.mnt;
+        transac.amount = String.format("%.2f", transac.mnt);
+        // reformat the date
+        transac.fdate = stringToDate(transac.trdate);
+        transac.trdate = dateToString(transac.fdate);
+        // add element to the table
+        transaclist.addElement(transac);
+        nbtransac++;
+        edittransaction(nbtransac-1);
+    }
+
+    private void edittransaction(int i) {
+        transac=transaclist.elementAt(i);
+        curtransac=i;
+        // start an activity to edit the transaction
+        Intent intent = new Intent(getActivity(), ContactEditTransActivity.class);
+        intent.setData(mContactUri);
+        intent.putExtra("NAME", mContactName.getText().toString());
+        intent.putExtra("DESCRIP", transac.descrip);
+        intent.putExtra("AMOUNT", transac.amount);
+        intent.putExtra("DATE", transac.trdate);
+        startActivityForResult(intent, EDITTRANS_REQUEST);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
+        // If the request went well (OK) and the request was EDITMEMO_REQUEST
         if (resultCode == Activity.RESULT_OK && requestCode == EDITMEMO_REQUEST) {
             notememo.setLength(0);
             notememo.append(data.getStringExtra("MEMO"));
             mMemoItem.setText(notememo);
+            savenote();
+        }
+        // If the request went well (OK) and the request was EDITTRANS_REQUEST
+        if (resultCode == Activity.RESULT_OK && requestCode == EDITTRANS_REQUEST) {
+            transac.descrip=data.getStringExtra("DESCRIP");
+            transac.amount=data.getStringExtra("AMOUNT");
+            transac.trdate=data.getStringExtra("DATE");
+            // reformat the amount
+            transac.mnt = Double.valueOf(transac.amount);
+            transac.prix = transac.mnt;
+            transac.amount = String.format("%.2f", transac.mnt);
+            // reformat the date
+            transac.fdate = stringToDate(transac.trdate);
+            transac.trdate = dateToString(transac.fdate);
+            compactnote();
             savenote();
         }
     }
@@ -695,8 +738,8 @@ public class ContactAdminFragment extends Fragment implements
                 } else {
                     // If nothing found, clear the data
                     mNotesData = "";
-                    mNotesRawId="";
-                    mNotesId="";
+                    mNotesRawId = "";
+                    mNotesId = "";
                     clearnote();
                 }
                 // display the memo part of the note in the memo field (decoded note)
@@ -719,12 +762,12 @@ public class ContactAdminFragment extends Fragment implements
         // added as children.
         mTransactionLayout.removeAllViews();
         int i;
-        double tot=0.0;
-        for (i=0;i<nbtransac;++i) {
+        double tot = 0.0;
+        for (i = 0; i < nbtransac; ++i) {
             // Builds the transaction layout
             // Inflates the transaction layout
             LinearLayout tlayout = (LinearLayout) LayoutInflater.from(getActivity()).inflate(
-                        R.layout.contact_transaction_item, null, false);
+                    R.layout.contact_transaction_item, null, false);
 
             // point to the 4 fields of the layout
             TextView t = (TextView) tlayout.findViewById(R.id.contact_transaction_description);
@@ -741,7 +784,7 @@ public class ContactAdminFragment extends Fragment implements
             mnt.setText(transac.amount);
 
             // cumulate the total amount
-            tot+=transac.mnt;
+            tot += transac.mnt;
 
             //save the position of the line in button id
             butt.setId(i);
@@ -753,6 +796,7 @@ public class ContactAdminFragment extends Fragment implements
                 public void onClick(View view) {
                     // Displays a message that no activity can handle the view button.
                     Toast.makeText(getActivity(), "Edit Transaction " + view.getId(), Toast.LENGTH_SHORT).show();
+                    edittransaction(view.getId());
                 }
             });
 
@@ -760,20 +804,32 @@ public class ContactAdminFragment extends Fragment implements
             mTransactionLayout.addView(tlayout, tlayoutParams);
         }
         // stamp the total amount in bottom view after the transaction layout
-        String stot=String.format("%.2f",tot);
+        String stot = String.format("%.2f", tot);
         mTransactionTotal.setText(stot);
+    }
+
+    // try to update the note field in database, or insert it if new
+    public void savenote() {
+        compactnote();
+        if (mNotesRawId.isEmpty()) {
+            mNotesRawId = mRawContactId;
+            mNotesId = mContactId;
+            insertnote();
+        } else {
+            updatenote();
+        }
     }
 
     // normalize the memo field, so the last line finish with a newline
     private void normalizememo() {
-        if(notememo.length()==0) return;
-        if(notememo.charAt(notememo.length()-1)!='\n') notememo.append("\n");
+        if (notememo.length() == 0) return;
+        if (notememo.charAt(notememo.length() - 1) != '\n') notememo.append("\n");
     }
 
     // update the note record in the database from the modified data in table
     private void updatenote() {
         normalizememo();
-        newnote = notememo.toString() + notereformat.toString() ;
+        newnote = notememo.toString() + notereformat.toString();
         // update the record
         try {
             ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
@@ -795,7 +851,7 @@ public class ContactAdminFragment extends Fragment implements
 
     public void insertnote() {
         normalizememo();
-        newnote = notememo.toString() + notereformat.toString() ;
+        newnote = notememo.toString() + notereformat.toString();
         try {
             ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
 
@@ -854,6 +910,9 @@ public class ContactAdminFragment extends Fragment implements
 
     // counter of table row
     private int nbtransac = 0;
+
+    // current table row in edition
+    private int curtransac = 0;
 
     // clear the table of fields for an empty note
     private void clearnote() {
@@ -941,7 +1000,7 @@ public class ContactAdminFragment extends Fragment implements
         int i;
         notereformat.setLength(0);
         // refill the string with the transactions list in readable mode
-        for(i=0;i<nbtransac;++i) {
+        for (i = 0; i < nbtransac; ++i) {
             transac = transaclist.elementAt(i);
             notereformat.append("ADMIN|");
             notereformat.append(transac.trdate);
@@ -955,14 +1014,14 @@ public class ContactAdminFragment extends Fragment implements
     }
 
     private String onlyNumbers(String from) {
-        StringBuffer tonum=new StringBuffer();
+        StringBuffer tonum = new StringBuffer();
         tonum.setLength(14);
         int i;
-        int j=0;
-        for(i=0;i<from.length();++i) {
-            char c=from.charAt(i);
-            if(c>='0' && c<='9') {
-                tonum.setCharAt(j,c);
+        int j = 0;
+        for (i = 0; i < from.length(); ++i) {
+            char c = from.charAt(i);
+            if (c >= '0' && c <= '9') {
+                tonum.setCharAt(j, c);
                 j++;
             }
         }
@@ -976,20 +1035,20 @@ public class ContactAdminFragment extends Fragment implements
         Calendar cal = Calendar.getInstance();
         int year, month, day, hour, min, sec;
         // extract only numbers from the string received
-        String ndate=onlyNumbers(sdate);
+        String ndate = onlyNumbers(sdate);
         // extract all subvalues
-        if(ndate.length()>=4) year = Integer.valueOf(ndate.substring(0, 4));
-        else year=0;
-        if(ndate.length()>=6) month = Integer.valueOf(ndate.substring(4, 6));
-        else month=1;
-        if(ndate.length()>=8) day = Integer.valueOf(ndate.substring(6, 8));
-        else day=0;
-        if(ndate.length()>=10) hour = Integer.valueOf(ndate.substring(8, 10));
-        else hour=0;
-        if(ndate.length()>=12) min = Integer.valueOf(ndate.substring(10, 12));
-        else min=0;
-        if(ndate.length()>=14) sec = Integer.valueOf(ndate.substring(12, 14));
-        else sec=0;
+        if (ndate.length() >= 4) year = Integer.valueOf(ndate.substring(0, 4));
+        else year = 0;
+        if (ndate.length() >= 6) month = Integer.valueOf(ndate.substring(4, 6));
+        else month = 1;
+        if (ndate.length() >= 8) day = Integer.valueOf(ndate.substring(6, 8));
+        else day = 0;
+        if (ndate.length() >= 10) hour = Integer.valueOf(ndate.substring(8, 10));
+        else hour = 0;
+        if (ndate.length() >= 12) min = Integer.valueOf(ndate.substring(10, 12));
+        else min = 0;
+        if (ndate.length() >= 14) sec = Integer.valueOf(ndate.substring(12, 14));
+        else sec = 0;
         // use calendar to format date/time
         cal.set(year, month - 1, day, hour, min, sec);
         long ldate = cal.getTimeInMillis();
@@ -1067,12 +1126,12 @@ public class ContactAdminFragment extends Fragment implements
      * Each note for the contact gets its own LinearLayout object; for example, if the contact
      * has three notes, then 3 LinearLayouts are generated.
      *
-     * @param type      From
-     *                         {@link android.provider.ContactsContract.CommonDataKinds.Phone#TYPE}
+     * @param type  From
+     *              {@link android.provider.ContactsContract.CommonDataKinds.Phone#TYPE}
      * @param label From
-     *                         {@link android.provider.ContactsContract.CommonDataKinds.Phone#LABEL}
+     *              {@link android.provider.ContactsContract.CommonDataKinds.Phone#LABEL}
      * @param phone From
-     *                         {@link android.provider.ContactsContract.CommonDataKinds.Phone#NUMBER}
+     *              {@link android.provider.ContactsContract.CommonDataKinds.Phone#NUMBER}
      * @return A LinearLayout to add to the contact notes layout,
      * populated with the provided notes.
      */
@@ -1126,12 +1185,12 @@ public class ContactAdminFragment extends Fragment implements
      * Each note for the contact gets its own LinearLayout object; for example, if the contact
      * has three notes, then 3 LinearLayouts are generated.
      *
-     * @param type      From
-     *                         {@link android.provider.ContactsContract.CommonDataKinds.Email#TYPE}
+     * @param type  From
+     *              {@link android.provider.ContactsContract.CommonDataKinds.Email#TYPE}
      * @param label From
-     *                         {@link android.provider.ContactsContract.CommonDataKinds.Email#LABEL}
+     *              {@link android.provider.ContactsContract.CommonDataKinds.Email#LABEL}
      * @param email From
-     *                         {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS}
+     *              {@link android.provider.ContactsContract.CommonDataKinds.Email#ADDRESS}
      * @return A LinearLayout to add to the contact notes layout,
      * populated with the provided notes.
      */
@@ -1428,7 +1487,7 @@ public class ContactAdminFragment extends Fragment implements
         final static int STARRED = 2;
         final static int LOOKUP_KEY = 3;
         final static int PHOTO_URI = 4;
-        final static int RAWID=5;
+        final static int RAWID = 5;
     }
 
     /**

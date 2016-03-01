@@ -21,6 +21,7 @@
     <string name="activity_contact_detail">Contact Detail</string>
     <string name="activity_contact_admin">Contact Admin</string>
     <string name="activity_contact_editmemo">Contact Edit Memo</string>
+    <string name="activity_contact_edittrans">Contact Edit Transaction</string>
     <string name="contacts_list_search_results_title">Contacts List Search for \"%s\"</string>
     <string name="app_description">This is a sample app, demonstrating use of the Android system Contacts Provider.</string>
     <string name="imageview_description">Contact Thumbnail</string>
