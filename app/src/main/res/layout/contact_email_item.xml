@@ -21,22 +21,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingLeft="@dimen/padding"
-    android:paddingTop="@dimen/padding">
-
-    <TextView
-        android:id="@+id/contact_email_header"
-        style="@style/emailHeader"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Email" />
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="48dp"
         android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/contact_email_header"
+            style="@style/emailHeader"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:layout_gravity="center"
+            android:paddingLeft="@dimen/padding"
+            android:paddingRight="@dimen/padding"
+            android:text="Email" />
 
         <TextView
             android:id="@+id/contact_email_item"
@@ -44,8 +45,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_weight="1"
-            android:hint="johndoe@domain.com"
+            android:layout_weight="6"
+            android:hint="jos@chose.com"
             android:paddingRight="@dimen/padding"
             android:text="" />
 
@@ -56,9 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:contentDescription="@string/email_button_description"
-            android:paddingBottom="8dp"
-            android:paddingTop="8dp"
-            android:src="@drawable/ic_action_edit" />
+            android:src="@drawable/ic_action_play" />
 
     </LinearLayout>
 
