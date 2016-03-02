@@ -42,9 +42,8 @@
                 <TextView
                     android:id="@+id/contact_name"
                     style="@style/contactNameTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="65"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:paddingLeft="@dimen/padding"
                     android:paddingRight="@dimen/padding"
                     android:paddingTop="8dp"
@@ -64,7 +63,19 @@
                     android:layout_gravity="center"
                     android:paddingLeft="@dimen/padding"
                     android:paddingRight="@dimen/padding"
-                    android:text="Description" />
+                    android:text="Date" />
+
+
+                <EditText
+                    android:id="@+id/trans_date"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_weight="8"
+                    android:ems="10"
+                    android:inputType="datetime"
+                    android:text="2016-01-01 00:00:00" />
 
             </LinearLayout>
 
@@ -73,76 +84,82 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <TextView
+                    style="@style/adminHeader"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:text="Description" />
+
                 <EditText
                     android:id="@+id/trans_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:gravity="left"
+                    android:minHeight="32dp"
+                    android:text="Description of invoice"
+                    android:lines="1"
+                    android:maxLines="1"
+                    android:inputType="textCapSentences" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#e4e4e4"
+                android:minHeight="32dp"
+                android:orientation="horizontal"
+                android:showDividers="middle">
+
+                <TextView
+                    style="@style/adminHeader"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="8"
+                    android:gravity="right"
+                    android:paddingLeft="@dimen/padding"
+                    android:paddingRight="@dimen/padding"
+                    android:text="Amount" />
+
+                <EditText
+                    android:id="@+id/trans_amount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="3"
+                    android:gravity="right"
+                    android:paddingLeft="@dimen/padding"
+                    android:paddingRight="@dimen/padding"
+                    android:text="0.00"
+                    android:inputType="numberDecimal"
+                    android:lines="1"
+                    android:maxLines="1" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/button_save_edittrans"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
-                    android:gravity="left"
-                    android:minHeight="64dp" />
+                    android:text="Save" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#e4e4e4"
-                    android:minHeight="32dp"
-                    android:orientation="horizontal"
-                    android:showDividers="middle">
-
-                    <TextView
-                        style="@style/adminHeader"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="8"
-                        android:gravity="right"
-                        android:paddingLeft="@dimen/padding"
-                        android:paddingRight="@dimen/padding"
-                        android:text="Amount" />
-
-                    <EditText
-                        android:id="@+id/trans_amount"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight="3"
-                        android:gravity="right"
-                        android:paddingLeft="@dimen/padding"
-                        android:paddingRight="@dimen/padding"
-                        android:text="0.00" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-
-                    <EditText
-                        android:id="@+id/trans_date"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="8"
-                        android:ems="10"
-                        android:inputType="date" />
-
-                    <Button
-                        android:id="@+id/button_save_edittrans"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginRight="16dp"
-                        android:text="Save" />
-
-                </LinearLayout>
             </LinearLayout>
 
-
         </LinearLayout>
+
     </ScrollView>
 
 </FrameLayout>

@@ -457,15 +457,11 @@ public class ContactAdminFragment extends Fragment implements
         transac.qte = 1.0;
         transac.prix = 0.0;
         transac.mnt = 0.0;
-        transac.trdate = "20160101";
-        transac.amount = "0.00";
+        transac.trdate = "";
+        transac.amount = "";
         transac.descrip = "";
-        // reformat the amount
-        transac.mnt = Double.valueOf(transac.amount);
-        transac.prix = transac.mnt;
-        transac.amount = String.format("%.2f", transac.mnt);
-        // reformat the date
-        transac.fdate = stringToDate(transac.trdate);
+        // reformat the date from the date/time now
+        transac.fdate = new Date();
         transac.trdate = dateToString(transac.fdate);
         // add element to the table
         transaclist.addElement(transac);
