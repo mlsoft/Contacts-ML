@@ -136,7 +136,7 @@
                     android:paddingLeft="@dimen/padding"
                     android:paddingRight="@dimen/padding"
                     android:text="0.00"
-                    android:inputType="numberDecimal"
+                    android:inputType="numberDecimal|numberSigned"
                     android:lines="1"
                     android:maxLines="1" />
 

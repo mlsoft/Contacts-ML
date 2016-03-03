@@ -353,11 +353,12 @@ public class ContactAdminFragment extends Fragment implements
 
     // email the note-transaction part to the contact
     public void emailcontact(String email) {
+        prepare_invoice();
         Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
         emailIntent.setType("message/rfc822");
         emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{email});
-        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Invoice");
-        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, notereformat.toString());
+        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Account State");
+        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, noteinvoice.toString());
         try {
             startActivity(Intent.createChooser(emailIntent, "Send Email."));
         } catch (Exception ex) {
@@ -379,6 +380,8 @@ public class ContactAdminFragment extends Fragment implements
     private void addtransaction() {
         // create an empty default transaction
         transac = new Transac();
+        transac.contactid=mContactId;
+        transac.rawcontactid=mRawContactId;
         transac.qte = 1.0;
         transac.prix = 0.0;
         transac.mnt = 0.0;
@@ -421,6 +424,7 @@ public class ContactAdminFragment extends Fragment implements
         }
         // If the request went well (OK) and the request was EDITTRANS_REQUEST
         if (resultCode == Activity.RESULT_OK && requestCode == EDITTRANS_REQUEST) {
+            transac=transaclist.elementAt(curtransac);
             transac.descrip=data.getStringExtra("DESCRIP");
             transac.amount=data.getStringExtra("AMOUNT");
             transac.trdate=data.getStringExtra("DATE");
@@ -818,6 +822,9 @@ public class ContactAdminFragment extends Fragment implements
     // string containing the reformatted part of the note
     private StringBuffer notereformat = new StringBuffer();
 
+    // string containing an invoice list in human readable form
+    private StringBuffer noteinvoice = new StringBuffer();
+
     // string containing the full note reassembled and ready to write back on disk
     private String newnote;
 
@@ -825,7 +832,9 @@ public class ContactAdminFragment extends Fragment implements
     private String noteline = "";
 
     // structure of a row of the table
-    private class Transac extends Object {
+    private class Transac {
+        String contactid;
+        String rawcontactid;
         double qte;
         double prix;
         double mnt;
@@ -885,6 +894,8 @@ public class ContactAdminFragment extends Fragment implements
     private void decodeline() {
         // create an empty default transaction
         transac = new Transac();
+        transac.contactid=mNotesId;
+        transac.rawcontactid=mNotesRawId;
         transac.qte = 1.0;
         transac.prix = 0.0;
         transac.mnt = 0.0;
@@ -926,6 +937,29 @@ public class ContactAdminFragment extends Fragment implements
         // add element to the table
         transaclist.addElement(transac);
         nbtransac++;
+    }
+
+    // transform the transaction table in a memo form, and display it in the last bottom debug field
+    private void prepare_invoice() {
+        int i;
+        double tot=0.0;
+        noteinvoice.setLength(0);
+        // refill the string with the transactions list in readable mode
+        noteinvoice.append("<html><PRE>\n+-----------+---------+------------+-------------------------------+\n");
+        for (i = 0; i < nbtransac; ++i) {
+            transac = transaclist.elementAt(i);
+            noteinvoice.append("| ");
+            noteinvoice.append(transac.trdate);
+            noteinvoice.append(" | ");
+            noteinvoice.append(String.format("%10.2f" , transac.mnt));
+            noteinvoice.append(" | ");
+            noteinvoice.append(String.format("%-30.30s", transac.descrip));
+            noteinvoice.append(" |\n");
+            tot+=transac.mnt;
+        }
+        noteinvoice.append("+-----------+---------+------------+-------------------------------+\n");
+        noteinvoice.append(String.format("+               TOTAL + %10.2f +                               +\n",tot));
+        noteinvoice.append("+-----------+---------+------------+-------------------------------+\n</PRE></html>");
     }
 
     // transform the transaction table in a memo form, and display it in the last bottom debug field

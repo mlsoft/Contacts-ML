@@ -1,532 +1,109 @@
 diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
-index fbf6312..6b9a7a5 100644
+index 6b9a7a5..a9560eb 100644
 --- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
 +++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
-@@ -32,15 +32,14 @@ import android.os.Build;
- import android.os.Bundle;
- import android.provider.ContactsContract;
- import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
-+import android.provider.ContactsContract.CommonDataKinds.Email;
- import android.provider.ContactsContract.Contacts;
- import android.provider.ContactsContract.Contacts.Photo;
--import android.provider.ContactsContract.Data;
--import android.provider.ContactsContract.CommonDataKinds.Email;
- import android.provider.ContactsContract.RawContacts;
-+import android.provider.ContactsContract.Data;
- 
- 
- import android.support.v4.app.Fragment;
--import android.support.v4.app.ListFragment;
- import android.support.v4.app.LoaderManager;
- import android.support.v4.content.CursorLoader;
- import android.support.v4.content.Loader;
-@@ -118,36 +117,20 @@ public class ContactAdminFragment extends Fragment implements
-     private ImageView mImageView;
-     private TextView mContactName;
- 
--    private TextView mContactAddress;
--    private ImageButton mMapAddressButton;
--
--    private TextView mContactPhone;
--    private TextView mContactEmail;
--
--    private Button mPhoneAdminButton;
--
--    private Button mEmailAdminButton;
--
--    private ImageButton mAddAdminButton;
--
-     private TextView mMemoItem;
-     private ImageButton mMemoEditButton;
- 
-+    private ImageButton mAddAdminButton;
-+    private LinearLayout mTransactionLayout;
-+    private TextView mTransactionTotal;
-+    private ImageButton mTransactionSaveButton;
-+
-     private LinearLayout mAddressLayout;
- 
-     private LinearLayout mPhoneLayout;
- 
-     private LinearLayout mEmailLayout;
- 
--    private LinearLayout mNotesLayout;
--
--    private LinearLayout mTransactionLayout;
--
--    private TextView mTransactionTotal;
--    private ImageButton mTransactionSaveButton;
--
--    private TextView mReformattedItem;
--
-     /**
-      * Factory method to generate a new instance of the fragment given a contact Uri. A factory
-      * method is preferable to simply using the constructor as it handles creating the bundle and
-@@ -234,15 +217,6 @@ public class ContactAdminFragment extends Fragment implements
-             if (mContactName != null) {
-                 mContactName.setText("");
-             }
--            if (mContactAddress != null) {
--                mContactAddress.setText("");
--            }
--            if (mContactPhone != null) {
--                mContactPhone.setText("");
--            }
--            if (mContactEmail != null) {
--                mContactEmail.setText("");
--            }
-             if (mModifContactMenuItem != null) {
-                 mModifContactMenuItem.setVisible(false);
-             }
-@@ -298,51 +272,6 @@ public class ContactAdminFragment extends Fragment implements
-         mContactName = (TextView) adminView.findViewById(R.id.contact_name);
-         mContactName.setVisibility(View.VISIBLE);
- 
--        mContactAddress = (TextView) adminView.findViewById(R.id.contact_address);
--        mContactAddress.setVisibility(View.VISIBLE);
--
--        // Defines an onClickListener object for the add-admin button
--        mMapAddressButton = (ImageButton) adminView.findViewById(R.id.button_map_address);
--        // Defines an onClickListener object for the address button
--        mMapAddressButton.setOnClickListener(new View.OnClickListener() {
--            // Defines what to do when users click the address button
--            @Override
--            public void onClick(View view) {
--                openaddress();
--            }
--        });
--
--
--        mContactPhone = (TextView) adminView.findViewById(R.id.contact_phone);
--        mContactPhone.setVisibility(View.VISIBLE);
--
--        // Defines an onClickListener object for the add-admin button
--        mPhoneAdminButton = (Button) adminView.findViewById(R.id.button_phone);
--        mPhoneAdminButton.setOnClickListener(new View.OnClickListener() {
--            // Defines what to do when users click the address button
--            @Override
--            public void onClick(View view) {
--                // Displays a message that no activity can handle the view button.
--                Toast.makeText(getActivity(), "Phone Contact", Toast.LENGTH_SHORT).show();
--                phonecontact();
--            }
--        });
--
--        mContactEmail = (TextView) adminView.findViewById(R.id.contact_email);
--        mContactEmail.setVisibility(View.VISIBLE);
--
--        // Defines an onClickListener object for the add-admin button
--        mEmailAdminButton = (Button) adminView.findViewById(R.id.button_email);
--        mEmailAdminButton.setOnClickListener(new View.OnClickListener() {
--            // Defines what to do when users click the address button
--            @Override
--            public void onClick(View view) {
--                // Displays a message that an email will be sent
--                Toast.makeText(getActivity(), "Email Contact", Toast.LENGTH_SHORT).show();
--                emailcontact();
--            }
--        });
--
-         // the textview for the memo part of the note
-         mMemoItem = (TextView) adminView.findViewById(R.id.contact_memo_item);
-         // Defines an onClickListener object for the add-admin button
-@@ -390,17 +319,13 @@ public class ContactAdminFragment extends Fragment implements
- 
-         mEmailLayout = (LinearLayout) adminView.findViewById(R.id.contact_email_layout);
- 
--        mNotesLayout = (LinearLayout) adminView.findViewById(R.id.contact_notes_layout);
--
--        mReformattedItem = (TextView) adminView.findViewById(R.id.contact_reformatted_item);
--
-         return adminView;
-     }
- 
-     // open the main address on google-map
--    public void openaddress() {
-+    public void openaddress(String address) {
-         final Intent viewIntent =
--                new Intent(Intent.ACTION_VIEW, constructGeoUri(mContactAddress.getText().toString()));
-+                new Intent(Intent.ACTION_VIEW, constructGeoUri(address));
- 
-         // A PackageManager instance is needed to verify that there's a default app
-         // that handles ACTION_VIEW and a geo Uri.
-@@ -421,16 +346,16 @@ public class ContactAdminFragment extends Fragment implements
-     }
- 
-     // open the phone-dialer with the phone number pre-dialed
--    public void phonecontact() {
--        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + mContactPhone.getText().toString()));
-+    public void phonecontact(String phone) {
-+        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone));
-         startActivity(intent);
-     }
+@@ -353,11 +353,12 @@ public class ContactAdminFragment extends Fragment implements
  
      // email the note-transaction part to the contact
--    public void emailcontact() {
-+    public void emailcontact(String email) {
+     public void emailcontact(String email) {
++        prepare_invoice();
          Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
          emailIntent.setType("message/rfc822");
--        emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{mContactName.getText().toString()});
-+        emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{email});
-         emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Invoice");
-         emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, notereformat.toString());
+         emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{email});
+-        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Invoice");
+-        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, notereformat.toString());
++        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Account State");
++        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, noteinvoice.toString());
          try {
-@@ -681,8 +606,6 @@ public class ContactAdminFragment extends Fragment implements
-                 // This query loads the contact address .
-                 // Loops through all the rows in the Cursor
-                 if (data.moveToFirst()) {
--                    // Fills the address field with the first address
--                    mContactAddress.setText(data.getString(ContactAddressQuery.ADDRESS));
-                     // loop thru all addresses for the bottom layout
-                     do {
-                         // Builds the address layout
-@@ -693,9 +616,6 @@ public class ContactAdminFragment extends Fragment implements
-                         // Adds the new address layout to the addresses layout
-                         mAddressLayout.addView(alayout, layoutParams);
-                     } while (data.moveToNext());
--                } else {
--                    // If nothing found, clear the address field
--                    mContactAddress.setText("");
-                 }
-                 break;
-             case ContactPhoneQuery.QUERY_ID:
-@@ -706,8 +626,6 @@ public class ContactAdminFragment extends Fragment implements
-                 // This query loads the contact phone
-                 // Loops through all the rows in the Cursor
-                 if (data.moveToFirst()) {
--                    // Fills the phone field with the primary phone
--                    mContactPhone.setText(data.getString(ContactPhoneQuery.PHONE));
-                     // loop thru all phones for the bottom layout
-                     do {
-                         final LinearLayout playout = buildPhoneLayout(
-@@ -717,9 +635,6 @@ public class ContactAdminFragment extends Fragment implements
-                         // Adds the new phone layout to the phones layout
-                         mPhoneLayout.addView(playout, layoutParams);
-                     } while (data.moveToNext());
--                } else {
--                    // If nothing found, clear the phone field
--                    mContactPhone.setText("");
-                 }
-                 break;
-             case ContactEmailQuery.QUERY_ID:
-@@ -730,8 +645,6 @@ public class ContactAdminFragment extends Fragment implements
-                 // This query loads the contact email
-                 // Loops through all the rows in the Cursor
-                 if (data.moveToFirst()) {
--                    // Fills the email field with primary email
--                    mContactEmail.setText(data.getString(ContactEmailQuery.EMAIL));
-                     // loop thru all emails for the bottom layout
-                     do {
-                         final LinearLayout elayout = buildEmailLayout(
-@@ -742,16 +655,9 @@ public class ContactAdminFragment extends Fragment implements
-                         mEmailLayout.addView(elayout, layoutParams);
-                         // store full note, and process it
-                     } while (data.moveToNext());
--                } else {
--                    // If nothing found, adds an empty address layout
--                    mContactEmail.setText("");
-                 }
-                 break;
-             case ContactNotesQuery.QUERY_ID:
--                // Clears out the details layout first in case the details
--                // layout has data from a previous data load still
--                // added as children.
--                mNotesLayout.removeAllViews();
-                 // This query loads the contact notes
-                 // Get the first row of the cursor (table contains only one row)
-                 if (data.moveToFirst()) {
-@@ -761,14 +667,6 @@ public class ContactAdminFragment extends Fragment implements
-                     mNotesId = data.getString(ContactNotesQuery.ID);
-                     expandnote();
-                     compactnote();
--                    // loop thru all notes for the bottom layout (only one)
--                    do {
--                        // Builds the notes layout
--                        final LinearLayout nlayout = buildNotesLayout(
--                                data.getString(ContactNotesQuery.NOTE));
--                        // Adds the new note layout to the notes layout
--                        mNotesLayout.addView(nlayout, layoutParams);
--                    } while (data.moveToNext());
-                 } else {
-                     // If nothing found, clear the data
-                     mNotesData = "";
-@@ -1045,7 +943,6 @@ public class ContactAdminFragment extends Fragment implements
-             notereformat.append(transac.descrip);
-             notereformat.append("\n");
+             startActivity(Intent.createChooser(emailIntent, "Send Email."));
+         } catch (Exception ex) {
+@@ -379,6 +380,8 @@ public class ContactAdminFragment extends Fragment implements
+     private void addtransaction() {
+         // create an empty default transaction
+         transac = new Transac();
++        transac.contactid=mContactId;
++        transac.rawcontactid=mRawContactId;
+         transac.qte = 1.0;
+         transac.prix = 0.0;
+         transac.mnt = 0.0;
+@@ -421,6 +424,7 @@ public class ContactAdminFragment extends Fragment implements
          }
--        mReformattedItem.setText(notereformat);
+         // If the request went well (OK) and the request was EDITTRANS_REQUEST
+         if (resultCode == Activity.RESULT_OK && requestCode == EDITTRANS_REQUEST) {
++            transac=transaclist.elementAt(curtransac);
+             transac.descrip=data.getStringExtra("DESCRIP");
+             transac.amount=data.getStringExtra("AMOUNT");
+             transac.trdate=data.getStringExtra("DATE");
+@@ -818,6 +822,9 @@ public class ContactAdminFragment extends Fragment implements
+     // string containing the reformatted part of the note
+     private StringBuffer notereformat = new StringBuffer();
+ 
++    // string containing an invoice list in human readable form
++    private StringBuffer noteinvoice = new StringBuffer();
++
+     // string containing the full note reassembled and ready to write back on disk
+     private String newnote;
+ 
+@@ -825,7 +832,9 @@ public class ContactAdminFragment extends Fragment implements
+     private String noteline = "";
+ 
+     // structure of a row of the table
+-    private class Transac extends Object {
++    private class Transac {
++        String contactid;
++        String rawcontactid;
+         double qte;
+         double prix;
+         double mnt;
+@@ -885,6 +894,8 @@ public class ContactAdminFragment extends Fragment implements
+     private void decodeline() {
+         // create an empty default transaction
+         transac = new Transac();
++        transac.contactid=mNotesId;
++        transac.rawcontactid=mNotesRawId;
+         transac.qte = 1.0;
+         transac.prix = 0.0;
+         transac.mnt = 0.0;
+@@ -929,6 +940,29 @@ public class ContactAdminFragment extends Fragment implements
      }
  
-     private String onlyNumbers(String from) {
-@@ -1110,57 +1007,6 @@ public class ContactAdminFragment extends Fragment implements
-      * Each note for the contact gets its own LinearLayout object; for example, if the contact
-      * has three notes, then 3 LinearLayouts are generated.
-      *
--     * @param note From
--     *             {@link android.provider.ContactsContract.CommonDataKinds.Note#NOTE}
--     * @return A LinearLayout to add to the contact notes layout,
--     * populated with the provided notes.
--     */
--    private LinearLayout buildNotesLayout(final String note) {
--
--        // Inflates the address layout
--        final LinearLayout notesLayout =
--                (LinearLayout) LayoutInflater.from(getActivity()).inflate(
--                        R.layout.contact_notes_item, mNotesLayout, false);
--
--        // Gets handles to the view objects in the layout
--        final TextView nheaderTextView =
--                (TextView) notesLayout.findViewById(R.id.contact_notes_header);
--        final TextView notesTextView =
--                (TextView) notesLayout.findViewById(R.id.contact_notes_item);
--        final ImageButton editNotesButton =
--                (ImageButton) notesLayout.findViewById(R.id.button_edit_notes);
--
--        // If there's no addresses for the contact, shows the empty view and message, and hides the
--        // header and button.
--        if (note == null) {
--            nheaderTextView.setVisibility(View.GONE);
--            editNotesButton.setVisibility(View.GONE);
--            notesTextView.setText(R.string.no_notes);
--        } else {
--            // Sets TextView objects in the layout
--            nheaderTextView.setText("Note");
--            notesTextView.setText(note);
--
--            // Defines an onClickListener object for the address button
--            editNotesButton.setOnClickListener(new View.OnClickListener() {
--                // Defines what to do when users click the address button
--                @Override
--                public void onClick(View view) {
--                    // Displays a message that no activity can handle the view button.
--                    Toast.makeText(getActivity(), "Edit Note", Toast.LENGTH_SHORT).show();
--                }
--            });
--
--        }
--        return notesLayout;
--    }
--
--
--    /**
--     * Builds a notes LinearLayout based on note information from the Contacts Provider.
--     * Each note for the contact gets its own LinearLayout object; for example, if the contact
--     * has three notes, then 3 LinearLayouts are generated.
--     *
-      * @param type  From
-      *              {@link android.provider.ContactsContract.CommonDataKinds.Phone#TYPE}
-      * @param label From
-@@ -1199,6 +1045,7 @@ public class ContactAdminFragment extends Fragment implements
-             // Sets TextView objects in the layout
-             pheaderTextView.setText(plabel + " Phone");
-             phoneTextView.setText(phone);
-+            editPhoneButton.setContentDescription(phone);
+     // transform the transaction table in a memo form, and display it in the last bottom debug field
++    private void prepare_invoice() {
++        int i;
++        double tot=0.0;
++        noteinvoice.setLength(0);
++        // refill the string with the transactions list in readable mode
++        noteinvoice.append("<html><PRE>\n+-----------+---------+------------+-------------------------------+\n");
++        for (i = 0; i < nbtransac; ++i) {
++            transac = transaclist.elementAt(i);
++            noteinvoice.append("| ");
++            noteinvoice.append(transac.trdate);
++            noteinvoice.append(" | ");
++            noteinvoice.append(String.format("%10.2f" , transac.mnt));
++            noteinvoice.append(" | ");
++            noteinvoice.append(String.format("%-30.30s", transac.descrip));
++            noteinvoice.append(" |\n");
++            tot+=transac.mnt;
++        }
++        noteinvoice.append("+-----------+---------+------------+-------------------------------+\n");
++        noteinvoice.append(String.format("+               TOTAL + %10.2f +                               +\n",tot));
++        noteinvoice.append("+-----------+---------+------------+-------------------------------+\n</PRE></html>");
++    }
++
++    // transform the transaction table in a memo form, and display it in the last bottom debug field
+     private void compactnote() {
+         int i;
+         notereformat.setLength(0);
+diff --git a/app/src/main/res/layout/contact_edittrans_fragment.xml b/app/src/main/res/layout/contact_edittrans_fragment.xml
+index bca859d..cceebbb 100644
+--- a/app/src/main/res/layout/contact_edittrans_fragment.xml
++++ b/app/src/main/res/layout/contact_edittrans_fragment.xml
+@@ -136,7 +136,7 @@
+                     android:paddingLeft="@dimen/padding"
+                     android:paddingRight="@dimen/padding"
+                     android:text="0.00"
+-                    android:inputType="numberDecimal"
++                    android:inputType="numberDecimal|numberSigned"
+                     android:lines="1"
+                     android:maxLines="1" />
  
-             // Defines an onClickListener object for the address button
-             editPhoneButton.setOnClickListener(new View.OnClickListener() {
-@@ -1206,7 +1053,8 @@ public class ContactAdminFragment extends Fragment implements
-                 @Override
-                 public void onClick(View view) {
-                     // Displays a message that no activity can handle the view button.
--                    Toast.makeText(getActivity(), "Edit Phone", Toast.LENGTH_SHORT).show();
-+                    Toast.makeText(getActivity(), "Call Phone", Toast.LENGTH_SHORT).show();
-+                    phonecontact(view.getContentDescription().toString());
-                 }
-             });
- 
-@@ -1258,6 +1106,7 @@ public class ContactAdminFragment extends Fragment implements
-             // Sets TextView objects in the layout
-             eheaderTextView.setText(elabel + " Email");
-             emailTextView.setText(email);
-+            editEmailButton.setContentDescription(email);
- 
-             // Defines an onClickListener object for the address button
-             editEmailButton.setOnClickListener(new View.OnClickListener() {
-@@ -1265,7 +1114,8 @@ public class ContactAdminFragment extends Fragment implements
-                 @Override
-                 public void onClick(View view) {
-                     // Displays a message that no activity can handle the view button.
--                    Toast.makeText(getActivity(), "Edit Email", Toast.LENGTH_SHORT).show();
-+                    Toast.makeText(getActivity(), "Send Email", Toast.LENGTH_SHORT).show();
-+                    emailcontact(view.getContentDescription().toString());
-                 }
-             });
- 
-@@ -1318,6 +1168,7 @@ public class ContactAdminFragment extends Fragment implements
-             // Sets TextView objects in the layout
-             headerTextView.setText(label + " Address");
-             addressTextView.setText(address);
-+            viewAddressButton.setContentDescription(address);
- 
-             // Defines an onClickListener object for the address button
-             viewAddressButton.setOnClickListener(new View.OnClickListener() {
-@@ -1326,7 +1177,8 @@ public class ContactAdminFragment extends Fragment implements
-                 public void onClick(View view) {
- 
-                     final Intent viewIntent =
--                            new Intent(Intent.ACTION_VIEW, constructGeoUri(address));
-+                            new Intent(Intent.ACTION_VIEW,
-+                                constructGeoUri(view.getContentDescription().toString()));
- 
-                     // A PackageManager instance is needed to verify that there's a default app
-                     // that handles ACTION_VIEW and a geo Uri.
-diff --git a/app/src/main/res/layout/contact_admin_fragment.xml b/app/src/main/res/layout/contact_admin_fragment.xml
-index 694d340..cd8d7c4 100644
---- a/app/src/main/res/layout/contact_admin_fragment.xml
-+++ b/app/src/main/res/layout/contact_admin_fragment.xml
-@@ -66,98 +66,6 @@
- 
-                 </LinearLayout>
- 
--                <LinearLayout
--                    android:layout_width="match_parent"
--                    android:layout_height="wrap_content"
--                    android:minHeight="32dp"
--                    android:orientation="horizontal">
--
--                    <TextView
--                        android:id="@+id/contact_address"
--                        style="@style/addressDetail"
--                        android:layout_width="0dp"
--                        android:layout_height="wrap_content"
--                        android:layout_gravity="center"
--                        android:layout_weight="8"
--                        android:hint=""
--                        android:paddingLeft="@dimen/padding"
--                        android:paddingRight="@dimen/padding" />
--
--                    <ImageButton
--                        android:id="@+id/button_map_address"
--                        style="@style/adminButton"
--                        android:layout_width="wrap_content"
--                        android:layout_height="match_parent"
--                        android:layout_gravity="center"
--                        android:contentDescription="@string/admin_addbutton_description"
--                        android:src="@drawable/ic_action_map" />
--
--                </LinearLayout>
--
--                <LinearLayout
--                    android:layout_width="match_parent"
--                    android:layout_height="wrap_content"
--                    android:orientation="horizontal">
--
--                    <TextView
--                        style="@style/adminHeader"
--                        android:layout_width="wrap_content"
--                        android:layout_height="wrap_content"
--                        android:layout_gravity="center"
--                        android:paddingLeft="@dimen/padding"
--                        android:paddingRight="@dimen/padding"
--                        android:text="Phone" />
--
--                    <TextView
--                        android:id="@+id/contact_phone"
--                        style="@style/addressDetail"
--                        android:layout_width="wrap_content"
--                        android:layout_height="wrap_content"
--                        android:layout_gravity="center"
--                        android:layout_weight="3"
--                        android:gravity="left"
--                        android:text="" />
--
--                    <Button
--                        android:id="@+id/button_phone"
--                        android:layout_width="wrap_content"
--                        android:layout_height="wrap_content"
--                        android:text="Call" />
--
--                </LinearLayout>
--
--                <LinearLayout
--                    android:layout_width="match_parent"
--                    android:layout_height="wrap_content"
--                    android:orientation="horizontal">
--
--                    <TextView
--                        style="@style/adminHeader"
--                        android:layout_width="wrap_content"
--                        android:layout_height="wrap_content"
--                        android:layout_gravity="center"
--                        android:paddingLeft="@dimen/padding"
--                        android:paddingRight="@dimen/padding"
--                        android:text="Email" />
--
--                    <TextView
--                        android:id="@+id/contact_email"
--                        style="@style/addressDetail"
--                        android:layout_width="wrap_content"
--                        android:layout_height="wrap_content"
--                        android:layout_gravity="center"
--                        android:layout_weight="3"
--                        android:gravity="left"
--                        android:text="" />
--
--                    <Button
--                        android:id="@+id/button_email"
--                        android:layout_width="wrap_content"
--                        android:layout_height="wrap_content"
--                        android:text="Send" />
--
--                </LinearLayout>
--
-                 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                     android:layout_width="match_parent"
-                     android:layout_height="wrap_content"
-@@ -199,7 +107,6 @@
- 
-                     </LinearLayout>
- 
--
-                 </LinearLayout>
- 
-                 <LinearLayout
-@@ -305,34 +212,6 @@
-                     android:layout_height="wrap_content"
-                     android:orientation="vertical"/>
- 
--                <LinearLayout
--                    android:id="@+id/contact_notes_layout"
--                    android:layout_width="match_parent"
--                    android:layout_height="wrap_content"
--                    android:orientation="vertical"/>
--
--                <LinearLayout
--                    android:layout_width="match_parent"
--                    android:layout_height="wrap_content"
--                    android:orientation="vertical"
--                    android:paddingLeft="@dimen/padding">
--
--                    <TextView
--                        style="@style/notesHeader"
--                        android:layout_width="wrap_content"
--                        android:layout_height="wrap_content"
--                        android:text="Reformatted" />
--
--                    <TextView
--                            android:id="@+id/contact_reformatted_item"
--                            style="@style/notesDetail"
--                            android:layout_width="match_parent"
--                            android:layout_height="wrap_content"
--                            android:paddingRight="@dimen/padding"
--                            android:text="" />
--
--                </LinearLayout>
--
-             </LinearLayout>
- 
-         </ScrollView>
-diff --git a/app/src/main/res/layout/contact_editmemo_fragment.xml b/app/src/main/res/layout/contact_editmemo_fragment.xml
-index 4aec3fa..533953b 100644
---- a/app/src/main/res/layout/contact_editmemo_fragment.xml
-+++ b/app/src/main/res/layout/contact_editmemo_fragment.xml
-@@ -80,8 +80,7 @@
-                     android:layout_gravity="center"
-                     android:layout_marginLeft="16dp"
-                     android:layout_marginRight="16dp"
--                    android:gravity="left"
--                    android:minHeight="140dp" />
-+                    android:gravity="left" />
- 
- 
-                 <Button
