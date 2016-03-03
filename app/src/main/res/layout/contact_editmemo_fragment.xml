@@ -80,8 +80,7 @@
                     android:layout_gravity="center"
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
-                    android:gravity="left"
-                    android:minHeight="140dp" />
+                    android:gravity="left" />
 
 
                 <Button
