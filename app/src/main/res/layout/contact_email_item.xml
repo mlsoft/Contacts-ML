@@ -30,18 +30,18 @@
 
         <TextView
             android:id="@+id/contact_email_header"
-            style="@style/emailHeader"
+            style="@style/addressHeader"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3"
             android:layout_gravity="center"
+            android:layout_weight="3"
             android:paddingLeft="@dimen/padding"
             android:paddingRight="@dimen/padding"
             android:text="Email" />
 
         <TextView
             android:id="@+id/contact_email_item"
-            style="@style/emailDetail"
+            style="@style/addressDetail"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -52,12 +52,12 @@
 
         <ImageButton
             android:id="@+id/button_edit_email"
-            style="@style/emailButton"
+            style="@style/addressButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:contentDescription="@string/email_button_description"
-            android:src="@drawable/ic_action_play" />
+            android:src="@drawable/ic_dialog_email" />
 
     </LinearLayout>
 

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   Copyright (C) 2013 The Android Open Source Project
 
   Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,13 +57,7 @@
     <string name="no_intent_found">No application found to handle this action!</string>
     <string name="yes_intent_found">Application found.</string>
 
-
     <string name="admin_description_texthint">Transaction Description</string>
     <string name="admin_date_texthint">2016-12-31</string>
-
-
-
-
-
 
 </resources>

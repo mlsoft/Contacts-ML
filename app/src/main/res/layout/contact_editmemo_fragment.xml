@@ -58,7 +58,7 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    style="@style/adminHeader"
+                    style="@style/notesHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -67,6 +67,7 @@
                     android:text="Memo" />
 
             </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -81,19 +82,45 @@
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
                     android:gravity="left" />
+            </LinearLayout>
 
 
-                <Button
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/button_delete_editmemo"
+                    style="@style/notesButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:src="@drawable/ic_menu_delete" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_weight="3" />
+
+
+                <ImageButton
                     android:id="@+id/button_save_editmemo"
+                    style="@style/notesButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
-                    android:text="Save" />
+                    android:gravity="right"
+                    android:src="@drawable/ic_menu_save" />
 
             </LinearLayout>
-
 
         </LinearLayout>
     </ScrollView>

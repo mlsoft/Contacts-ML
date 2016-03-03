@@ -30,18 +30,18 @@
 
         <TextView
             android:id="@+id/contact_phone_header"
-            style="@style/phoneHeader"
+            style="@style/addressHeader"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3"
             android:layout_gravity="center"
+            android:layout_weight="3"
             android:paddingLeft="@dimen/padding"
             android:paddingRight="@dimen/padding"
             android:text="Phone" />
 
         <TextView
             android:id="@+id/contact_phone_item"
-            style="@style/phoneDetail"
+            style="@style/addressDetail"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -52,12 +52,12 @@
 
         <ImageButton
             android:id="@+id/button_edit_phone"
-            style="@style/phoneButton"
+            style="@style/addressButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:contentDescription="@string/phone_button_description"
-            android:src="@drawable/ic_action_play" />
+            android:src="@drawable/ic_menu_call" />
 
     </LinearLayout>
 

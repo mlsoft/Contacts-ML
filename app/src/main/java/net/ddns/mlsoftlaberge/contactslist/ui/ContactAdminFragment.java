@@ -380,8 +380,8 @@ public class ContactAdminFragment extends Fragment implements
     private void addtransaction() {
         // create an empty default transaction
         transac = new Transac();
-        transac.contactid=mContactId;
-        transac.rawcontactid=mRawContactId;
+        transac.contactid = mContactId;
+        transac.rawcontactid = mRawContactId;
         transac.qte = 1.0;
         transac.prix = 0.0;
         transac.mnt = 0.0;
@@ -394,13 +394,13 @@ public class ContactAdminFragment extends Fragment implements
         // add element to the table
         transaclist.addElement(transac);
         nbtransac++;
-        edittransaction(nbtransac-1);
+        edittransaction(nbtransac - 1);
     }
 
     // start the editing activity for editing a transaction
     private void edittransaction(int i) {
-        transac=transaclist.elementAt(i);
-        curtransac=i;
+        transac = transaclist.elementAt(i);
+        curtransac = i;
         // start an activity to edit the transaction
         Intent intent = new Intent(getActivity(), ContactEditTransActivity.class);
         intent.setData(mContactUri);
@@ -424,17 +424,22 @@ public class ContactAdminFragment extends Fragment implements
         }
         // If the request went well (OK) and the request was EDITTRANS_REQUEST
         if (resultCode == Activity.RESULT_OK && requestCode == EDITTRANS_REQUEST) {
-            transac=transaclist.elementAt(curtransac);
-            transac.descrip=data.getStringExtra("DESCRIP");
-            transac.amount=data.getStringExtra("AMOUNT");
-            transac.trdate=data.getStringExtra("DATE");
-            // reformat the amount
-            transac.mnt = Double.valueOf(transac.amount);
-            transac.prix = transac.mnt;
-            transac.amount = String.format("%.2f", transac.mnt);
-            // reformat the date
-            transac.fdate = stringToDate(transac.trdate);
-            transac.trdate = dateToString(transac.fdate);
+            transac = transaclist.elementAt(curtransac);
+            if (data.getStringExtra("DESCRIP").isEmpty() && data.getStringExtra("AMOUNT").isEmpty()) {
+                transaclist.removeElementAt(curtransac);
+                nbtransac--;
+            } else {
+                transac.descrip = data.getStringExtra("DESCRIP");
+                transac.amount = data.getStringExtra("AMOUNT");
+                transac.trdate = data.getStringExtra("DATE");
+                // reformat the amount
+                transac.mnt = Double.valueOf(transac.amount);
+                transac.prix = transac.mnt;
+                transac.amount = String.format("%.2f", transac.mnt);
+                // reformat the date
+                transac.fdate = stringToDate(transac.trdate);
+                transac.trdate = dateToString(transac.fdate);
+            }
             compactnote();
             savenote();
         }
@@ -894,8 +899,8 @@ public class ContactAdminFragment extends Fragment implements
     private void decodeline() {
         // create an empty default transaction
         transac = new Transac();
-        transac.contactid=mNotesId;
-        transac.rawcontactid=mNotesRawId;
+        transac.contactid = mNotesId;
+        transac.rawcontactid = mNotesRawId;
         transac.qte = 1.0;
         transac.prix = 0.0;
         transac.mnt = 0.0;
@@ -942,7 +947,7 @@ public class ContactAdminFragment extends Fragment implements
     // transform the transaction table in a memo form, and display it in the last bottom debug field
     private void prepare_invoice() {
         int i;
-        double tot=0.0;
+        double tot = 0.0;
         noteinvoice.setLength(0);
         // refill the string with the transactions list in readable mode
         noteinvoice.append("<html><PRE>\n+-----------+---------+------------+-------------------------------+\n");
@@ -951,14 +956,14 @@ public class ContactAdminFragment extends Fragment implements
             noteinvoice.append("| ");
             noteinvoice.append(transac.trdate);
             noteinvoice.append(" | ");
-            noteinvoice.append(String.format("%10.2f" , transac.mnt));
+            noteinvoice.append(String.format("%10.2f", transac.mnt));
             noteinvoice.append(" | ");
             noteinvoice.append(String.format("%-30.30s", transac.descrip));
             noteinvoice.append(" |\n");
-            tot+=transac.mnt;
+            tot += transac.mnt;
         }
         noteinvoice.append("+-----------+---------+------------+-------------------------------+\n");
-        noteinvoice.append(String.format("+               TOTAL + %10.2f +                               +\n",tot));
+        noteinvoice.append(String.format("+               TOTAL + %10.2f +                               +\n", tot));
         noteinvoice.append("+-----------+---------+------------+-------------------------------+\n</PRE></html>");
     }
 
@@ -1212,7 +1217,7 @@ public class ContactAdminFragment extends Fragment implements
 
                     final Intent viewIntent =
                             new Intent(Intent.ACTION_VIEW,
-                                constructGeoUri(view.getContentDescription().toString()));
+                                    constructGeoUri(view.getContentDescription().toString()));
 
                     // A PackageManager instance is needed to verify that there's a default app
                     // that handles ACTION_VIEW and a geo Uri.

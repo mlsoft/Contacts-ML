@@ -53,7 +53,7 @@ public class ContactEditTransActivity extends FragmentActivity {
 
                 // Adds a newly created ContactEditMemoFragment that is instantiated with the
                 // data Uri
-                ft.add(android.R.id.content, ContactEditTransFragment.newInstance(uri,name,descrip,amount,date), TAG);
+                ft.add(android.R.id.content, ContactEditTransFragment.newInstance(uri, name, descrip, amount, date), TAG);
                 ft.commit();
             }
         } else {

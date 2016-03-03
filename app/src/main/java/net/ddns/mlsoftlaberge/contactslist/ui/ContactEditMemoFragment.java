@@ -6,10 +6,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.app.Fragment;
@@ -29,16 +32,18 @@ public class ContactEditMemoFragment extends Fragment {
 
     private Uri mContactUri; // Stores the contact Uri for this fragment instance
 
-    public String contactName="";   // stores the contact name for this instance
+    public String contactName = "";   // stores the contact name for this instance
 
-    public String contactMemo="";   // stores the memo data for this instance
+    public String contactMemo = "";   // stores the memo data for this instance
 
 
     private TextView mContactName;  // display contact name
 
     private EditText mEditMemo;     // display and edit the memo field
 
-    private Button mEditMemoButton; // save the data and return to previous avtivity
+    private ImageButton mEditMemoButton; // save the data and return to previous avtivity
+
+    private ImageButton mDeleteMemoButton; // save the data and return to previous avtivity
 
     /**
      * Factory method to generate a new instance of the fragment given a contact Uri. A factory
@@ -52,8 +57,8 @@ public class ContactEditMemoFragment extends Fragment {
         // Create new instance of this fragment
         final ContactEditMemoFragment fragment = new ContactEditMemoFragment();
 
-        fragment.contactName=name;
-        fragment.contactMemo=memo;
+        fragment.contactName = name;
+        fragment.contactMemo = memo;
 
         // Create and populate the args bundle
         final Bundle args = new Bundle();
@@ -96,10 +101,10 @@ public class ContactEditMemoFragment extends Fragment {
             mContactUri = ContactsContract.Contacts.lookupContact(getActivity().getContentResolver(),
                     contactLookupUri);
         }
-        if(mContactName != null) {
+        if (mContactName != null) {
             mContactName.setText(contactName);
         }
-        if(mEditMemo != null) {
+        if (mEditMemo != null) {
             mEditMemo.setText(contactMemo);
         }
     }
@@ -128,14 +133,43 @@ public class ContactEditMemoFragment extends Fragment {
         mEditMemo.setVisibility(View.VISIBLE);
 
         // Defines an onClickListener object for the add-admin button
-        mEditMemoButton = (Button) adminView.findViewById(R.id.button_save_editmemo);
+        mEditMemoButton = (ImageButton) adminView.findViewById(R.id.button_save_editmemo);
         mEditMemoButton.setOnClickListener(new View.OnClickListener() {
             // Defines what to do when users click the address button
             @Override
             public void onClick(View view) {
                 // Displays a message that no activity can handle the view button.
                 Toast.makeText(getActivity(), "Save EditMemo", Toast.LENGTH_SHORT).show();
-                returnresult();
+                returnresult(true);
+            }
+        });
+
+        // Defines an onClickListener object for the add-admin button
+        mDeleteMemoButton = (ImageButton) adminView.findViewById(R.id.button_delete_editmemo);
+        mDeleteMemoButton.setOnClickListener(new View.OnClickListener() {
+            // Defines what to do when users click the address button
+            @Override
+            public void onClick(View view) {
+                // Displays a message that no activity can handle the view button.
+                Toast.makeText(getActivity(), "Delete EditMemo", Toast.LENGTH_SHORT).show();
+                // create a popup menu to confirm deletion
+                PopupMenu popup = new PopupMenu(getActivity(), view);
+                popup.getMenuInflater().inflate(R.menu.popupdel, popup.getMenu());
+                // catch the selection of the popup
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        String title = String.valueOf(item.getTitle());
+                        if (title.equals("DELETE")) {
+                            returnresult(false);
+                        } else {
+                            Toast.makeText(getActivity(), "Clicked popup menu item " + title,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        return true;
+                    }
+                });
+                // start the popup
+                popup.show();
             }
         });
 
@@ -171,13 +205,15 @@ public class ContactEditMemoFragment extends Fragment {
     }
 
     // returns the contents of edited data to the caller activity
-    public void returnresult() {
+    public void returnresult(boolean saveordel) {
         final Intent data = new Intent();
-        data.putExtra("MEMO",mEditMemo.getText().toString());
-        getActivity().setResult(Activity.RESULT_OK,data);
+        if (saveordel) {
+            data.putExtra("MEMO", mEditMemo.getText().toString());
+        } else {
+            data.putExtra("MEMO", "");
+        }
+        getActivity().setResult(Activity.RESULT_OK, data);
         getActivity().finish();
     }
-
-
 
 }

@@ -22,9 +22,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#f0f0f0"
-    android:paddingTop="2dp"
+    android:orientation="horizontal"
     android:paddingLeft="@dimen/padding"
-    android:orientation="horizontal">
+    android:paddingTop="2dp">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -53,7 +53,7 @@
 
     <TextView
         android:id="@+id/contact_transaction_amount"
-        style="@style/adminDetail"
+        style="@style/addressDetail"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

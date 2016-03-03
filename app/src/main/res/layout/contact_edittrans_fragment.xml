@@ -57,7 +57,7 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    style="@style/adminHeader"
+                    style="@style/addressHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -85,7 +85,7 @@
                 android:orientation="vertical">
 
                 <TextView
-                    style="@style/adminHeader"
+                    style="@style/addressHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left"
@@ -99,11 +99,11 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="left"
                     android:gravity="left"
-                    android:minHeight="32dp"
-                    android:text="Description of invoice"
+                    android:inputType="textCapSentences"
                     android:lines="1"
                     android:maxLines="1"
-                    android:inputType="textCapSentences" />
+                    android:minHeight="32dp"
+                    android:text="Description of invoice" />
 
             </LinearLayout>
 
@@ -116,7 +116,7 @@
                 android:showDividers="middle">
 
                 <TextView
-                    style="@style/adminHeader"
+                    style="@style/addressHeader"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -133,28 +133,50 @@
                     android:layout_gravity="center"
                     android:layout_weight="3"
                     android:gravity="right"
-                    android:paddingLeft="@dimen/padding"
-                    android:paddingRight="@dimen/padding"
-                    android:text="0.00"
                     android:inputType="numberDecimal|numberSigned"
                     android:lines="1"
-                    android:maxLines="1" />
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/padding"
+                    android:paddingRight="@dimen/padding"
+                    android:text="0.00" />
 
             </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/button_save_edittrans"
+                <ImageButton
+                    android:id="@+id/button_delete_edittrans"
+                    style="@style/notesButton"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:src="@drawable/ic_menu_delete" />
+
+                <TextView
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"
-                    android:text="Save" />
+                    android:layout_weight="3" />
+
+
+                <ImageButton
+                    android:id="@+id/button_save_edittrans"
+                    style="@style/notesButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:gravity="right"
+                    android:src="@drawable/ic_menu_save" />
 
             </LinearLayout>
 

@@ -118,7 +118,7 @@
                     android:showDividers="middle">
 
                     <TextView
-                        style="@style/adminHeader"
+                        style="@style/addressHeader"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -128,7 +128,7 @@
                         android:text="Description" />
 
                     <TextView
-                        style="@style/adminHeader"
+                        style="@style/addressHeader"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -138,7 +138,7 @@
 
                     <ImageButton
                         android:id="@+id/button_add_admin"
-                        style="@style/adminButton"
+                        style="@style/addressButton"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
@@ -163,19 +163,19 @@
                     android:showDividers="middle">
 
                     <TextView
-                        style="@style/adminHeader"
+                        style="@style/addressHeader"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_weight="8"
+                        android:gravity="right"
                         android:paddingLeft="@dimen/padding"
                         android:paddingRight="@dimen/padding"
-                        android:gravity="right"
                         android:text="Total" />
 
                     <TextView
-                        style="@style/adminDetail"
                         android:id="@+id/contact_transaction_total"
+                        style="@style/addressDetail"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
@@ -185,7 +185,7 @@
 
                     <ImageButton
                         android:id="@+id/button_save_transaction"
-                        style="@style/adminButton"
+                        style="@style/addressButton"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
@@ -198,19 +198,19 @@
                     android:id="@+id/contact_address_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"/>
+                    android:orientation="vertical" />
 
                 <LinearLayout
                     android:id="@+id/contact_phone_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"/>
+                    android:orientation="vertical" />
 
                 <LinearLayout
                     android:id="@+id/contact_email_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"/>
+                    android:orientation="vertical" />
 
             </LinearLayout>
 

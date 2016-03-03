@@ -1,109 +1,927 @@
 diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
-index 6b9a7a5..a9560eb 100644
+index a9560eb..05b9187 100644
 --- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
 +++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactAdminFragment.java
-@@ -353,11 +353,12 @@ public class ContactAdminFragment extends Fragment implements
- 
-     // email the note-transaction part to the contact
-     public void emailcontact(String email) {
-+        prepare_invoice();
-         Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
-         emailIntent.setType("message/rfc822");
-         emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{email});
--        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Invoice");
--        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, notereformat.toString());
-+        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Account State");
-+        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, noteinvoice.toString());
-         try {
-             startActivity(Intent.createChooser(emailIntent, "Send Email."));
-         } catch (Exception ex) {
-@@ -379,6 +380,8 @@ public class ContactAdminFragment extends Fragment implements
+@@ -380,8 +380,8 @@ public class ContactAdminFragment extends Fragment implements
      private void addtransaction() {
          // create an empty default transaction
          transac = new Transac();
-+        transac.contactid=mContactId;
-+        transac.rawcontactid=mRawContactId;
+-        transac.contactid=mContactId;
+-        transac.rawcontactid=mRawContactId;
++        transac.contactid = mContactId;
++        transac.rawcontactid = mRawContactId;
          transac.qte = 1.0;
          transac.prix = 0.0;
          transac.mnt = 0.0;
-@@ -421,6 +424,7 @@ public class ContactAdminFragment extends Fragment implements
+@@ -394,13 +394,13 @@ public class ContactAdminFragment extends Fragment implements
+         // add element to the table
+         transaclist.addElement(transac);
+         nbtransac++;
+-        edittransaction(nbtransac-1);
++        edittransaction(nbtransac - 1);
+     }
+ 
+     // start the editing activity for editing a transaction
+     private void edittransaction(int i) {
+-        transac=transaclist.elementAt(i);
+-        curtransac=i;
++        transac = transaclist.elementAt(i);
++        curtransac = i;
+         // start an activity to edit the transaction
+         Intent intent = new Intent(getActivity(), ContactEditTransActivity.class);
+         intent.setData(mContactUri);
+@@ -424,17 +424,22 @@ public class ContactAdminFragment extends Fragment implements
          }
          // If the request went well (OK) and the request was EDITTRANS_REQUEST
          if (resultCode == Activity.RESULT_OK && requestCode == EDITTRANS_REQUEST) {
-+            transac=transaclist.elementAt(curtransac);
-             transac.descrip=data.getStringExtra("DESCRIP");
-             transac.amount=data.getStringExtra("AMOUNT");
-             transac.trdate=data.getStringExtra("DATE");
-@@ -818,6 +822,9 @@ public class ContactAdminFragment extends Fragment implements
-     // string containing the reformatted part of the note
-     private StringBuffer notereformat = new StringBuffer();
- 
-+    // string containing an invoice list in human readable form
-+    private StringBuffer noteinvoice = new StringBuffer();
-+
-     // string containing the full note reassembled and ready to write back on disk
-     private String newnote;
- 
-@@ -825,7 +832,9 @@ public class ContactAdminFragment extends Fragment implements
-     private String noteline = "";
- 
-     // structure of a row of the table
--    private class Transac extends Object {
-+    private class Transac {
-+        String contactid;
-+        String rawcontactid;
-         double qte;
-         double prix;
-         double mnt;
-@@ -885,6 +894,8 @@ public class ContactAdminFragment extends Fragment implements
+-            transac=transaclist.elementAt(curtransac);
+-            transac.descrip=data.getStringExtra("DESCRIP");
+-            transac.amount=data.getStringExtra("AMOUNT");
+-            transac.trdate=data.getStringExtra("DATE");
+-            // reformat the amount
+-            transac.mnt = Double.valueOf(transac.amount);
+-            transac.prix = transac.mnt;
+-            transac.amount = String.format("%.2f", transac.mnt);
+-            // reformat the date
+-            transac.fdate = stringToDate(transac.trdate);
+-            transac.trdate = dateToString(transac.fdate);
++            transac = transaclist.elementAt(curtransac);
++            if (data.getStringExtra("DESCRIP").isEmpty() && data.getStringExtra("AMOUNT").isEmpty()) {
++                transaclist.removeElementAt(curtransac);
++                nbtransac--;
++            } else {
++                transac.descrip = data.getStringExtra("DESCRIP");
++                transac.amount = data.getStringExtra("AMOUNT");
++                transac.trdate = data.getStringExtra("DATE");
++                // reformat the amount
++                transac.mnt = Double.valueOf(transac.amount);
++                transac.prix = transac.mnt;
++                transac.amount = String.format("%.2f", transac.mnt);
++                // reformat the date
++                transac.fdate = stringToDate(transac.trdate);
++                transac.trdate = dateToString(transac.fdate);
++            }
+             compactnote();
+             savenote();
+         }
+@@ -894,8 +899,8 @@ public class ContactAdminFragment extends Fragment implements
      private void decodeline() {
          // create an empty default transaction
          transac = new Transac();
-+        transac.contactid=mNotesId;
-+        transac.rawcontactid=mNotesRawId;
+-        transac.contactid=mNotesId;
+-        transac.rawcontactid=mNotesRawId;
++        transac.contactid = mNotesId;
++        transac.rawcontactid = mNotesRawId;
          transac.qte = 1.0;
          transac.prix = 0.0;
          transac.mnt = 0.0;
-@@ -929,6 +940,29 @@ public class ContactAdminFragment extends Fragment implements
+@@ -942,7 +947,7 @@ public class ContactAdminFragment extends Fragment implements
+     // transform the transaction table in a memo form, and display it in the last bottom debug field
+     private void prepare_invoice() {
+         int i;
+-        double tot=0.0;
++        double tot = 0.0;
+         noteinvoice.setLength(0);
+         // refill the string with the transactions list in readable mode
+         noteinvoice.append("<html><PRE>\n+-----------+---------+------------+-------------------------------+\n");
+@@ -951,14 +956,14 @@ public class ContactAdminFragment extends Fragment implements
+             noteinvoice.append("| ");
+             noteinvoice.append(transac.trdate);
+             noteinvoice.append(" | ");
+-            noteinvoice.append(String.format("%10.2f" , transac.mnt));
++            noteinvoice.append(String.format("%10.2f", transac.mnt));
+             noteinvoice.append(" | ");
+             noteinvoice.append(String.format("%-30.30s", transac.descrip));
+             noteinvoice.append(" |\n");
+-            tot+=transac.mnt;
++            tot += transac.mnt;
+         }
+         noteinvoice.append("+-----------+---------+------------+-------------------------------+\n");
+-        noteinvoice.append(String.format("+               TOTAL + %10.2f +                               +\n",tot));
++        noteinvoice.append(String.format("+               TOTAL + %10.2f +                               +\n", tot));
+         noteinvoice.append("+-----------+---------+------------+-------------------------------+\n</PRE></html>");
      }
  
-     // transform the transaction table in a memo form, and display it in the last bottom debug field
-+    private void prepare_invoice() {
-+        int i;
-+        double tot=0.0;
-+        noteinvoice.setLength(0);
-+        // refill the string with the transactions list in readable mode
-+        noteinvoice.append("<html><PRE>\n+-----------+---------+------------+-------------------------------+\n");
-+        for (i = 0; i < nbtransac; ++i) {
-+            transac = transaclist.elementAt(i);
-+            noteinvoice.append("| ");
-+            noteinvoice.append(transac.trdate);
-+            noteinvoice.append(" | ");
-+            noteinvoice.append(String.format("%10.2f" , transac.mnt));
-+            noteinvoice.append(" | ");
-+            noteinvoice.append(String.format("%-30.30s", transac.descrip));
-+            noteinvoice.append(" |\n");
-+            tot+=transac.mnt;
-+        }
-+        noteinvoice.append("+-----------+---------+------------+-------------------------------+\n");
-+        noteinvoice.append(String.format("+               TOTAL + %10.2f +                               +\n",tot));
-+        noteinvoice.append("+-----------+---------+------------+-------------------------------+\n</PRE></html>");
-+    }
+@@ -1212,7 +1217,7 @@ public class ContactAdminFragment extends Fragment implements
+ 
+                     final Intent viewIntent =
+                             new Intent(Intent.ACTION_VIEW,
+-                                constructGeoUri(view.getContentDescription().toString()));
++                                    constructGeoUri(view.getContentDescription().toString()));
+ 
+                     // A PackageManager instance is needed to verify that there's a default app
+                     // that handles ACTION_VIEW and a geo Uri.
+diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoActivity.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoActivity.java
+index 55d5f45..e0cba22 100644
+--- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoActivity.java
++++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoActivity.java
+@@ -51,7 +51,7 @@ public class ContactEditMemoActivity extends FragmentActivity {
+ 
+                 // Adds a newly created ContactEditMemoFragment that is instantiated with the
+                 // data Uri
+-                ft.add(android.R.id.content, ContactEditMemoFragment.newInstance(uri,name,memo), TAG);
++                ft.add(android.R.id.content, ContactEditMemoFragment.newInstance(uri, name, memo), TAG);
+                 ft.commit();
+             }
+         } else {
+diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoFragment.java
+index 485f277..01d0ef3 100644
+--- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoFragment.java
++++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditMemoFragment.java
+@@ -6,10 +6,13 @@ import android.net.Uri;
+ import android.os.Bundle;
+ import android.provider.ContactsContract;
+ import android.view.LayoutInflater;
++import android.view.MenuItem;
+ import android.view.View;
+ import android.view.ViewGroup;
+ import android.widget.Button;
+ import android.widget.EditText;
++import android.widget.ImageButton;
++import android.widget.PopupMenu;
+ import android.widget.TextView;
+ import android.widget.Toast;
+ import android.support.v4.app.Fragment;
+@@ -29,16 +32,18 @@ public class ContactEditMemoFragment extends Fragment {
+ 
+     private Uri mContactUri; // Stores the contact Uri for this fragment instance
+ 
+-    public String contactName="";   // stores the contact name for this instance
++    public String contactName = "";   // stores the contact name for this instance
+ 
+-    public String contactMemo="";   // stores the memo data for this instance
++    public String contactMemo = "";   // stores the memo data for this instance
+ 
+ 
+     private TextView mContactName;  // display contact name
+ 
+     private EditText mEditMemo;     // display and edit the memo field
+ 
+-    private Button mEditMemoButton; // save the data and return to previous avtivity
++    private ImageButton mEditMemoButton; // save the data and return to previous avtivity
 +
-+    // transform the transaction table in a memo form, and display it in the last bottom debug field
-     private void compactnote() {
-         int i;
-         notereformat.setLength(0);
++    private ImageButton mDeleteMemoButton; // save the data and return to previous avtivity
+ 
+     /**
+      * Factory method to generate a new instance of the fragment given a contact Uri. A factory
+@@ -52,8 +57,8 @@ public class ContactEditMemoFragment extends Fragment {
+         // Create new instance of this fragment
+         final ContactEditMemoFragment fragment = new ContactEditMemoFragment();
+ 
+-        fragment.contactName=name;
+-        fragment.contactMemo=memo;
++        fragment.contactName = name;
++        fragment.contactMemo = memo;
+ 
+         // Create and populate the args bundle
+         final Bundle args = new Bundle();
+@@ -96,10 +101,10 @@ public class ContactEditMemoFragment extends Fragment {
+             mContactUri = ContactsContract.Contacts.lookupContact(getActivity().getContentResolver(),
+                     contactLookupUri);
+         }
+-        if(mContactName != null) {
++        if (mContactName != null) {
+             mContactName.setText(contactName);
+         }
+-        if(mEditMemo != null) {
++        if (mEditMemo != null) {
+             mEditMemo.setText(contactMemo);
+         }
+     }
+@@ -128,14 +133,43 @@ public class ContactEditMemoFragment extends Fragment {
+         mEditMemo.setVisibility(View.VISIBLE);
+ 
+         // Defines an onClickListener object for the add-admin button
+-        mEditMemoButton = (Button) adminView.findViewById(R.id.button_save_editmemo);
++        mEditMemoButton = (ImageButton) adminView.findViewById(R.id.button_save_editmemo);
+         mEditMemoButton.setOnClickListener(new View.OnClickListener() {
+             // Defines what to do when users click the address button
+             @Override
+             public void onClick(View view) {
+                 // Displays a message that no activity can handle the view button.
+                 Toast.makeText(getActivity(), "Save EditMemo", Toast.LENGTH_SHORT).show();
+-                returnresult();
++                returnresult(true);
++            }
++        });
++
++        // Defines an onClickListener object for the add-admin button
++        mDeleteMemoButton = (ImageButton) adminView.findViewById(R.id.button_delete_editmemo);
++        mDeleteMemoButton.setOnClickListener(new View.OnClickListener() {
++            // Defines what to do when users click the address button
++            @Override
++            public void onClick(View view) {
++                // Displays a message that no activity can handle the view button.
++                Toast.makeText(getActivity(), "Delete EditMemo", Toast.LENGTH_SHORT).show();
++                // create a popup menu to confirm deletion
++                PopupMenu popup = new PopupMenu(getActivity(), view);
++                popup.getMenuInflater().inflate(R.menu.popupdel, popup.getMenu());
++                // catch the selection of the popup
++                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
++                    public boolean onMenuItemClick(MenuItem item) {
++                        String title = String.valueOf(item.getTitle());
++                        if (title.equals("DELETE")) {
++                            returnresult(false);
++                        } else {
++                            Toast.makeText(getActivity(), "Clicked popup menu item " + title,
++                                    Toast.LENGTH_SHORT).show();
++                        }
++                        return true;
++                    }
++                });
++                // start the popup
++                popup.show();
+             }
+         });
+ 
+@@ -171,13 +205,15 @@ public class ContactEditMemoFragment extends Fragment {
+     }
+ 
+     // returns the contents of edited data to the caller activity
+-    public void returnresult() {
++    public void returnresult(boolean saveordel) {
+         final Intent data = new Intent();
+-        data.putExtra("MEMO",mEditMemo.getText().toString());
+-        getActivity().setResult(Activity.RESULT_OK,data);
++        if (saveordel) {
++            data.putExtra("MEMO", mEditMemo.getText().toString());
++        } else {
++            data.putExtra("MEMO", "");
++        }
++        getActivity().setResult(Activity.RESULT_OK, data);
+         getActivity().finish();
+     }
+ 
+-
+-
+ }
+diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransActivity.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransActivity.java
+index b731966..9ac6b56 100644
+--- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransActivity.java
++++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransActivity.java
+@@ -53,7 +53,7 @@ public class ContactEditTransActivity extends FragmentActivity {
+ 
+                 // Adds a newly created ContactEditMemoFragment that is instantiated with the
+                 // data Uri
+-                ft.add(android.R.id.content, ContactEditTransFragment.newInstance(uri,name,descrip,amount,date), TAG);
++                ft.add(android.R.id.content, ContactEditTransFragment.newInstance(uri, name, descrip, amount, date), TAG);
+                 ft.commit();
+             }
+         } else {
+diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransFragment.java
+index 04687e0..a594ded 100644
+--- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransFragment.java
++++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactEditTransFragment.java
+@@ -6,10 +6,13 @@ import android.net.Uri;
+ import android.os.Bundle;
+ import android.provider.ContactsContract;
+ import android.view.LayoutInflater;
++import android.view.MenuItem;
+ import android.view.View;
+ import android.view.ViewGroup;
+ import android.widget.Button;
+ import android.widget.EditText;
++import android.widget.ImageButton;
++import android.widget.PopupMenu;
+ import android.widget.TextView;
+ import android.widget.Toast;
+ import android.support.v4.app.Fragment;
+@@ -29,13 +32,13 @@ public class ContactEditTransFragment extends Fragment {
+ 
+     private Uri mContactUri; // Stores the contact Uri for this fragment instance
+ 
+-    public String contactName="";   // stores the contact name for this instance
++    public String contactName = "";   // stores the contact name for this instance
+ 
+-    public String transDescrip="";   // stores the transaction description for this instance
++    public String transDescrip = "";   // stores the transaction description for this instance
+ 
+-    public String transAmount="";   // stores the amount data for this instance
++    public String transAmount = "";   // stores the amount data for this instance
+ 
+-    public String transDate="";     // stores the date of transaction
++    public String transDate = "";     // stores the date of transaction
+ 
+     private TextView mContactName;  // display contact name
+ 
+@@ -43,7 +46,9 @@ public class ContactEditTransFragment extends Fragment {
+     private EditText mEditAmount;     // display and edit the memo field
+     private EditText mEditDate;     // display and edit the memo field
+ 
+-    private Button mEditTransButton; // save the data and return to previous avtivity
++    private ImageButton mEditTransButton; // save the data and return to previous avtivity
++
++    private ImageButton mDeleteTransButton; // save the data and return to previous avtivity
+ 
+     /**
+      * Factory method to generate a new instance of the fragment given a contact Uri. A factory
+@@ -57,10 +62,10 @@ public class ContactEditTransFragment extends Fragment {
+         // Create new instance of this fragment
+         final ContactEditTransFragment fragment = new ContactEditTransFragment();
+ 
+-        fragment.contactName=name;
+-        fragment.transDescrip=descrip;
+-        fragment.transAmount=amount;
+-        fragment.transDate=date;
++        fragment.contactName = name;
++        fragment.transDescrip = descrip;
++        fragment.transAmount = amount;
++        fragment.transDate = date;
+ 
+         // Create and populate the args bundle
+         final Bundle args = new Bundle();
+@@ -103,16 +108,16 @@ public class ContactEditTransFragment extends Fragment {
+             mContactUri = ContactsContract.Contacts.lookupContact(getActivity().getContentResolver(),
+                     contactLookupUri);
+         }
+-        if(mContactName != null) {
++        if (mContactName != null) {
+             mContactName.setText(contactName);
+         }
+-        if(mEditDescrip != null) {
++        if (mEditDescrip != null) {
+             mEditDescrip.setText(transDescrip);
+         }
+-        if(mEditAmount != null) {
++        if (mEditAmount != null) {
+             mEditAmount.setText(transAmount);
+         }
+-        if(mEditDate != null) {
++        if (mEditDate != null) {
+             mEditDate.setText(transDate);
+         }
+     }
+@@ -147,17 +152,45 @@ public class ContactEditTransFragment extends Fragment {
+         mEditDate.setVisibility(View.VISIBLE);
+ 
+         // Defines an onClickListener object for the add-admin button
+-        mEditTransButton = (Button) adminView.findViewById(R.id.button_save_edittrans);
++        mEditTransButton = (ImageButton) adminView.findViewById(R.id.button_save_edittrans);
+         mEditTransButton.setOnClickListener(new View.OnClickListener() {
+             // Defines what to do when users click the address button
+             @Override
+             public void onClick(View view) {
+                 // Displays a message that no activity can handle the view button.
+                 Toast.makeText(getActivity(), "Save EditTrans", Toast.LENGTH_SHORT).show();
+-                returnresult();
++                returnresult(true);
+             }
+         });
+ 
++        // Defines an onClickListener object for the add-admin button
++        mDeleteTransButton = (ImageButton) adminView.findViewById(R.id.button_delete_edittrans);
++        mDeleteTransButton.setOnClickListener(new View.OnClickListener() {
++            // Defines what to do when users click the address button
++            @Override
++            public void onClick(View view) {
++                // Displays a message that no activity can handle the view button.
++                Toast.makeText(getActivity(), "Delete EditTrans", Toast.LENGTH_SHORT).show();
++                // create a popup menu to confirm deletion
++                PopupMenu popup = new PopupMenu(getActivity(), view);
++                popup.getMenuInflater().inflate(R.menu.popupdel, popup.getMenu());
++                // catch the selection of the popup
++                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
++                    public boolean onMenuItemClick(MenuItem item) {
++                        String title = String.valueOf(item.getTitle());
++                        if (title.equals("DELETE")) {
++                            returnresult(false);
++                        } else {
++                            Toast.makeText(getActivity(), "Clicked popup menu item " + title,
++                                    Toast.LENGTH_SHORT).show();
++                        }
++                        return true;
++                    }
++                });
++                // start the popup
++                popup.show();
++            }
++        });
+ 
+         return adminView;
+     }
+@@ -190,15 +223,20 @@ public class ContactEditTransFragment extends Fragment {
+     }
+ 
+     // returns the contents of edited data to the caller activity
+-    public void returnresult() {
++    public void returnresult(boolean saveordel) {
+         final Intent data = new Intent();
+-        data.putExtra("DESCRIP",mEditDescrip.getText().toString());
+-        data.putExtra("AMOUNT",mEditAmount.getText().toString());
+-        data.putExtra("DATE",mEditDate.getText().toString());
+-        getActivity().setResult(Activity.RESULT_OK,data);
++        if (saveordel) {
++            data.putExtra("DESCRIP", mEditDescrip.getText().toString());
++            data.putExtra("AMOUNT", mEditAmount.getText().toString());
++            data.putExtra("DATE", mEditDate.getText().toString());
++        } else {
++            data.putExtra("DESCRIP", "");
++            data.putExtra("AMOUNT", "");
++            data.putExtra("DATE", "");
++        }
++        getActivity().setResult(Activity.RESULT_OK, data);
+         getActivity().finish();
+     }
+ 
+ 
+-
+ }
+diff --git a/app/src/main/res/drawable/star_big_on.png b/app/src/main/res/drawable/star_big_on.png
+index 510c8b2..944918e 100644
+Binary files a/app/src/main/res/drawable/star_big_on.png and b/app/src/main/res/drawable/star_big_on.png differ
+diff --git a/app/src/main/res/layout/contact_admin_fragment.xml b/app/src/main/res/layout/contact_admin_fragment.xml
+index cd8d7c4..433469a 100644
+--- a/app/src/main/res/layout/contact_admin_fragment.xml
++++ b/app/src/main/res/layout/contact_admin_fragment.xml
+@@ -118,7 +118,7 @@
+                     android:showDividers="middle">
+ 
+                     <TextView
+-                        style="@style/adminHeader"
++                        style="@style/addressHeader"
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_gravity="center"
+@@ -128,7 +128,7 @@
+                         android:text="Description" />
+ 
+                     <TextView
+-                        style="@style/adminHeader"
++                        style="@style/addressHeader"
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_gravity="center"
+@@ -138,7 +138,7 @@
+ 
+                     <ImageButton
+                         android:id="@+id/button_add_admin"
+-                        style="@style/adminButton"
++                        style="@style/addressButton"
+                         android:layout_width="wrap_content"
+                         android:layout_height="match_parent"
+                         android:layout_gravity="center"
+@@ -163,19 +163,19 @@
+                     android:showDividers="middle">
+ 
+                     <TextView
+-                        style="@style/adminHeader"
++                        style="@style/addressHeader"
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_gravity="center"
+                         android:layout_weight="8"
++                        android:gravity="right"
+                         android:paddingLeft="@dimen/padding"
+                         android:paddingRight="@dimen/padding"
+-                        android:gravity="right"
+                         android:text="Total" />
+ 
+                     <TextView
+-                        style="@style/adminDetail"
+                         android:id="@+id/contact_transaction_total"
++                        style="@style/addressDetail"
+                         android:layout_width="0dp"
+                         android:layout_height="wrap_content"
+                         android:layout_gravity="center"
+@@ -185,7 +185,7 @@
+ 
+                     <ImageButton
+                         android:id="@+id/button_save_transaction"
+-                        style="@style/adminButton"
++                        style="@style/addressButton"
+                         android:layout_width="wrap_content"
+                         android:layout_height="match_parent"
+                         android:layout_gravity="center"
+@@ -198,19 +198,19 @@
+                     android:id="@+id/contact_address_layout"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+-                    android:orientation="vertical"/>
++                    android:orientation="vertical" />
+ 
+                 <LinearLayout
+                     android:id="@+id/contact_phone_layout"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+-                    android:orientation="vertical"/>
++                    android:orientation="vertical" />
+ 
+                 <LinearLayout
+                     android:id="@+id/contact_email_layout"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+-                    android:orientation="vertical"/>
++                    android:orientation="vertical" />
+ 
+             </LinearLayout>
+ 
+diff --git a/app/src/main/res/layout/contact_editmemo_fragment.xml b/app/src/main/res/layout/contact_editmemo_fragment.xml
+index 533953b..c07ee93 100644
+--- a/app/src/main/res/layout/contact_editmemo_fragment.xml
++++ b/app/src/main/res/layout/contact_editmemo_fragment.xml
+@@ -58,7 +58,7 @@
+                 android:orientation="horizontal">
+ 
+                 <TextView
+-                    style="@style/adminHeader"
++                    style="@style/notesHeader"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="center"
+@@ -68,6 +68,7 @@
+ 
+             </LinearLayout>
+ 
++
+             <LinearLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+@@ -81,20 +82,46 @@
+                     android:layout_marginLeft="16dp"
+                     android:layout_marginRight="16dp"
+                     android:gravity="left" />
++            </LinearLayout>
+ 
+ 
+-                <Button
++            <LinearLayout
++                android:layout_width="match_parent"
++                android:layout_height="wrap_content"
++                android:orientation="horizontal">
++
++                <ImageButton
++                    android:id="@+id/button_delete_editmemo"
++                    style="@style/notesButton"
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:layout_gravity="left"
++                    android:layout_marginLeft="16dp"
++                    android:layout_marginRight="16dp"
++                    android:src="@drawable/ic_menu_delete" />
++
++                <TextView
++                    android:layout_width="0dp"
++                    android:layout_height="wrap_content"
++                    android:layout_gravity="center"
++                    android:layout_marginLeft="16dp"
++                    android:layout_marginRight="16dp"
++                    android:layout_weight="3" />
++
++
++                <ImageButton
+                     android:id="@+id/button_save_editmemo"
++                    style="@style/notesButton"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="right"
+                     android:layout_marginLeft="16dp"
+                     android:layout_marginRight="16dp"
+-                    android:text="Save" />
++                    android:gravity="right"
++                    android:src="@drawable/ic_menu_save" />
+ 
+             </LinearLayout>
+ 
+-
+         </LinearLayout>
+     </ScrollView>
+ 
 diff --git a/app/src/main/res/layout/contact_edittrans_fragment.xml b/app/src/main/res/layout/contact_edittrans_fragment.xml
-index bca859d..cceebbb 100644
+index cceebbb..2861eff 100644
 --- a/app/src/main/res/layout/contact_edittrans_fragment.xml
 +++ b/app/src/main/res/layout/contact_edittrans_fragment.xml
-@@ -136,7 +136,7 @@
-                     android:paddingLeft="@dimen/padding"
-                     android:paddingRight="@dimen/padding"
-                     android:text="0.00"
--                    android:inputType="numberDecimal"
-+                    android:inputType="numberDecimal|numberSigned"
-                     android:lines="1"
-                     android:maxLines="1" />
+@@ -57,7 +57,7 @@
+                 android:orientation="horizontal">
  
+                 <TextView
+-                    style="@style/adminHeader"
++                    style="@style/addressHeader"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="center"
+@@ -85,7 +85,7 @@
+                 android:orientation="vertical">
+ 
+                 <TextView
+-                    style="@style/adminHeader"
++                    style="@style/addressHeader"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="left"
+@@ -99,11 +99,11 @@
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="left"
+                     android:gravity="left"
+-                    android:minHeight="32dp"
+-                    android:text="Description of invoice"
++                    android:inputType="textCapSentences"
+                     android:lines="1"
+                     android:maxLines="1"
+-                    android:inputType="textCapSentences" />
++                    android:minHeight="32dp"
++                    android:text="Description of invoice" />
+ 
+             </LinearLayout>
+ 
+@@ -116,7 +116,7 @@
+                 android:showDividers="middle">
+ 
+                 <TextView
+-                    style="@style/adminHeader"
++                    style="@style/addressHeader"
+                     android:layout_width="0dp"
+                     android:layout_height="wrap_content"
+                     android:layout_gravity="center"
+@@ -133,28 +133,50 @@
+                     android:layout_gravity="center"
+                     android:layout_weight="3"
+                     android:gravity="right"
+-                    android:paddingLeft="@dimen/padding"
+-                    android:paddingRight="@dimen/padding"
+-                    android:text="0.00"
+                     android:inputType="numberDecimal|numberSigned"
+                     android:lines="1"
+-                    android:maxLines="1" />
++                    android:maxLines="1"
++                    android:paddingLeft="@dimen/padding"
++                    android:paddingRight="@dimen/padding"
++                    android:text="0.00" />
+ 
+             </LinearLayout>
+ 
++
+             <LinearLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+-                android:orientation="vertical">
++                android:orientation="horizontal">
+ 
+-                <Button
+-                    android:id="@+id/button_save_edittrans"
++                <ImageButton
++                    android:id="@+id/button_delete_edittrans"
++                    style="@style/notesButton"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
++                    android:layout_gravity="left"
++                    android:layout_marginLeft="16dp"
++                    android:layout_marginRight="16dp"
++                    android:src="@drawable/ic_menu_delete" />
++
++                <TextView
++                    android:layout_width="0dp"
++                    android:layout_height="wrap_content"
+                     android:layout_gravity="center"
+                     android:layout_marginLeft="16dp"
+                     android:layout_marginRight="16dp"
+-                    android:text="Save" />
++                    android:layout_weight="3" />
++
++
++                <ImageButton
++                    android:id="@+id/button_save_edittrans"
++                    style="@style/notesButton"
++                    android:layout_width="wrap_content"
++                    android:layout_height="wrap_content"
++                    android:layout_gravity="right"
++                    android:layout_marginLeft="16dp"
++                    android:layout_marginRight="16dp"
++                    android:gravity="right"
++                    android:src="@drawable/ic_menu_save" />
+ 
+             </LinearLayout>
+ 
+diff --git a/app/src/main/res/layout/contact_email_item.xml b/app/src/main/res/layout/contact_email_item.xml
+index 737acd6..c706fc2 100644
+--- a/app/src/main/res/layout/contact_email_item.xml
++++ b/app/src/main/res/layout/contact_email_item.xml
+@@ -30,18 +30,18 @@
+ 
+         <TextView
+             android:id="@+id/contact_email_header"
+-            style="@style/emailHeader"
++            style="@style/addressHeader"
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+-            android:layout_weight="3"
+             android:layout_gravity="center"
++            android:layout_weight="3"
+             android:paddingLeft="@dimen/padding"
+             android:paddingRight="@dimen/padding"
+             android:text="Email" />
+ 
+         <TextView
+             android:id="@+id/contact_email_item"
+-            style="@style/emailDetail"
++            style="@style/addressDetail"
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_gravity="center"
+@@ -52,12 +52,12 @@
+ 
+         <ImageButton
+             android:id="@+id/button_edit_email"
+-            style="@style/emailButton"
++            style="@style/addressButton"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_gravity="center"
+             android:contentDescription="@string/email_button_description"
+-            android:src="@drawable/ic_action_play" />
++            android:src="@drawable/ic_dialog_email" />
+ 
+     </LinearLayout>
+ 
+diff --git a/app/src/main/res/layout/contact_phone_item.xml b/app/src/main/res/layout/contact_phone_item.xml
+index a682e75..29abce4 100644
+--- a/app/src/main/res/layout/contact_phone_item.xml
++++ b/app/src/main/res/layout/contact_phone_item.xml
+@@ -30,18 +30,18 @@
+ 
+         <TextView
+             android:id="@+id/contact_phone_header"
+-            style="@style/phoneHeader"
++            style="@style/addressHeader"
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+-            android:layout_weight="3"
+             android:layout_gravity="center"
++            android:layout_weight="3"
+             android:paddingLeft="@dimen/padding"
+             android:paddingRight="@dimen/padding"
+             android:text="Phone" />
+ 
+         <TextView
+             android:id="@+id/contact_phone_item"
+-            style="@style/phoneDetail"
++            style="@style/addressDetail"
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_gravity="center"
+@@ -52,12 +52,12 @@
+ 
+         <ImageButton
+             android:id="@+id/button_edit_phone"
+-            style="@style/phoneButton"
++            style="@style/addressButton"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_gravity="center"
+             android:contentDescription="@string/phone_button_description"
+-            android:src="@drawable/ic_action_play" />
++            android:src="@drawable/ic_menu_call" />
+ 
+     </LinearLayout>
+ 
+diff --git a/app/src/main/res/layout/contact_transaction_item.xml b/app/src/main/res/layout/contact_transaction_item.xml
+index 23de5db..0d71c6a 100644
+--- a/app/src/main/res/layout/contact_transaction_item.xml
++++ b/app/src/main/res/layout/contact_transaction_item.xml
+@@ -22,9 +22,9 @@
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:background="#f0f0f0"
+-    android:paddingTop="2dp"
++    android:orientation="horizontal"
+     android:paddingLeft="@dimen/padding"
+-    android:orientation="horizontal">
++    android:paddingTop="2dp">
+ 
+     <LinearLayout
+         android:layout_width="0dp"
+@@ -53,7 +53,7 @@
+ 
+     <TextView
+         android:id="@+id/contact_transaction_amount"
+-        style="@style/adminDetail"
++        style="@style/addressDetail"
+         android:layout_width="0dp"
+         android:layout_height="wrap_content"
+         android:layout_gravity="center"
+diff --git a/app/src/main/res/menu/popupdel.xml b/app/src/main/res/menu/popupdel.xml
+index fe187c0..a41dd4d 100644
+--- a/app/src/main/res/menu/popupdel.xml
++++ b/app/src/main/res/menu/popupdel.xml
+@@ -1,4 +1,24 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<menu xmlns:android="http://schemas.android.com/apk/res/android">
++<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2010 Google Inc.
++
++     Licensed under the Apache License, Version 2.0 (the "License");
++     you may not use this file except in compliance with the License.
++     You may obtain a copy of the License at
+ 
+-</menu>
+\ No newline at end of file
++          http://www.apache.org/licenses/LICENSE-2.0
++
++     Unless required by applicable law or agreed to in writing, software
++     distributed under the License is distributed on an "AS IS" BASIS,
++     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++     See the License for the specific language governing permissions and
++     limitations under the License.
++-->
++<menu xmlns:android="http://schemas.android.com/apk/res/android">
++    <item
++        android:id="@+id/nodel"
++        android:icon="@android:drawable/ic_menu_close_clear_cancel"
++        android:title="CANCEL" />
++    <item
++        android:id="@+id/yesdel"
++        android:icon="@android:drawable/ic_menu_delete"
++        android:title="DELETE" />
++</menu>
+diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+index 79bae1a..d3a15c3 100644
+--- a/app/src/main/res/values/strings.xml
++++ b/app/src/main/res/values/strings.xml
+@@ -1,5 +1,4 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<!--
++<?xml version="1.0" encoding="utf-8"?><!--
+   Copyright (C) 2013 The Android Open Source Project
+ 
+   Licensed under the Apache License, Version 2.0 (the "License");
+@@ -58,13 +57,7 @@
+     <string name="no_intent_found">No application found to handle this action!</string>
+     <string name="yes_intent_found">Application found.</string>
+ 
+-
+     <string name="admin_description_texthint">Transaction Description</string>
+     <string name="admin_date_texthint">2016-12-31</string>
+ 
+-
+-
+-
+-
+-
+ </resources>
+diff --git a/app/src/main/res/values/styles.xml b/app/src/main/res/values/styles.xml
+index ac7eee8..f77d054 100644
+--- a/app/src/main/res/values/styles.xml
++++ b/app/src/main/res/values/styles.xml
+@@ -42,6 +42,13 @@
+         <item name="android:textStyle">bold</item>
+     </style>
+ 
++    <style name="contactNameTitle" parent="@android:style/TextAppearance.Large">
++        <item name="android:textSize">38sp</item>
++        <item name="android:textColor">@color/holo_blue</item>
++        <item name="android:fontFamily">sans-serif</item>
++        <item name="android:textIsSelectable">true</item>
++    </style>
++
+     <style name="addressHeader" parent="@android:style/TextAppearance.Small">
+         <item name="android:textAllCaps">true</item>
+         <item name="android:textStyle">bold</item>
+@@ -68,50 +75,4 @@
+ 
+     <style name="notesButton" parent="@android:style/Widget.Holo.Button.Borderless"/>
+ 
+-    <style name="adminHeader" parent="@android:style/TextAppearance.Small">
+-        <item name="android:textAllCaps">true</item>
+-        <item name="android:textStyle">bold</item>
+-        <item name="android:textColor">@color/holo_blue</item>
+-    </style>
+-
+-    <style name="adminDetail" parent="@android:style/TextAppearance.Medium">
+-        <item name="android:fontFamily">sans-serif-light</item>
+-        <item name="android:textIsSelectable">true</item>
+-    </style>
+-
+-    <style name="adminButton" parent="@android:style/Widget.Holo.Button.Borderless"/>
+-
+-    <style name="phoneHeader" parent="@android:style/TextAppearance.Small">
+-        <item name="android:textAllCaps">true</item>
+-        <item name="android:textStyle">bold</item>
+-        <item name="android:textColor">@color/holo_blue</item>
+-    </style>
+-
+-    <style name="phoneDetail" parent="@android:style/TextAppearance.Medium">
+-        <item name="android:fontFamily">sans-serif-light</item>
+-        <item name="android:textIsSelectable">true</item>
+-    </style>
+-
+-    <style name="phoneButton" parent="@android:style/Widget.Holo.Button.Borderless"/>
+-
+-    <style name="emailHeader" parent="@android:style/TextAppearance.Small">
+-        <item name="android:textAllCaps">true</item>
+-        <item name="android:textStyle">bold</item>
+-        <item name="android:textColor">@color/holo_blue</item>
+-    </style>
+-
+-    <style name="emailDetail" parent="@android:style/TextAppearance.Medium">
+-        <item name="android:fontFamily">sans-serif-light</item>
+-        <item name="android:textIsSelectable">true</item>
+-    </style>
+-
+-    <style name="emailButton" parent="@android:style/Widget.Holo.Button.Borderless"/>
+-
+-    <style name="contactNameTitle" parent="@android:style/TextAppearance.Large">
+-        <item name="android:textSize">38sp</item>
+-        <item name="android:textColor">@color/holo_blue</item>
+-        <item name="android:fontFamily">sans-serif</item>
+-        <item name="android:textIsSelectable">true</item>
+-    </style>
+-
+ </resources>

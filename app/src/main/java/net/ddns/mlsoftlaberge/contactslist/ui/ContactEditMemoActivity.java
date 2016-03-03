@@ -51,7 +51,7 @@ public class ContactEditMemoActivity extends FragmentActivity {
 
                 // Adds a newly created ContactEditMemoFragment that is instantiated with the
                 // data Uri
-                ft.add(android.R.id.content, ContactEditMemoFragment.newInstance(uri,name,memo), TAG);
+                ft.add(android.R.id.content, ContactEditMemoFragment.newInstance(uri, name, memo), TAG);
                 ft.commit();
             }
         } else {
