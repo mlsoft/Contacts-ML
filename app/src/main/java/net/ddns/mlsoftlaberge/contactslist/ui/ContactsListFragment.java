@@ -116,6 +116,9 @@ public class ContactsListFragment extends ListFragment implements
     // OS versions as search results are shown in-line via Action Bar search from honeycomb onward
     private boolean mIsSearchResultView = false;
 
+    // keep the flag if we want starred filter or not
+    private int starredfind=1;
+
     /**
      * Fragments require an empty constructor.
      */
@@ -370,8 +373,7 @@ public class ContactsListFragment extends ListFragment implements
                     // Restarts the loader. This triggers onCreateLoader(), which builds the
                     // necessary content Uri from mSearchTerm.
                     mSearchQueryChanged = true;
-                    getLoaderManager().restartLoader(
-                            ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
+                    getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
                     return true;
                 }
             });
@@ -393,8 +395,7 @@ public class ContactsListFragment extends ListFragment implements
                             onSelectionCleared();
                         }
                         mSearchTerm = null;
-                        getLoaderManager().restartLoader(
-                                ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
+                        getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
                         return true;
                     }
                 });
@@ -446,6 +447,20 @@ public class ContactsListFragment extends ListFragment implements
                     getActivity().onSearchRequested();
                 }
                 break;
+            // Sends a request to the People app to display the create contact screen
+            case R.id.menu_starred:
+                // switch the starred flag on/off
+                if(starredfind==0) {
+                    starredfind=1;
+                    item.setIcon(R.drawable.btn_star_big_on);
+                }
+                else {
+                    starredfind=0;
+                    item.setIcon(R.drawable.btn_star_big_off);
+                }
+                // reread the list with new flag
+                getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -477,12 +492,21 @@ public class ContactsListFragment extends ListFragment implements
             // for the selection clause. The search string is either encoded onto the content URI,
             // or no contacts search string is used. The other search criteria are constants. See
             // the ContactsQuery interface.
-            return new CursorLoader(getActivity(),
-                    contentUri,
-                    ContactsQuery.PROJECTION,
-                    ContactsQuery.SELECTION,
-                    null,
-                    ContactsQuery.SORT_ORDER);
+            if(starredfind==0) {
+                return new CursorLoader(getActivity(),
+                        contentUri,
+                        ContactsQuery.PROJECTION,
+                        ContactsQuery.SELECTION,
+                        null,
+                        ContactsQuery.SORT_ORDER);
+            } else {
+                return new CursorLoader(getActivity(),
+                        contentUri,
+                        ContactsQuery.PROJECTION,
+                        ContactsQuery.SELECTION2,
+                        null,
+                        ContactsQuery.SORT_ORDER);
+            }
         }
 
         Log.e(TAG, "onCreateLoader - incorrect ID provided (" + id + ")");
@@ -889,9 +913,18 @@ public class ContactsListFragment extends ListFragment implements
         // the search string to CONTENT_FILTER_URI.
         @SuppressLint("InlinedApi")
         final static String SELECTION =
+                    (Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) + "<>''"
+                            + " AND " + Contacts.IN_VISIBLE_GROUP + "=1";
+
+        // The selection clause for the CursorLoader query. The search criteria defined here
+        // restrict results to contacts that have a display name and are linked to visible groups.
+        // Notice that the search on the string provided by the user is implemented by appending
+        // the search string to CONTENT_FILTER_URI.
+        @SuppressLint("InlinedApi")
+        final static String SELECTION2 =
                 (Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) + "<>''"
-                        + " AND " + Contacts.IN_VISIBLE_GROUP + "=1";
-        // + " AND " + Contacts.STARRED + "=1";
+                        + " AND " + Contacts.IN_VISIBLE_GROUP + "=1"
+                        + " AND " + Contacts.STARRED + "=1";
 
         // The desired sort order for the returned Cursor. In Android 3.0 and later, the primary
         // sort key allows for localization. In earlier versions. use the display name as the sort
@@ -937,4 +970,6 @@ public class ContactsListFragment extends ListFragment implements
         final static int PHOTO_THUMBNAIL_DATA = 3;
         final static int SORT_KEY = 4;
     }
+
+
 }
