@@ -1,310 +1,327 @@
-diff --git a/app/src/main/res/layout/contact_editmemo_fragment.xml b/app/src/main/res/layout/contact_editmemo_fragment.xml
-index c07ee93..9a2d8e2 100644
---- a/app/src/main/res/layout/contact_editmemo_fragment.xml
-+++ b/app/src/main/res/layout/contact_editmemo_fragment.xml
-@@ -42,9 +42,8 @@
-                 <TextView
-                     android:id="@+id/contact_name"
-                     style="@style/contactNameTitle"
--                    android:layout_width="0dp"
--                    android:layout_height="match_parent"
--                    android:layout_weight="65"
-+                    android:layout_width="match_parent"
-+                    android:layout_height="wrap_content"
-                     android:paddingLeft="@dimen/padding"
-                     android:paddingRight="@dimen/padding"
-                     android:paddingTop="8dp"
-@@ -55,25 +54,17 @@
-             <LinearLayout
-                 android:layout_width="match_parent"
-                 android:layout_height="wrap_content"
--                android:orientation="horizontal">
-+                android:orientation="vertical">
- 
-                 <TextView
-                     style="@style/notesHeader"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
--                    android:layout_gravity="center"
-+                    android:layout_gravity="left"
-                     android:paddingLeft="@dimen/padding"
-                     android:paddingRight="@dimen/padding"
-                     android:text="Memo" />
- 
--            </LinearLayout>
--
--
--            <LinearLayout
--                android:layout_width="match_parent"
--                android:layout_height="wrap_content"
--                android:orientation="vertical">
--
-                 <EditText
-                     android:id="@+id/contact_memo"
-                     android:layout_width="match_parent"
-@@ -82,6 +73,7 @@
-                     android:layout_marginLeft="16dp"
-                     android:layout_marginRight="16dp"
-                     android:gravity="left" />
-+
-             </LinearLayout>
- 
- 
+diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactsListFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactsListFragment.java
+index 96ffa1c..acdd703 100644
+--- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactsListFragment.java
++++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactsListFragment.java
+@@ -30,6 +30,7 @@ import android.os.Build;
+ import android.os.Bundle;
+ import android.provider.ContactsContract.Contacts;
+ import android.provider.ContactsContract.Contacts.Photo;
++import android.support.v4.app.Fragment;
+ import android.support.v4.app.ListFragment;
+ import android.support.v4.app.LoaderManager;
+ import android.support.v4.content.CursorLoader;
 diff --git a/gitdiff.txt b/gitdiff.txt
-index 10c6ed3..e69de29 100644
+index 0819f82..e69de29 100644
 --- a/gitdiff.txt
 +++ b/gitdiff.txt
-@@ -1,253 +0,0 @@
--diff --git a/app/app.iml b/app/app.iml
--index 07c7524..6809875 100644
----- a/app/app.iml
--+++ b/app/app.iml
--@@ -68,7 +68,7 @@
--       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/blame" />
--       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/classes" />
--       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
---      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.3/jars" />
--+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/23.2.0/jars" />
--       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
--       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/jniLibs" />
--       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/manifests" />
--@@ -80,9 +80,9 @@
--       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
--       <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
--     </content>
---    <orderEntry type="jdk" jdkName="Android API 21 Platform" jdkType="Android SDK" />
--+    <orderEntry type="jdk" jdkName="Android API 23 Platform" jdkType="Android SDK" />
--     <orderEntry type="sourceFolder" forTests="false" />
---    <orderEntry type="library" exported="" name="support-annotations-21.0.3" level="project" />
---    <orderEntry type="library" exported="" name="support-v4-21.0.3" level="project" />
--+    <orderEntry type="library" exported="" name="support-v4-23.2.0" level="project" />
--+    <orderEntry type="library" exported="" name="support-annotations-23.2.0" level="project" />
--   </component>
-- </module>
--\ No newline at end of file
--diff --git a/app/build.gradle b/app/build.gradle
--index a56f610..21d8306 100644
----- a/app/build.gradle
--+++ b/app/build.gradle
--@@ -1,31 +1,19 @@
-- apply plugin: 'com.android.application'
+@@ -1,310 +0,0 @@
+-diff --git a/app/src/main/res/layout/contact_editmemo_fragment.xml b/app/src/main/res/layout/contact_editmemo_fragment.xml
+-index c07ee93..9a2d8e2 100644
+---- a/app/src/main/res/layout/contact_editmemo_fragment.xml
+-+++ b/app/src/main/res/layout/contact_editmemo_fragment.xml
+-@@ -42,9 +42,8 @@
+-                 <TextView
+-                     android:id="@+id/contact_name"
+-                     style="@style/contactNameTitle"
+--                    android:layout_width="0dp"
+--                    android:layout_height="match_parent"
+--                    android:layout_weight="65"
+-+                    android:layout_width="match_parent"
+-+                    android:layout_height="wrap_content"
+-                     android:paddingLeft="@dimen/padding"
+-                     android:paddingRight="@dimen/padding"
+-                     android:paddingTop="8dp"
+-@@ -55,25 +54,17 @@
+-             <LinearLayout
+-                 android:layout_width="match_parent"
+-                 android:layout_height="wrap_content"
+--                android:orientation="horizontal">
+-+                android:orientation="vertical">
 - 
-- android {
---    signingConfigs {
---        config {
---            keyAlias 'mlsoft'
---            keyPassword 'password'
---            storeFile file('/home/mlsoft/AndroidStudioProjects/keystore.jks')
---            storePassword 'password'
---        }
---    }
---    compileSdkVersion 21
+-                 <TextView
+-                     style="@style/notesHeader"
+-                     android:layout_width="wrap_content"
+-                     android:layout_height="wrap_content"
+--                    android:layout_gravity="center"
+-+                    android:layout_gravity="left"
+-                     android:paddingLeft="@dimen/padding"
+-                     android:paddingRight="@dimen/padding"
+-                     android:text="Memo" />
+- 
+--            </LinearLayout>
+--
+--
+--            <LinearLayout
+--                android:layout_width="match_parent"
+--                android:layout_height="wrap_content"
+--                android:orientation="vertical">
+--
+-                 <EditText
+-                     android:id="@+id/contact_memo"
+-                     android:layout_width="match_parent"
+-@@ -82,6 +73,7 @@
+-                     android:layout_marginLeft="16dp"
+-                     android:layout_marginRight="16dp"
+-                     android:gravity="left" />
 -+
--+    compileSdkVersion 23
--     buildToolsVersion "23.0.2"
--     defaultConfig {
--         applicationId "net.ddns.mlsoftlaberge.contactslist"
---        minSdkVersion 16
---        targetSdkVersion 21
---    }
---    buildTypes {
---        release {
---            minifyEnabled false
---            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
---        }
--+        minSdkVersion 15
--+        targetSdkVersion 23
--     }
--+
--     productFlavors {
--     }
-- }
+-             </LinearLayout>
 - 
-- dependencies {
---    compile 'com.android.support:support-v4:21.0.3'
--+    compile 'com.android.support:support-v4:23.2.0'
-- }
--diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
--index 0079731..4054784 100644
----- a/app/src/main/AndroidManifest.xml
--+++ b/app/src/main/AndroidManifest.xml
--@@ -17,11 +17,11 @@
-- <manifest xmlns:android="http://schemas.android.com/apk/res/android"
--     package="net.ddns.mlsoftlaberge.contactslist"
--     android:versionCode="1"
---    android:versionName="1.0" >
--+    android:versionName="1.1" >
 - 
--     <uses-sdk
--         android:minSdkVersion="15"
---        android:targetSdkVersion="21" />
--+        android:targetSdkVersion="23" />
-- 
--     <uses-permission android:name="android.permission.READ_CONTACTS" />
--     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
--diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactsListFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactsListFragment.java
--index c552bab..96ffa1c 100644
----- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactsListFragment.java
--+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactsListFragment.java
--@@ -116,6 +116,9 @@ public class ContactsListFragment extends ListFragment implements
--     // OS versions as search results are shown in-line via Action Bar search from honeycomb onward
--     private boolean mIsSearchResultView = false;
-- 
--+    // keep the flag if we want starred filter or not
--+    private int starredfind=1;
--+
--     /**
--      * Fragments require an empty constructor.
--      */
--@@ -370,8 +373,7 @@ public class ContactsListFragment extends ListFragment implements
--                     // Restarts the loader. This triggers onCreateLoader(), which builds the
--                     // necessary content Uri from mSearchTerm.
--                     mSearchQueryChanged = true;
---                    getLoaderManager().restartLoader(
---                            ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
--+                    getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
--                     return true;
--                 }
--             });
--@@ -393,8 +395,7 @@ public class ContactsListFragment extends ListFragment implements
--                             onSelectionCleared();
--                         }
--                         mSearchTerm = null;
---                        getLoaderManager().restartLoader(
---                                ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
--+                        getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
--                         return true;
--                     }
--                 });
--@@ -446,6 +447,20 @@ public class ContactsListFragment extends ListFragment implements
--                     getActivity().onSearchRequested();
--                 }
--                 break;
--+            // Sends a request to the People app to display the create contact screen
--+            case R.id.menu_starred:
--+                // switch the starred flag on/off
--+                if(starredfind==0) {
--+                    starredfind=1;
--+                    item.setIcon(R.drawable.btn_star_big_on);
--+                }
--+                else {
--+                    starredfind=0;
--+                    item.setIcon(R.drawable.btn_star_big_off);
--+                }
--+                // reread the list with new flag
--+                getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
--+                break;
--         }
--         return super.onOptionsItemSelected(item);
--     }
--@@ -477,12 +492,21 @@ public class ContactsListFragment extends ListFragment implements
--             // for the selection clause. The search string is either encoded onto the content URI,
--             // or no contacts search string is used. The other search criteria are constants. See
--             // the ContactsQuery interface.
---            return new CursorLoader(getActivity(),
---                    contentUri,
---                    ContactsQuery.PROJECTION,
---                    ContactsQuery.SELECTION,
---                    null,
---                    ContactsQuery.SORT_ORDER);
--+            if(starredfind==0) {
--+                return new CursorLoader(getActivity(),
--+                        contentUri,
--+                        ContactsQuery.PROJECTION,
--+                        ContactsQuery.SELECTION,
--+                        null,
--+                        ContactsQuery.SORT_ORDER);
--+            } else {
--+                return new CursorLoader(getActivity(),
--+                        contentUri,
--+                        ContactsQuery.PROJECTION,
--+                        ContactsQuery.SELECTION2,
--+                        null,
--+                        ContactsQuery.SORT_ORDER);
--+            }
--         }
-- 
--         Log.e(TAG, "onCreateLoader - incorrect ID provided (" + id + ")");
--@@ -889,9 +913,18 @@ public class ContactsListFragment extends ListFragment implements
--         // the search string to CONTENT_FILTER_URI.
--         @SuppressLint("InlinedApi")
--         final static String SELECTION =
--+                    (Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) + "<>''"
--+                            + " AND " + Contacts.IN_VISIBLE_GROUP + "=1";
--+
--+        // The selection clause for the CursorLoader query. The search criteria defined here
--+        // restrict results to contacts that have a display name and are linked to visible groups.
--+        // Notice that the search on the string provided by the user is implemented by appending
--+        // the search string to CONTENT_FILTER_URI.
--+        @SuppressLint("InlinedApi")
--+        final static String SELECTION2 =
--                 (Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) + "<>''"
---                        + " AND " + Contacts.IN_VISIBLE_GROUP + "=1";
---        // + " AND " + Contacts.STARRED + "=1";
--+                        + " AND " + Contacts.IN_VISIBLE_GROUP + "=1"
--+                        + " AND " + Contacts.STARRED + "=1";
-- 
--         // The desired sort order for the returned Cursor. In Android 3.0 and later, the primary
--         // sort key allows for localization. In earlier versions. use the display name as the sort
--@@ -937,4 +970,6 @@ public class ContactsListFragment extends ListFragment implements
--         final static int PHOTO_THUMBNAIL_DATA = 3;
--         final static int SORT_KEY = 4;
--     }
--+
--+
-- }
--diff --git a/app/src/main/res/menu/contact_list_menu.xml b/app/src/main/res/menu/contact_list_menu.xml
--index e784054..e4e5f0d 100644
----- a/app/src/main/res/menu/contact_list_menu.xml
--+++ b/app/src/main/res/menu/contact_list_menu.xml
--@@ -1,5 +1,4 @@
---<?xml version="1.0" encoding="utf-8"?>
---<!--
--+<?xml version="1.0" encoding="utf-8"?><!--
--   Copyright (C) 2013 The Android Open Source Project
-- 
--   Licensed under the Apache License, Version 2.0 (the "License");
--@@ -20,16 +19,22 @@
--          which expands within the Action Bar directly. Note the initial collapsed state set using
--          collapseActionView in the showAsAction attribute. -->
--     <item
---            android:id="@+id/menu_search"
---            android:title="@string/menu_search"
---            android:icon="@drawable/ic_action_search"
---            android:showAsAction="ifRoom|collapseActionView"
---            android:actionViewClass="android.widget.SearchView"/>
--+        android:id="@+id/menu_search"
--+        android:actionViewClass="android.widget.SearchView"
--+        android:icon="@drawable/ic_action_search"
--+        android:showAsAction="ifRoom|collapseActionView"
--+        android:title="@string/menu_search" />
-- 
--     <item
---            android:id="@+id/menu_add_contact"
---            android:title="@string/menu_add_contact"
---            android:icon="@drawable/ic_action_add"
---            android:showAsAction="ifRoom"/>
--+        android:id="@+id/menu_add_contact"
--+        android:icon="@drawable/ic_action_add"
--+        android:showAsAction="ifRoom"
--+        android:title="@string/menu_add_contact" />
--+
--+    <item
--+        android:id="@+id/menu_starred"
--+        android:icon="@drawable/btn_star_big_on"
--+        android:showAsAction="ifRoom"
--+        android:title="@string/menu_starred" />
-- 
-- </menu>
--diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
--index d3a15c3..c60fd66 100644
----- a/app/src/main/res/values/strings.xml
--+++ b/app/src/main/res/values/strings.xml
--@@ -35,6 +35,7 @@
--     <string name="menu_add_contact">Add Contact</string>
--     <string name="menu_edit_contact">Edit Contact</string>
--     <string name="menu_modif_contact">Modify Contact</string>
--+    <string name="menu_starred">Starred Contact</string>
--     <string name="no_contacts">No Contacts Found</string>
--     <string name="no_contact_selected">No Contact Selected</string>
--     <string name="search_hint">Find contacts</string>
+-diff --git a/gitdiff.txt b/gitdiff.txt
+-index 10c6ed3..e69de29 100644
+---- a/gitdiff.txt
+-+++ b/gitdiff.txt
+-@@ -1,253 +0,0 @@
+--diff --git a/app/app.iml b/app/app.iml
+--index 07c7524..6809875 100644
+----- a/app/app.iml
+--+++ b/app/app.iml
+--@@ -68,7 +68,7 @@
+--       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/blame" />
+--       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/classes" />
+--       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
+---      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.3/jars" />
+--+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/23.2.0/jars" />
+--       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
+--       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/jniLibs" />
+--       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/manifests" />
+--@@ -80,9 +80,9 @@
+--       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
+--       <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
+--     </content>
+---    <orderEntry type="jdk" jdkName="Android API 21 Platform" jdkType="Android SDK" />
+--+    <orderEntry type="jdk" jdkName="Android API 23 Platform" jdkType="Android SDK" />
+--     <orderEntry type="sourceFolder" forTests="false" />
+---    <orderEntry type="library" exported="" name="support-annotations-21.0.3" level="project" />
+---    <orderEntry type="library" exported="" name="support-v4-21.0.3" level="project" />
+--+    <orderEntry type="library" exported="" name="support-v4-23.2.0" level="project" />
+--+    <orderEntry type="library" exported="" name="support-annotations-23.2.0" level="project" />
+--   </component>
+-- </module>
+--\ No newline at end of file
+--diff --git a/app/build.gradle b/app/build.gradle
+--index a56f610..21d8306 100644
+----- a/app/build.gradle
+--+++ b/app/build.gradle
+--@@ -1,31 +1,19 @@
+-- apply plugin: 'com.android.application'
+-- 
+-- android {
+---    signingConfigs {
+---        config {
+---            keyAlias 'mlsoft'
+---            keyPassword 'password'
+---            storeFile file('/home/mlsoft/AndroidStudioProjects/keystore.jks')
+---            storePassword 'password'
+---        }
+---    }
+---    compileSdkVersion 21
+--+
+--+    compileSdkVersion 23
+--     buildToolsVersion "23.0.2"
+--     defaultConfig {
+--         applicationId "net.ddns.mlsoftlaberge.contactslist"
+---        minSdkVersion 16
+---        targetSdkVersion 21
+---    }
+---    buildTypes {
+---        release {
+---            minifyEnabled false
+---            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+---        }
+--+        minSdkVersion 15
+--+        targetSdkVersion 23
+--     }
+--+
+--     productFlavors {
+--     }
+-- }
+-- 
+-- dependencies {
+---    compile 'com.android.support:support-v4:21.0.3'
+--+    compile 'com.android.support:support-v4:23.2.0'
+-- }
+--diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--index 0079731..4054784 100644
+----- a/app/src/main/AndroidManifest.xml
+--+++ b/app/src/main/AndroidManifest.xml
+--@@ -17,11 +17,11 @@
+-- <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+--     package="net.ddns.mlsoftlaberge.contactslist"
+--     android:versionCode="1"
+---    android:versionName="1.0" >
+--+    android:versionName="1.1" >
+-- 
+--     <uses-sdk
+--         android:minSdkVersion="15"
+---        android:targetSdkVersion="21" />
+--+        android:targetSdkVersion="23" />
+-- 
+--     <uses-permission android:name="android.permission.READ_CONTACTS" />
+--     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+--diff --git a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactsListFragment.java b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactsListFragment.java
+--index c552bab..96ffa1c 100644
+----- a/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactsListFragment.java
+--+++ b/app/src/main/java/net/ddns/mlsoftlaberge/contactslist/ui/ContactsListFragment.java
+--@@ -116,6 +116,9 @@ public class ContactsListFragment extends ListFragment implements
+--     // OS versions as search results are shown in-line via Action Bar search from honeycomb onward
+--     private boolean mIsSearchResultView = false;
+-- 
+--+    // keep the flag if we want starred filter or not
+--+    private int starredfind=1;
+--+
+--     /**
+--      * Fragments require an empty constructor.
+--      */
+--@@ -370,8 +373,7 @@ public class ContactsListFragment extends ListFragment implements
+--                     // Restarts the loader. This triggers onCreateLoader(), which builds the
+--                     // necessary content Uri from mSearchTerm.
+--                     mSearchQueryChanged = true;
+---                    getLoaderManager().restartLoader(
+---                            ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
+--+                    getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
+--                     return true;
+--                 }
+--             });
+--@@ -393,8 +395,7 @@ public class ContactsListFragment extends ListFragment implements
+--                             onSelectionCleared();
+--                         }
+--                         mSearchTerm = null;
+---                        getLoaderManager().restartLoader(
+---                                ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
+--+                        getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
+--                         return true;
+--                     }
+--                 });
+--@@ -446,6 +447,20 @@ public class ContactsListFragment extends ListFragment implements
+--                     getActivity().onSearchRequested();
+--                 }
+--                 break;
+--+            // Sends a request to the People app to display the create contact screen
+--+            case R.id.menu_starred:
+--+                // switch the starred flag on/off
+--+                if(starredfind==0) {
+--+                    starredfind=1;
+--+                    item.setIcon(R.drawable.btn_star_big_on);
+--+                }
+--+                else {
+--+                    starredfind=0;
+--+                    item.setIcon(R.drawable.btn_star_big_off);
+--+                }
+--+                // reread the list with new flag
+--+                getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
+--+                break;
+--         }
+--         return super.onOptionsItemSelected(item);
+--     }
+--@@ -477,12 +492,21 @@ public class ContactsListFragment extends ListFragment implements
+--             // for the selection clause. The search string is either encoded onto the content URI,
+--             // or no contacts search string is used. The other search criteria are constants. See
+--             // the ContactsQuery interface.
+---            return new CursorLoader(getActivity(),
+---                    contentUri,
+---                    ContactsQuery.PROJECTION,
+---                    ContactsQuery.SELECTION,
+---                    null,
+---                    ContactsQuery.SORT_ORDER);
+--+            if(starredfind==0) {
+--+                return new CursorLoader(getActivity(),
+--+                        contentUri,
+--+                        ContactsQuery.PROJECTION,
+--+                        ContactsQuery.SELECTION,
+--+                        null,
+--+                        ContactsQuery.SORT_ORDER);
+--+            } else {
+--+                return new CursorLoader(getActivity(),
+--+                        contentUri,
+--+                        ContactsQuery.PROJECTION,
+--+                        ContactsQuery.SELECTION2,
+--+                        null,
+--+                        ContactsQuery.SORT_ORDER);
+--+            }
+--         }
+-- 
+--         Log.e(TAG, "onCreateLoader - incorrect ID provided (" + id + ")");
+--@@ -889,9 +913,18 @@ public class ContactsListFragment extends ListFragment implements
+--         // the search string to CONTENT_FILTER_URI.
+--         @SuppressLint("InlinedApi")
+--         final static String SELECTION =
+--+                    (Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) + "<>''"
+--+                            + " AND " + Contacts.IN_VISIBLE_GROUP + "=1";
+--+
+--+        // The selection clause for the CursorLoader query. The search criteria defined here
+--+        // restrict results to contacts that have a display name and are linked to visible groups.
+--+        // Notice that the search on the string provided by the user is implemented by appending
+--+        // the search string to CONTENT_FILTER_URI.
+--+        @SuppressLint("InlinedApi")
+--+        final static String SELECTION2 =
+--                 (Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) + "<>''"
+---                        + " AND " + Contacts.IN_VISIBLE_GROUP + "=1";
+---        // + " AND " + Contacts.STARRED + "=1";
+--+                        + " AND " + Contacts.IN_VISIBLE_GROUP + "=1"
+--+                        + " AND " + Contacts.STARRED + "=1";
+-- 
+--         // The desired sort order for the returned Cursor. In Android 3.0 and later, the primary
+--         // sort key allows for localization. In earlier versions. use the display name as the sort
+--@@ -937,4 +970,6 @@ public class ContactsListFragment extends ListFragment implements
+--         final static int PHOTO_THUMBNAIL_DATA = 3;
+--         final static int SORT_KEY = 4;
+--     }
+--+
+--+
+-- }
+--diff --git a/app/src/main/res/menu/contact_list_menu.xml b/app/src/main/res/menu/contact_list_menu.xml
+--index e784054..e4e5f0d 100644
+----- a/app/src/main/res/menu/contact_list_menu.xml
+--+++ b/app/src/main/res/menu/contact_list_menu.xml
+--@@ -1,5 +1,4 @@
+---<?xml version="1.0" encoding="utf-8"?>
+---<!--
+--+<?xml version="1.0" encoding="utf-8"?><!--
+--   Copyright (C) 2013 The Android Open Source Project
+-- 
+--   Licensed under the Apache License, Version 2.0 (the "License");
+--@@ -20,16 +19,22 @@
+--          which expands within the Action Bar directly. Note the initial collapsed state set using
+--          collapseActionView in the showAsAction attribute. -->
+--     <item
+---            android:id="@+id/menu_search"
+---            android:title="@string/menu_search"
+---            android:icon="@drawable/ic_action_search"
+---            android:showAsAction="ifRoom|collapseActionView"
+---            android:actionViewClass="android.widget.SearchView"/>
+--+        android:id="@+id/menu_search"
+--+        android:actionViewClass="android.widget.SearchView"
+--+        android:icon="@drawable/ic_action_search"
+--+        android:showAsAction="ifRoom|collapseActionView"
+--+        android:title="@string/menu_search" />
+-- 
+--     <item
+---            android:id="@+id/menu_add_contact"
+---            android:title="@string/menu_add_contact"
+---            android:icon="@drawable/ic_action_add"
+---            android:showAsAction="ifRoom"/>
+--+        android:id="@+id/menu_add_contact"
+--+        android:icon="@drawable/ic_action_add"
+--+        android:showAsAction="ifRoom"
+--+        android:title="@string/menu_add_contact" />
+--+
+--+    <item
+--+        android:id="@+id/menu_starred"
+--+        android:icon="@drawable/btn_star_big_on"
+--+        android:showAsAction="ifRoom"
+--+        android:title="@string/menu_starred" />
+-- 
+-- </menu>
+--diff --git a/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+--index d3a15c3..c60fd66 100644
+----- a/app/src/main/res/values/strings.xml
+--+++ b/app/src/main/res/values/strings.xml
+--@@ -35,6 +35,7 @@
+--     <string name="menu_add_contact">Add Contact</string>
+--     <string name="menu_edit_contact">Edit Contact</string>
+--     <string name="menu_modif_contact">Modify Contact</string>
+--+    <string name="menu_starred">Starred Contact</string>
+--     <string name="no_contacts">No Contacts Found</string>
+--     <string name="no_contact_selected">No Contact Selected</string>
+--     <string name="search_hint">Find contacts</string>
