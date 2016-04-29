@@ -17,6 +17,7 @@
 
     <string name="app_name">Contacts-ML</string>
     <string name="activity_contacts_list">Contacts List</string>
+    <string name="activity_contact_budget">Contacts Budget</string>
     <string name="activity_contact_detail">Contact Detail</string>
     <string name="activity_contact_admin">Contact Admin</string>
     <string name="activity_contact_editmemo">Contact Edit Memo</string>
@@ -36,6 +37,7 @@
     <string name="menu_edit_contact">Edit Contact</string>
     <string name="menu_modif_contact">Modify Contact</string>
     <string name="menu_starred">Starred Contact</string>
+    <string name="menu_budget">Budget</string>
     <string name="no_contacts">No Contacts Found</string>
     <string name="no_contact_selected">No Contact Selected</string>
     <string name="search_hint">Find contacts</string>

@@ -57,6 +57,19 @@
                        android:resource="@xml/searchable_contacts" />
         </activity>
         <activity
+            android:name=".ui.ContactsBudgetActivity"
+            android:label="@string/activity_contact_budget"
+            android:parentActivityName=".ui.ContactsListActivity">
+            <!-- Define hierarchical parent of this activity, both via the system
+                 parentActivityName attribute (added in API Level 16) and via meta-data annotation.
+                 This allows use of the support library NavUtils class in a way that works over
+                 all Android versions. See the "Tasks and Back Stack" guide for more information:
+                 http://developer.android.com/guide/components/tasks-and-back-stack.html
+            -->
+            <meta-data android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.ContactsListActivity" />
+        </activity>
+        <activity
             android:name=".ui.ContactAdminActivity"
             android:label="@string/activity_contact_admin"
             android:parentActivityName=".ui.ContactsListActivity">

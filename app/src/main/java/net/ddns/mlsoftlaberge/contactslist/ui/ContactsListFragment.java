@@ -462,6 +462,10 @@ public class ContactsListFragment extends ListFragment implements
                 // reread the list with new flag
                 getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
                 break;
+            case R.id.menu_budget:
+                Intent intentbudget = new Intent(getActivity(), ContactsBudgetActivity.class);
+                startActivity(intentbudget);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
