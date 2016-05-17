@@ -19,6 +19,7 @@ package net.ddns.mlsoftlaberge.contactslist.ui;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -120,6 +121,8 @@ public class ContactsListFragment extends ListFragment implements
     // keep the flag if we want starred filter or not
     private int starredfind=1;
 
+    private View mContainer;
+
     /**
      * Fragments require an empty constructor.
      */
@@ -201,7 +204,9 @@ public class ContactsListFragment extends ListFragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the list fragment layout
-        return inflater.inflate(R.layout.contact_list_fragment, container, false);
+        View view = inflater.inflate(R.layout.contact_list_fragment, container, false);
+        mContainer=view.findViewById(R.id.main_content);
+        return view;
     }
 
     @Override
@@ -463,8 +468,15 @@ public class ContactsListFragment extends ListFragment implements
                 getLoaderManager().restartLoader(ContactsQuery.QUERY_ID, null, ContactsListFragment.this);
                 break;
             case R.id.menu_budget:
+                // instantiate an activity
                 Intent intentbudget = new Intent(getActivity(), ContactsBudgetActivity.class);
+                // add animation options
+                //ActivityOptions options = ActivityOptions.makeScaleUpAnimation(mContainer,0,0,
+                //        200,400);
+                // start the activity
+                //startActivity(intentbudget , options.toBundle());
                 startActivity(intentbudget);
+
                 break;
         }
         return super.onOptionsItemSelected(item);
